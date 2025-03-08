@@ -13,15 +13,13 @@ return new class extends Migration
     {
         Schema::create('institutes', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Name of the institute
-            $table->text('description')->nullable(); // Description of the institute
-            $table->string('logo_url')->nullable(); // URL for the logo
-            $table->string('about_us')->nullable(); // URL for the logo
-            $table->string('about_image')->nullable(); // URL for the logo
-            $table->string('institute_servicies')->nullable(); // URL for the logo
-            $table->string('address')->nullable(); // Address
-            $table->string('phone')->nullable(); // Phone number
-            $table->string('email')->nullable(); // Email
+            $table->string('institute_name');
+            $table->text('institute_description')->nullable();
+            $table->string('about_us')->nullable();
+            $table->string('about_image')->nullable();
+            $table->string('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
 
             $table->timestamps();
         });
