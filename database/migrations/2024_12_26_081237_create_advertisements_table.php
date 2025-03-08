@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('advertisements', function (Blueprint $table) {
             $table->id();
-            $table->string('title'); // إضافة حقل العنوان بعد حقل المعرف
+            $table->string("title");
             $table->string("content");
             $table->string("image");
             $table->date("publish_date")->default(now());

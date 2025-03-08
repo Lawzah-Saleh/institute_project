@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
-            $table->string("student_name_en", 300);
-            $table->string("student_name_ar", 300);
+            $table->string('student_name_en', 300)->index();
+            $table->string('student_name_ar', 300)->index();
             $table->string("image", 500)->nullable();
-            $table->string("phone", 20);
+            $table->json('phones')->nullable();
             $table->enum("gender", ["male", "female"]);
             $table->string("qualification");
             $table->date("birth_date");

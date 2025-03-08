@@ -15,16 +15,14 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('session_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('employee_id');
             $table->dateTime('attendance_date')->default(now());
-
             $table->boolean('status');
             $table->timestamps();
 
-            // المفاتيح الأجنبية
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
             $table->foreign('session_id')->references('id')->on('course_sessions')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');
         });
     }
 

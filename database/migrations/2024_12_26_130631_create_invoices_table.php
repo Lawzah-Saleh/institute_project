@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
-            $table->decimal('amount');
-            $table->integer('status');
+            $table->unsignedBigInteger('amount');
+            $table->boolean('status')->default(0);
             $table->string('invoice_number')->unique();
             $table->string('invoice_details');
             $table->date('due_date')->nullable(); // تاريخ استحقاق الدفع

@@ -13,18 +13,17 @@ return new class extends Migration
     {
         Schema::create('degrees', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('student_id');
-            $table->unsignedBigInteger('course_id');
-            $table->string("practical_degree");
-            $table->string("final_degree");
-            $table->string("attendance_degree");
-            $table->string("total_degree");
-            $table->string('status')->nullable(); //(fail or pass)
-            $table->boolean("state");
+            $table->unsignedBigInteger('student_id')->index();
+            $table->unsignedBigInteger('course_session_id')->index();
+            $table->decimal('practical_degree', 5, 2);
+            $table->decimal('final_degree', 5, 2);
+            $table->decimal('attendance_degree', 5, 2);
+            $table->decimal('total_degree', 5, 2);
+            $table->enum('status', ['pass', 'fail'])->nullable();
             $table->timestamps();
-            
+
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+            $table->foreign('course_session_id')->references('id')->on('course_sessions')->onDelete('cascade');
         });
     }
 

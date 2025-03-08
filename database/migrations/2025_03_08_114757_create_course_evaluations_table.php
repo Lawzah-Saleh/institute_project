@@ -13,16 +13,18 @@ return new class extends Migration
     {
         Schema::create('course_evaluations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('course_id');
+            $table->unsignedBigInteger('student_id');
+            $table->unsignedBigInteger('course_session_id');
             $table->integer('rating');
             $table->text('feedback')->nullable();
-            $table->dateTime('date')->default(now());
+            $table->date('date')->default(now());
+            $table->unique(['student_id', 'course_session_id']);// الطالب ما يقدر يقيم الكورس الا مرة واحدة
 
 
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
+
+            $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
+            $table->foreign('course_session_id')->references('id')->on('course_sessions')->onDelete('cascade');
             $table->timestamps();
         });
     }

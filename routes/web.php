@@ -227,4 +227,11 @@ Route::patch('/holidays/{id}/toggle', [HolidayController::class, 'toggleState'])
 
 
 
+use App\Http\Controllers\AttendanceController;
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/teacher/sessions', [AttendanceController::class, 'getTeacherSessions']); // عرض الجلسات التي يدرسها المعلم
+    Route::post('/attendance/mark', [AttendanceController::class, 'markAttendance']); // تسجيل الحضور
+    Route::get('/attendance/session/{sessionId}', [AttendanceController::class, 'getSessionAttendance']); // عرض الحضور لجلسة
+});
 

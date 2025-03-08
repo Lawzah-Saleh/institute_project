@@ -16,15 +16,13 @@ class CreateStudentNotificationsTable extends Migration
         Schema::create('student_notifications', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
-            $table->unsignedBigInteger('advertisement_id');
-            $table->date("date");
-            $table->boolean("state");
+            $table->text('note');
+            $table->enum('state', ['unread', 'read'])->default('unread');
+            $table->date('date')->default(now());
             $table->timestamps();
 
 
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-
-            $table->foreign('advertisement_id')->references('id')->on('advertisements')->onDelete('cascade');
         });
     }
 

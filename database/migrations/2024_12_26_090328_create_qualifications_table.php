@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('employee_id');
             $table->string('qualification_name');
             $table->string('issuing_authority');
+            $table->string('certification')->nullable();
             $table->date('obtained_date')->nullable();
 
             $table->foreign('employee_id')->references('id')->on('employees')->onDelete('cascade');

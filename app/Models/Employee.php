@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 
 
 class Employee extends Model
@@ -32,5 +33,16 @@ class Employee extends Model
         return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id')
                     ->wherePivot('model_type', 'App\Models\User'); // Ensure it connects via User
     }
+    public function getTeacherSessions(Request $request)
+    {
+        $employeeId = auth()->user()->employee->id; // جلب ID الموظف المرتبط بالمستخدم
+
+        $sessions = CourseSession::where('teacher_id', $employeeId)
+            ->with('students')
+            ->get();
+
+        return response()->json($sessions);
+    }
+
 
 }

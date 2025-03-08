@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string("name_en",300);
             $table->string("name_ar",300);
-            $table->unsignedInteger("phone");
+            $table->json('phones')->nullable();
             $table->string("address");
-            $table->string("gender");
-            $table->date("Day_birth");
-            $table->string("place_birth");
+            $table->enum("gender", ["male", "female"]);
+            $table->date("birth_date");
+            $table->string("birth_place");
             $table->string ("image")->nullable();
-            $table->string("email")->nullable();
-            $table->string("emptype");
-            $table->string("state");
+            $table->string("email")->nullable()->unique();
+            $table->string('emptype');
+            $table->boolean('state')->default(0);
             $table->timestamps();
 
         });
