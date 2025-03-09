@@ -92,6 +92,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/Teacher-dashboard/students', [StudentController::class, 'teacherStudents'])->name('teacher.students');
 
 use App\Http\Controllers\Admin\AdminDashboardController;
 

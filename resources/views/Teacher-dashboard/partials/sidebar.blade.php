@@ -7,7 +7,7 @@
             </div>
             <span class="user-img">
                 <div class="">
-                <img class="rounded-circle img" src="{{ asset('Teacher/assets/img/profiles/profile-t.png') }}"
+                <img class="rounded-circle img" src="{{ asset('default_profile.png') }}"
                 style="width: 60% ;height: 60%;"
                     alt="Soeng Souy">
                 </div>
@@ -20,21 +20,21 @@
 
                             <li>
 
-                                <a href="{{ url('/') }}"><i class="feather-grid"></i> <span>لوحة التحكم </span>
+                                <a href="{{ url('/Teacher-dashboard') }}"><i class="feather-grid"></i> <span>لوحة التحكم </span>
                                     <span></span>
                                 </a>
                             </li>
 
                 <li>
 
-                    <a href="{{ url('students') }}"><i class="fas fa-graduation-cap"></i> <span> الطلاب</span>
+                    <a href="{{ route('teacher.students') }}"><i class="fas fa-graduation-cap"></i> <span> الطلاب</span>
                         <span></span>
                     </a>
                 </li>
 
                 <li>
 
-                    <a href="{{ url('presence and absence') }}"><i class="fas fa-clipboard"></i> <span> الحضور والغياب</span> <span></span>
+                    <a href="{{ url('/Teacher-dashboard/presence and absence') }}"><i class="fas fa-clipboard"></i> <span> الحضور والغياب</span> <span></span>
 
                     </a>
                 </li>
@@ -43,13 +43,13 @@
 
 
                 <li>
-                    <a href="{{ url('add-result') }}"><i class="fas fa-clipboard-list"></i><span> اضافة الدرجات</span> <span></span>
+                    <a href="{{ url('/Teacher-dashboard/add-result') }}"><i class="fas fa-clipboard-list"></i><span> اضافة الدرجات</span> <span></span>
 
                     </a>
                 </li>
 
                 <li>
-                    <a href="{{url('profile')}}"><span> الملف الشخصي</span> <span></span>
+                    <a href="{{url('/Teacher-dashboard/profile')}}"><span> الملف الشخصي</span> <span></span>
 
                     </a>
                 </li>

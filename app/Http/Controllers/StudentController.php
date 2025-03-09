@@ -363,4 +363,9 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')->with('success', 'تم حذف الطالب بنجاح.');
     }
+    public function teacherStudents()
+    {
+        $students = Student::all();
+        return view('Teacher-dashboard.students', compact('students'));
+    }
 }

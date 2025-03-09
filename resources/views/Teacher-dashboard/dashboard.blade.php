@@ -22,7 +22,7 @@
                             <h3 style="font-size: 2rem; font-weight: bold; color: #e67e22;">+{{ $students_count ?? 0 }}</h3>
                         </div>
                         <div>
-                            <img src="{{ asset('Teacher/assets/img/icons/dash-icon-01.png') }}" alt="Dashboard Icon" style="height: 70px; width: 70px;">
+                            <img src="{{ asset('admin/assets/img/icons/dash-icon-01.png') }}" alt="Dashboard Icon" style="height: 70px; width: 70px;">
                         </div>
                     </div>
                 </div>
@@ -39,7 +39,7 @@
                             <h3 style="font-size: 2rem; font-weight: bold; color: #3498db;">{{ $courses_count ?? 0 }}+</h3>
                         </div>
                         <div>
-                            <img src="{{ asset('Teacher/assets/img/icons/dash-icon-04.svg') }}" alt="Dashboard Icon" style="height: 50px; width: 70px;">
+                            <img src="{{ asset('admin/assets/img/icons/dash-icon-04.svg') }}" alt="Dashboard Icon" style="height: 50px; width: 70px;">
                         </div>
                     </div>
                 </div>
