@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'إضافة جلسة جديدة')
+@section('title', 'تهيئة دورة جديدة')
 
 @section('content')
 
@@ -10,10 +10,9 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title">إضافة جلسة جديدة</h3>
+                    <h3 class="page-title">تهيئة دورة جديدة</h3>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('course-sessions.index') }}">جلسات الكورسات</a></li>
-                        <li class="breadcrumb-item active">إضافة جلسة</li>
+                        <li class="breadcrumb-item"><a href="{{ route('course-sessions.index') }}"> الدورات المتاحة</a></li>
                     </ul>
                 </div>
             </div>
@@ -99,7 +98,7 @@
                                 </div>
 
                                 <div class="col-sm-12">
-                                    <button type="submit" class="btn btn-primary">إضافة الجلسة</button>
+                                    <button type="submit" class="btn btn-primary"> تهيئة الدورة</button>
                                     <a href="{{ route('course-sessions.index') }}" class="btn btn-secondary">إلغاء</a>
                                 </div>
                             </div>

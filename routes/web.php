@@ -27,15 +27,6 @@ use App\Http\Controllers\CourseSessionStudentController;
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-// Route::get('/login', [AuthController::class, 'login'])->name('login');
-
-// use App\Http\Controllers\Auth\RegisterController;
-
-// Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register.form');
-// Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
-// Route::get('/get-courses/{department}', [RegisterController::class, 'getCourses']); // جلب الكورسات حسب القسم
-
-
 
 
 Route::get('/registeration', [StudentController::class, 'showRegistrationForm'])->name('students.register');
@@ -70,8 +61,6 @@ Route::get('/get-course-price/{course_id}', function ($course_id) {
 
 
 
-// use App\Http\Controllers\AdminController;
-// Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
 
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -82,9 +71,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -94,10 +81,11 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/Teacher-dashboard/students', [StudentController::class, 'teacherStudents'])->name('teacher.students');
 
-use App\Http\Controllers\Admin\AdminDashboardController;
 
 
 require __DIR__.'/auth.php';
+use App\Http\Controllers\AdminDashboardController;
+
 
 Route::group(['middleware' => ['role:admin']], function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
@@ -115,24 +103,13 @@ Route::group(['middleware' => ['role:student']], function () {
 
 
 
-// use App\Http\Controllers\TeacherController;
-//     Route::resource('teachers', TeacherController::class);
-
-
 use App\Http\Controllers\EmployeeController;
 
 Route::resource('employees', EmployeeController::class);
-
-// // Resource route for courses
-// Route::resource('courses', CourseController::class);
-
-// // Custom route for filtering courses by section
-// Route::get('/courses/section/{sectionId}', [CourseController::class, 'getCoursesBySection'])->name('courses.getBySection');
+Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggleStatus');
 
 
 
-// Define a resource route for the DashboardController
-Route::resource('/', DashboardController::class);
 ////////////////////////////////////////////////////////////////////////////////////
 // this is for the admin dashboard
 

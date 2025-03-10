@@ -12,7 +12,6 @@ class CoursePrice extends Model
     protected $fillable = [
         'course_id',
         'price',
-        'price_details',
         'date',
         'price_approval',
         'state',

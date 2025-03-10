@@ -1,6 +1,6 @@
 @extends('admin.layouts.app')
 
-@section('title', 'جلسات الكورسات')
+@section('title', ' الدورات المتاحة ')
 
 @section('content')
 
@@ -17,11 +17,11 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title">جلسات الكورسات</h3>
+                    <h3 class="page-title"> الدورات المتاحة</h3>
                 </div>
                 <div class="col-auto text-end float-end ms-auto">
                     <a href="{{ route('course-sessions.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> إضافة جلسة
+                        <i class="fas fa-plus"></i> تهيئة دورة
                     </a>
                 </div>
             </div>
@@ -34,7 +34,7 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>رقم الجلسة</th>
+                                    <th>رقم الدورة المتاحة</th>
                                     <th>اسم الكورس</th>
                                     <th>المدرس</th>
                                     <th>تاريخ البداية</th>
@@ -83,7 +83,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center">لا توجد جلسات مضافة.</td>
+                                    <td colspan="9" class="text-center">لا توجد دورات متاحة مضافة.</td>
                                 </tr>
                                 @endforelse
                             </tbody>

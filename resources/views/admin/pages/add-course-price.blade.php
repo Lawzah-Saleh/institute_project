@@ -36,12 +36,7 @@
                                         <input type="number" name="price" class="form-control" required>
                                     </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>تفاصيل السعر:</label>
-                                        <input type="number" name="price_details" class="form-control" >
-                                    </div>
-                                </div>
+
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label>تاريخ السعر:</label>

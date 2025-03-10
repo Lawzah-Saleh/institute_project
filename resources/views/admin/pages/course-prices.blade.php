@@ -35,7 +35,6 @@
                                     <th>رقم السعر</th>
                                     <th>اسم الدورة</th>
                                     <th>السعر</th>
-                                    <th>تفاصيل السعر</th>
                                     <th>تاريخ السعر</th>
                                     <th>تاريخ الموافقة</th>
                                     <th>الحالة</th>
@@ -48,7 +47,6 @@
                                     <td>{{ $price->id }}</td>
                                     <td>{{ $price->course->course_name }}</td>
                                     <td>{{ $price->price }}</td>
-                                    <td>{{ $price->price_details }}</td>
                                     <td>{{ $price->date }}</td>
                                     <td>{{ $price->price_approval }}</td>
                                     <td>

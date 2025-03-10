@@ -39,19 +39,13 @@
                     <ul>
                         <li><a href="{{ route('courses.index')}}">عرض الدورات</a></li>
                         <li><a href="{{ route('courses.create')}}">اضافة دورة </a></li>
+                        <li><a href="{{ route('course-sessions.index')}}">عرض الدورات المتاحة</a></li>
+                        <li><a href="{{ route('course-sessions.create')}}">اضافة دورة متاحة </a></li>
                         <li><a href="{{ route('course-prices.index')}}">عرض الأسعار</a></li>
                         <li><a href="{{ route('course-prices.create')}}">اضافة سعر </a></li>
                     </ul>
                 </li>
 
-                <li class="submenu">
-                    <a href="#"><i class="fas fa-book-reader"></i> <span>الدورات المتاحة </span> <span
-                            class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="{{ route('course-sessions.index')}}">عرض الدورات المتاحة</a></li>
-                        <li><a href="{{ route('course-sessions.create')}}">اضافة دورة </a></li>
-                    </ul>
-                </li>
                 <li class="submenu">
                     <a href="#"><i class="fas fa-building"></i> <span> أيام الاجازة</span> <span
                             class="menu-arrow"></span></a>

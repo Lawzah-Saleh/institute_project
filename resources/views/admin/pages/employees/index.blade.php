@@ -4,135 +4,138 @@
 
 @section('content')
 
-<div class="page-wrapper">
-<div class="content container-fluid">
+<div class="page-wrapper" style="background-color: #F9F9FB;">
+    <div class="content container-fluid">
 
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h3 class="page-title">الموظفون</h3>
-            </div>
-        </div>
-    </div>
 
-    <!-- Search & Filter Form -->
-    <div class="student-group-form">
-        <form method="GET" action="{{ url('employees') }}">
-            <div class="row">
-                <div class="col-lg-3 col-md-6">
-                    <div class="form-group">
-                        <input type="text" name="search_id" class="form-control" placeholder="البحث بالرقم ..." value="{{ request('search_id') }}">
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="form-group">
-                        <input type="text" name="search_name" class="form-control" placeholder="البحث بالأسم ..." value="{{ request('search_name') }}">
-                    </div>
-                </div>
 
-                <div class="col-lg-3 col-md-6">
-                    <label>عرض حسب نوع الوظيفة</label>
+        <!-- Search & Filter Form -->
+        <div class="card filter-card">
+            <div class="card-body">
+                <form method="GET" action="{{ url('employees') }}">
+                    <div class="row">
+                        <!-- Search by ID -->
+                        <div class="col-md-4">
+                            <label>البحث بالرقم</label>
+                            <input type="text" name="search_id" class="form-control" placeholder="رقم الموظف ..." value="{{ request('search_id') }}">
+                        </div>
 
-                    <div class="form-group">
-                        <select name="emptype" class="form-control">
-                            <option value="">-- عرض الجميع --</option>
-                            <option value="teacher" {{ request('emptype') == 'teacher' ? 'selected' : '' }}>المعلمين</option>
-                            <option value="employee" {{ request('emptype') == 'employee' ? 'selected' : '' }}>الموظفين العاديين</option>
-                        </select>
-                    </div>
-                </div>
+                        <!-- Search by Name -->
+                        <div class="col-md-4">
+                            <label>البحث بالاسم</label>
+                            <input type="text" name="search_name" class="form-control" placeholder="اسم الموظف ..." value="{{ request('search_name') }}">
+                        </div>
 
-                <div class="col-lg-2">
-                    <div class="search-student-btn">
-                        <button type="submit" class="btn btn-primary">بحث</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-    </div>
+                        <!-- Filter by Job Type -->
+                        <div class="col-md-4">
+                            <label>نوع الوظيفة</label>
+                            <select name="emptype" class="form-control">
+                                <option value="">-- عرض الجميع --</option>
+                                <option value="teacher" {{ request('emptype') == 'teacher' ? 'selected' : '' }}>المعلمين</option>
+                                <option value="employee" {{ request('emptype') == 'employee' ? 'selected' : '' }}>الموظفين الإداريين</option>
+                            </select>
+                        </div>
 
-    <!-- Table Section -->
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="card card-table">
-                <div class="card-body">
-
-                    <!-- Table Header -->
-                    <div class="page-header">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h3 class="page-title">قائمة الموظفين</h3>
-                            </div>
-                            <div class="col-auto text-end float-end ms-auto download-grp">
-                                <a href="{{ url('employees/create') }}" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i> إضافة موظف
-                                </a>
-                            </div>
+                        <!-- Submit Button -->
+                        <div class="col-md-12 text-end mt-3">
+                            <button type="submit" class="btn btn-primary">بحث</button>
                         </div>
                     </div>
+                </form>
+            </div>
+        </div>
 
-                    <!-- Employee Table -->
-                    <div class="table-responsive">
-                        <table class="table border-0 table-hover table-center mb-0 datatable table-striped">
-                            <thead>
+        <!-- Employee Table -->
+        <div class="card">
+            <div class="card-body ">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="page-title">قائمة الموظفين</h3>
+                        </div>
+                        <div class="col-auto text-start"> <!-- Changed from text-end to text-start -->
+                            <a href="{{ url('employees/create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> إضافة موظف
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped datatable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>الصورة</th>
+                                <th>الاسم بالإنجليزية</th>
+                                <th>الاسم بالعربية</th>
+                                <th>رقم الهاتف</th>
+                                <th>العنوان</th>
+                                <th>الجنس</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>نوع الوظيفة</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>مكان الميلاد</th>
+                                <th class="text-end">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($employees as $employee)
                                 <tr>
-                                    <th>ID</th>
-                                    <th>الصورة</th>
-                                    <th>الاسم بالإنجليزية</th>
-                                    <th>الاسم بالعربية</th>
-                                    <th>رقم الهاتف</th>
-                                    <th>العنوان</th>
-                                    <th>الجنس</th>
-                                    <th>البريد الإلكتروني</th>
-                                    <th>نوع الوظيفة</th>
-                                    <th>تاريخ الميلاد</th>
-                                    <th>مكان الميلاد</th>
-                                    <th class="text-end">الإجراءات</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($employees as $employee)
-                                <tr>
-                                    <td>{{ $employee->id }}</td>
+                                    <td>{{ $loop->iteration }}</td> <!-- Auto-incrementing ID -->
                                     <td>
                                         @if ($employee->image)
-                                            <img src="{{ asset('storage/' . $employee->image) }}" alt="Employee Image" width="50">
+                                            <img src="{{ asset('storage/' . $employee->image) }}" alt="صورة الموظف" width="50" class="rounded-circle">
                                         @else
-                                            <span>لا توجد صورة</span>
+                                            <span class="text-muted">لا توجد صورة</span>
                                         @endif
                                     </td>
                                     <td>{{ $employee->name_en }}</td>
                                     <td>{{ $employee->name_ar }}</td>
                                     <td>{{ $employee->phone }}</td>
                                     <td>{{ $employee->address }}</td>
-                                    <td>{{ $employee->gender }}</td>
+                                    <td>{{ $employee->gender == 'male' ? 'ذكر' : 'أنثى' }}</td>
                                     <td>{{ $employee->email }}</td>
-                                    <td>{{ $employee->emptype }}</td> <!-- Job Type -->
-                                    <td>{{ $employee->Day_birth }}</td>
-                                    <td>{{ $employee->place_birth }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-white">
+                                            {{ $employee->emptype == 'teacher' ? 'معلم' : 'موظف إداري' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ \Carbon\Carbon::parse($employee->birth_date)->format('Y-m-d') }}</td>
+                                    <td>{{ $employee->birth_place }}</td>
+                                    <td class="text-center">
+                                        <form action="{{ route('employees.toggleStatus', $employee->id) }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm {{ $employee->state ? 'btn-success' : 'btn-danger' }}" 
+                                                    style="border-radius: 50px; padding: 5px 15px;">
+                                                <i class="fas {{ $employee->state ? 'fa-check-circle' : 'fa-ban' }}"></i>
+                                                {{ $employee->state ? 'نشط' : 'غير نشط' }}
+                                            </button>
+                                        </form>
+                                    </td>
+                                    
+                                    
                                     <td class="text-end">
-                                        <div class="actions">
-                                            <a href="{{ url('employees/'.$employee->id) }}" class="btn btn-sm bg-success-light me-2">
+                                        <div class="btn-group">
+                                            <a href="{{ url('employees/'.$employee->id) }}" class="btn btn-sm">
                                                 <i class="feather-eye"></i>
                                             </a>
-                                            <a href="{{ url('employees/'.$employee->id.'/edit') }}" class="btn btn-sm bg-danger-light">
+                                            <a href="{{ url('employees/'.$employee->id.'/edit') }}" class="btn btn-sm">
                                                 <i class="feather-edit"></i>
                                             </a>
+
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
+
             </div>
         </div>
-    </div>
 
-</div>
+    </div>
 </div>
 
 @endsection

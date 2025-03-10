@@ -14,7 +14,6 @@
                     <h3 class="page-title">إضافة موظف</h3>
                     <ul class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ url('employees') }}">الموظفون</a></li>
-                        <li class="breadcrumb-item active">إضافة موظف</li>
                     </ul>
                 </div>
             </div>
@@ -48,28 +47,28 @@
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>الاسم باللغة الإنجليزية <span class="text-danger">*</span></label>
-                                        <input type="text" name="name_en" class="form-control" placeholder="الاسم بالإنجليزية" value="{{ old('name_en') }}" required>
+                                        <input type="text" name="name_en" class="form-control" value="{{ old('name_en') }}" required>
                                     </div>
                                 </div>
 
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>الاسم باللغة العربية <span class="text-danger">*</span></label>
-                                        <input type="text" name="name_ar" class="form-control" placeholder="الاسم بالعربية" value="{{ old('name_ar') }}" required>
+                                        <input type="text" name="name_ar" class="form-control" value="{{ old('name_ar') }}" required>
                                     </div>
                                 </div>
 
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>رقم الهاتف <span class="text-danger">*</span></label>
-                                        <input type="text" name="phone" class="form-control" placeholder="أدخل رقم الهاتف" value="{{ old('phone') }}" required>
+                                        <input type="text" name="phones" class="form-control" value="{{ old('phone') }}" required>
                                     </div>
                                 </div>
 
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>العنوان <span class="text-danger">*</span></label>
-                                        <input type="text" name="address" class="form-control" placeholder="أدخل العنوان" value="{{ old('address') }}" required>
+                                        <input type="text" name="address" class="form-control" value="{{ old('address') }}" required>
                                     </div>
                                 </div>
 
@@ -77,8 +76,8 @@
                                     <div class="form-group local-forms">
                                         <label>الجنس <span class="text-danger">*</span></label>
                                         <select class="form-control select" name="gender" required>
-                                            <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>ذكر</option>
-                                            <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>أنثى</option>
+                                            <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>ذكر</option>
+                                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>أنثى</option>
                                         </select>
                                     </div>
                                 </div>
@@ -86,7 +85,7 @@
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>البريد الإلكتروني <span class="text-danger">*</span></label>
-                                        <input type="email" name="email" class="form-control" placeholder="أدخل البريد الإلكتروني" value="{{ old('email') }}" required>
+                                        <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
                                     </div>
                                 </div>
 
@@ -100,21 +99,21 @@
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>تاريخ الميلاد <span class="text-danger">*</span></label>
-                                        <input type="date" name="Day_birth" class="form-control" value="{{ old('Day_birth') }}" required>
+                                        <input type="date" name="birth_date" class="form-control" value="{{ old('birth_date') }}" required>
                                     </div>
                                 </div>
-
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>مكان الميلاد <span class="text-danger">*</span></label>
-                                        <select name="place_birth" class="form-control" required>
+                                        <select name="birth_place" class="form-control" required>
                                             <option value="">-- اختر المحافظة --</option>
                                             @foreach (['صنعاء', 'عدن', 'تعز', 'الحديدة', 'إب', 'المكلا', 'مارب', 'شبوة', 'حضرموت', 'البيضاء', 'صعدة'] as $place)
-                                                <option value="{{ $place }}" {{ old('place_birth') == $place ? 'selected' : '' }}>{{ $place }}</option>
+                                                <option value="{{ $place }}" {{ old('birth_place') == $place ? 'selected' : '' }}>{{ $place }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                 </div>
+                                
 
                                 <!-- Role Selection -->
                                 <div class="col-12 col-sm-4">
@@ -135,7 +134,7 @@
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
                                         <label>نوع الوظيفة <span class="text-danger">*</span></label>
-                                        <input type="text" name="emptype" class="form-control" placeholder="أدخل نوع الوظيفة" value="{{ old('emptype') }}" required>
+                                        <input type="text" name="emptype" class="form-control" value="{{ old('emptype') }}" required>
                                     </div>
                                 </div>
 
@@ -144,8 +143,8 @@
                                     <div class="form-group local-forms">
                                         <label>حالة الموظف <span class="text-danger">*</span></label>
                                         <select name="state" class="form-control" required>
-                                            <option value="نشط" {{ old('state') == 'نشط' ? 'selected' : '' }}>نشط</option>
-                                            <option value="غير نشط" {{ old('state') == 'غير نشط' ? 'selected' : '' }}>غير نشط</option>
+                                            <option value="1" {{ old('state') == '1' ? 'selected' : '' }}>نشط</option>
+                                            <option value="0" {{ old('state') == '0' ? 'selected' : '' }}>غير نشط</option>
                                         </select>
                                     </div>
                                 </div>
@@ -157,11 +156,38 @@
                                     </div>
                                 </div>
 
-                                <!-- Submit Button -->
+                                <!-- Qualifications -->
                                 <div class="col-12">
-                                    <div class="student-submit">
-                                        <button type="submit" class="btn btn-primary">إضافة الموظف</button>
+                                    <h5 class="form-title"><span>المؤهلات العلمية</span></h5>
+                                </div>
+
+                                <div id="qualification-fields">
+                                    <div class="row qualification-item">
+                                        <div class="col-md-4 mb-3">
+                                            <label>المؤهل العلمي</label>
+                                            <input type="text" name="qualification_name[]" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label>الجهة المانحة</label>
+                                            <input type="text" name="issuing_authority[]" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                                <label>تاريخ الميلاد <span class="text-danger">*</span></label>
+                                                <input type="date" name="obtained_date[]" class="form-control" value="{{ old('obtained_date') }}" >
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label>ملف الشهادة</label>
+                                            <input type="file" name="certification[]" class="form-control">
+                                        </div>
                                     </div>
+                                </div>
+
+                                <button type="button" class="btn btn-info" id="add-qualification"style="background-color: #007BFF">إضافة مؤهل آخر</button>
+
+                                <!-- Submit Button -->
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-primary" >إضافة الموظف</button>
                                 </div>
 
                             </div> <!-- End Row -->
@@ -174,5 +200,13 @@
 
     </div>
 </div>
+
+<script>
+document.getElementById('add-qualification').addEventListener('click', function() {
+    let qualificationFields = document.getElementById('qualification-fields');
+    let newField = qualificationFields.firstElementChild.cloneNode(true);
+    qualificationFields.appendChild(newField);
+});
+</script>
 
 @endsection

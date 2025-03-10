@@ -7,12 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 
+
 class Employee extends Model
 {
     protected $fillable = [
-        'user_id', 'name_en', 'name_ar', 'phone', 'address', 'gender',
-        'Day_birth', 'place_birth', 'image', 'email', 'emptype', 'state'
+        'name_en', 'name_ar', 'phones', 'address', 'gender', 'birth_date', 
+        'birth_place', 'image', 'email', 'emptype', 'state','user_id'
     ];
+
+    protected $casts = [
+        'phones' => 'array',
+        'state' => 'boolean', 
+    ];
+    public function qualifications()
+    {
+        return $this->hasMany(Qualification::class);
+    }
 
     public function user()
     {
