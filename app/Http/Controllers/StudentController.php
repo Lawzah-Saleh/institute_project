@@ -24,7 +24,6 @@ class StudentController extends Controller
     {
         $query = Student::query();
     
-        // جلب جميع الأقسام والكورسات والجلسات
         $departments = Department::all();
         $courses = Course::all();
         $sessions = CourseSession::all();

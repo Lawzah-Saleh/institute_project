@@ -46,4 +46,32 @@ class TeacherDashboardController extends Controller
             'courses_count' => $courses_count, // ✅ Now correctly passed to the view
         ]);
     }
+    public function getTeacherSessions(Request $request)
+{
+    $teacherId = auth()->id(); // جلب ID المدرّس المسجل الدخول
+
+    // البحث عن الموظف المرتبط بهذا المستخدم
+    $employee = Employee::where('user_id', $teacherId)->first();
+    if (!$employee) {
+        return response()->json([]);
+    }
+
+    // جلب الجلسات الخاصة بالمدرّس
+    $sessions = CourseSession::where('employee_id', $employee->id)
+        ->whereDate('start_date', '>=', now())
+        ->get();
+
+    // تنسيق البيانات لتناسب FullCalendar
+    $events = [];
+    foreach ($sessions as $session) {
+        $events[] = [
+            'title' => '📚 ' . $session->course->name,
+            'start' => $session->start_date . 'T' . $session->start_time,
+            'end'   => $session->end_date . 'T' . $session->end_time,
+            'color' => '#007bff' // لون الجلسة
+        ];
+    }
+
+    return response()->json($events);
+}
 }

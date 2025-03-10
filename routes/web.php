@@ -10,17 +10,8 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CoursePriceController;
 use App\Http\Controllers\CourseSessionController;
 use App\Http\Controllers\CourseSessionStudentController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\HolidayController;
 
 
 
@@ -58,11 +49,6 @@ Route::get('/get-course-price/{course_id}', function ($course_id) {
 });
 
 
-
-
-
-
-
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
@@ -79,7 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/Teacher-dashboard/students', [StudentController::class, 'teacherStudents'])->name('teacher.students');
 
 
 
@@ -94,107 +79,51 @@ use App\Http\Controllers\TeacherDashboardController;
 
 Route::group(['middleware' => ['role:teacher']], function () {
     Route::get('/teacher/classes', [TeacherDashboardController::class, 'index']);
+    Route::get('/teacher/sessions', [TeacherDashboardController::class, 'getTeacherSessions'])->name('teacher.sessions');
+
 });
 
 Route::group(['middleware' => ['role:student']], function () {
     Route::get('/student/enroll', [StudentController::class, 'enroll']);
 });
+//employees route
+Route::middleware(['auth', 'admin'])->group(function () {
 
+    Route::resource('employees', EmployeeController::class);
+    Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggleStatus');
+});
 
+//student routes
 
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('students', StudentController::class);
 
-use App\Http\Controllers\EmployeeController;
+});
 
-Route::resource('employees', EmployeeController::class);
-Route::post('/employees/{id}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggleStatus');
-
-
-
-////////////////////////////////////////////////////////////////////////////////////
-// this is for the admin dashboard
-
-Route::resource('students', StudentController::class);
-
-Route::get('/get-courses/{departmentId}', [CourseController::class, 'getCoursesByDepartment']);
-Route::get('/get-sessions/{courseId}', [CourseSessionController::class, 'getSessionsByCourse']);
-
-
-Route::get('/get-all-students', [StudentController::class, 'getAllStudents']);
-Route::get('/search-students', [StudentController::class, 'searchStudents']);
-
-
-// Resource route for SectionController
-Route::resource('departments', DepartmentController::class);
-Route::patch('/departments/{department}/toggle', [DepartmentController::class, 'toggleState'])->name('departments.toggle');
-
-
-Route::resource('courses', CourseController::class);
-Route::patch('/courses/{course}/toggle', [CourseController::class, 'toggleState'])->name('courses.toggle');
-
-Route::resource('course-prices', CoursePriceController::class);
-Route::patch('/course-prices/{id}/toggle', [CoursePriceController::class, 'toggle'])->name('course-prices.toggle');
-
+// courses routes
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('courses', CourseController::class);
+    Route::patch('/courses/{course}/toggle', [CourseController::class, 'toggleState'])->name('courses.toggle');
+    Route::resource('course-prices', CoursePriceController::class);
+    Route::patch('/course-prices/{id}/toggle', [CoursePriceController::class, 'toggle'])->name('course-prices.toggle');
+});
 //course session
 Route::middleware(['auth', 'role:admin'])->group(function () {
-Route::resource('course-sessions', CourseSessionController::class);
+    Route::resource('course-sessions', CourseSessionController::class);
+    Route::patch('/course-sessions/{id}/toggle', [CourseSessionController::class, 'toggleState'])->name('course-sessions.toggle');
+
+    });
+//department routes 
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('departments', DepartmentController::class);
+    Route::patch('/departments/{department}/toggle', [DepartmentController::class, 'toggleState'])->name('departments.toggle');
 });
-Route::match(['get', 'post'], '/course-sessions/{sessionId}/enroll', [CourseSessionController::class, 'enrollStudents'])->name('course-sessions.enroll');
-Route::patch('/course-sessions/{id}/toggle', [CourseSessionController::class, 'toggleState'])->name('course-sessions.toggle');
 
-Route::get('/course-sessions/{id}/enroll', [CourseSessionController::class, 'enroll'])->name('course-sessions.enroll');
-Route::post('/course-sessions/{id}/store-enrollment', [CourseSessionController::class, 'storeEnrollment'])->name('course-sessions.store-enrollment');
-
-
-
-// Resource route for StudentController
-Route::get('/get-all-students', [StudentController::class, 'getAllStudents']);
 Route::get('/get-courses/{departmentId}', [CourseController::class, 'getCoursesByDepartment']);
 Route::get('/get-sessions/{courseId}', [CourseSessionController::class, 'getSessionsByCourse']);
 
 
 
-// Get courses by section ID
-Route::get('get-courses/{section_id}', [StudentController::class, 'getCourses'])->name('students.getCourses');
-
-// Get students by course ID
-Route::get('get-students/{course_id}', [StudentController::class, 'getStudents'])->name('students.getStudents');
-
-// Search for students by ID or name
-Route::get('search-students', [StudentController::class, 'searchStudents'])->name('students.searchStudents');
-Route::post('/students', [StudentController::class, 'store'])->name('students.store');
-
-
-use App\Models\CourseSession;
-use Illuminate\Http\Request;
-
-Route::get('/teacher/sessions', function (Request $request) {
-    $teacherId = auth()->id(); // Get logged-in teacher ID
-
-    // Get the teacher's employee ID
-    $employee = \App\Models\Employee::where('user_id', $teacherId)->first();
-    if (!$employee) {
-        return response()->json([]);
-    }
-
-    $sessions = CourseSession::where('employee_id', $employee->id)
-        ->whereDate('start_date', '>=', now())
-        ->get();
-
-    // Format data for FullCalendar
-    $events = [];
-    foreach ($sessions as $session) {
-        $events[] = [
-            'title' => '📚 ' . $session->course->name,
-            'start' => $session->start_date . 'T' . $session->start_time,
-            'end'   => $session->end_date . 'T' . $session->end_time,
-            'color' => '#007bff' // Blue color
-        ];
-    }
-
-    return response()->json($events);
-});
-
-use App\Http\Controllers\HolidayController;
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('holidays', HolidayController::class);

@@ -75,7 +75,7 @@
                                             <a href="{{ route('course-sessions.edit', $session->id) }}" class="btn btn-sm bg-success-light me-1">
                                                 <i class="feather-edit"></i>
                                             </a>
-                                            <a href="{{ route('course-sessions.enroll', $session->id) }}" class="btn btn-sm btn-primary me-2">
+                                            <a href="" class="btn btn-sm btn-primary me-2">
                                                 <i class="feather-user-plus"></i> تسجيل طلاب
                                             </a>
                                         </div>

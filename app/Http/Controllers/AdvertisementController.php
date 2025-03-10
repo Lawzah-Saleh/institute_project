@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class AdvertisementController extends Controller
 {
-    /**
-     * عرض جميع الإعلانات
-     */
+
     public function index(Request $request)
     {
         $query = Advertisement::query();
@@ -35,9 +33,7 @@ class AdvertisementController extends Controller
         return view('admin.pages.advertisements.create');
     }
 
-    /**
-     * حفظ إعلان جديد في قاعدة البيانات
-     */
+ 
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -47,15 +43,12 @@ class AdvertisementController extends Controller
             'end_date' => 'required|date|after:today',
         ]);
     
-        // رفع الصورة وحفظها
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('advertisements', 'public');
         }
     
-        // تعيين تاريخ النشر ليكون الآن
         $validated['publish_date'] = now();
     
-        // حساب حالة الإعلان تلقائيًا بناءً على تاريخ الانتهاء
         $validated['state'] = now()->lte($validated['end_date']);
     
         Advertisement::create($validated);
@@ -70,17 +63,13 @@ class AdvertisementController extends Controller
     }
     
 
-    /**
-     * عرض صفحة تعديل الإعلان
-     */
+
     public function edit(Advertisement $advertisement)
     {
         return view('admin.pages.advertisements.edit', compact('advertisement'));
     }
 
-    /**
-     * تحديث بيانات الإعلان
-     */
+
     public function update(Request $request, Advertisement $advertisement)
     {
         $validated = $request->validate([
@@ -90,15 +79,12 @@ class AdvertisementController extends Controller
             'end_date' => 'required|date|after:today',
         ]);
     
-        // تحديث الصورة في حالة التعديل
         if ($request->hasFile('image')) {
             $validated['image'] = $request->file('image')->store('advertisements', 'public');
         }
     
-        // تحديد تاريخ النشر ليكون الآن في حالة عدم وجوده
         $validated['publish_date'] = $advertisement->publish_date ?? now();
     
-        // تحديث حالة الإعلان بناءً على تاريخ الانتهاء
         $validated['state'] = now()->lte($validated['end_date']);
     
         $advertisement->update($validated);
@@ -106,9 +92,6 @@ class AdvertisementController extends Controller
         return redirect()->route('advertisements.index')->with('success', 'تم تعديل الإعلان بنجاح!');
     }
     
-    /**
-     * حذف الإعلان
-     */
     public function destroy(Advertisement $advertisement)
     {
         // حذف الصورة من التخزين

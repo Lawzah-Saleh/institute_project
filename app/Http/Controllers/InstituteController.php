@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class InstituteController extends Controller
 {
-    /**
-     * عرض قائمة المعاهد.
-     */
+
     public function index()
     {
         $institute = Institute::first(); // جلب أول معهد (لأن هناك واحد فقط)
@@ -19,17 +17,13 @@ class InstituteController extends Controller
     }
     
 
-    /**
-     * عرض نموذج إضافة معهد جديد.
-     */
+ 
     public function create()
     {
         return view('admin.pages.institute.create');
     }
 
-    /**
-     * حفظ بيانات المعهد الجديد.
-     */
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -52,9 +46,7 @@ class InstituteController extends Controller
     }
     
 
-    /**
-     * عرض تفاصيل معهد معين.
-     */
+ 
     public function show($id)
     {
         $institute = Institute::findOrFail($id);
@@ -70,9 +62,7 @@ class InstituteController extends Controller
         return view('admin.pages.institute.edit', compact('institute'));
     }
 
-    /**
-     * تحديث بيانات معهد معين.
-     */
+ 
     public function update(Request $request, $id)
     {
         $institute = Institute::findOrFail($id);
@@ -100,9 +90,7 @@ class InstituteController extends Controller
         return redirect()->route('institute.index')->with('success', 'تم تحديث بيانات المعهد بنجاح!');
     }
 
-    /**
-     * حذف معهد معين.
-     */
+
     public function destroy($id)
     {
         $institute = Institute::findOrFail($id);

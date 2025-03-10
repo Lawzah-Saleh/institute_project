@@ -159,6 +159,7 @@ return [
         /*
          * Package Service Providers...
          */
+        Spatie\Permission\PermissionServiceProvider::class, // i have add to remove the errror of the admin 
 
         /*
          * Application Service Providers...
