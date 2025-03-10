@@ -3,148 +3,157 @@
 @section('title', 'تعديل بيانات الطالب')
 
 @section('content')
-
 <div class="page-wrapper">
     <div class="content container-fluid">
 
-        <div class="page-header">
-            <div class="row align-items-center">
-                <div class="col">
-                    <h3 class="page-title">تعديل بيانات الطالب</h3>
-                    <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('students.index') }}">الطلاب</a></li>
-                        <li class="breadcrumb-item active">تعديل بيانات الطالب</li>
-                    </ul>
-                </div>
-            </div>
+        <!-- 🔹 Page Header -->
+        <div class="page-header d-flex justify-content-between align-items-center">
+            <h3 class="page-title">تعديل بيانات الطالب</h3>
+            <a href="{{ route('students.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> الرجوع
+            </a>
         </div>
 
-        <div class="card comman-shadow">
+        <!-- 🔹 Student Form -->
+        <div class="card shadow-sm">
             <div class="card-body">
                 <form action="{{ route('students.update', $student->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
                     <div class="row">
-                        <!-- الاسم بالعربية -->
-                        <div class="col-md-6 mb-3">
-                            <label>الاسم بالعربية <span class="text-danger">*</span></label>
-                            <input type="text" name="student_name_ar" class="form-control" value="{{ $student->student_name_ar }}" required>
+                        <!-- Student Image -->
+                        <div class="col-md-3 text-center">
+                            <img src="{{ $student->image ? asset('storage/' . $student->image) : asset('images/default-student.png') }}" 
+                                 alt="صورة الطالب" 
+                                 class="rounded-circle shadow-sm img-thumbnail" 
+                                 style="width: 140px; height: 140px;">
+                            <input type="file" name="image" class="form-control mt-3">
                         </div>
 
-                        <!-- الاسم بالإنجليزية -->
-                        <div class="col-md-6 mb-3">
-                            <label>الاسم بالإنجليزية <span class="text-danger">*</span></label>
-                            <input type="text" name="student_name_en" class="form-control" value="{{ $student->student_name_en }}" required>
-                        </div>
+                        <!-- Student Details -->
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>الاسم بالعربية <span class="text-danger">*</span></label>
+                                    <input type="text" name="student_name_ar" class="form-control" 
+                                           value="{{ old('student_name_ar', $student->student_name_ar) }}" required>
+                                </div>
 
-                        <!-- الهاتف -->
-                        <div class="col-md-6 mb-3">
-                            <label>رقم الهاتف <span class="text-danger">*</span></label>
-                            <input type="text" name="phone" class="form-control" value="{{ $student->phone }}" required>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>الاسم بالإنجليزية <span class="text-danger">*</span></label>
+                                    <input type="text" name="student_name_en" class="form-control" 
+                                           value="{{ old('student_name_en', $student->student_name_en) }}" required>
+                                </div>
 
-                        <!-- الجنس -->
-                        <div class="col-md-6 mb-3">
-                            <label>الجنس <span class="text-danger">*</span></label>
-                            <select name="gender" class="form-control" required>
-                                <option value="male" {{ $student->gender == 'male' ? 'selected' : '' }}>ذكر</option>
-                                <option value="female" {{ $student->gender == 'female' ? 'selected' : '' }}>أنثى</option>
-                            </select>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>رقم الهاتف <span class="text-danger">*</span></label>
+                                    <div id="phone-container">
+                                        @php
+                                            $phones = json_decode($student->phones, true) ?? [];
+                                        @endphp
+                                
+                                        @foreach($phones as $phone)
+                                            <input type="text" name="phones[]" class="form-control mt-2" value="{{ old('phones.' . $loop->index, $phone) }}">
+                                        @endforeach
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-secondary mt-2" id="add-phone">+ إضافة رقم آخر</button>
+                                </div>
+                                
 
-                        <!-- المؤهل -->
-                        <div class="col-md-6 mb-3">
-                            <label>المؤهل <span class="text-danger">*</span></label>
-                            <input type="text" name="qualification" class="form-control" value="{{ $student->qualification }}" required>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>البريد الإلكتروني</label>
+                                    <input type="email" name="email" class="form-control" 
+                                           value="{{ old('email', $student->email) }}">
+                                </div>
 
-                        <!-- تاريخ الميلاد -->
-                        <div class="col-md-6 mb-3">
-                            <label>تاريخ الميلاد <span class="text-danger">*</span></label>
-                            <input type="date" name="birth_date" class="form-control" value="{{ $student->birth_date }}" required>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>المؤهل <span class="text-danger">*</span></label>
+                                    <input type="text" name="qualification" class="form-control" 
+                                           value="{{ old('qualification', $student->qualification) }}" required>
+                                </div>
 
-                        <!-- مكان الميلاد -->
-                        <div class="col-md-6 mb-3">
-                            <label>مكان الميلاد <span class="text-danger">*</span></label>
-                            <input type="text" name="birth_place" class="form-control" value="{{ $student->birth_place }}" required>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>الجنس <span class="text-danger">*</span></label>
+                                    <select name="gender" class="form-select">
+                                        <option value="male" {{ $student->gender == 'male' ? 'selected' : '' }}>ذكر</option>
+                                        <option value="female" {{ $student->gender == 'female' ? 'selected' : '' }}>أنثى</option>
+                                    </select>
+                                </div>
 
-                        <!-- العنوان -->
-                        <div class="col-md-6 mb-3">
-                            <label>العنوان <span class="text-danger">*</span></label>
-                            <input type="text" name="address" class="form-control" value="{{ $student->address }}" required>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>تاريخ الميلاد <span class="text-danger">*</span></label>
+                                    <input type="date" name="birth_date" class="form-control" 
+                                           value="{{ old('birth_date', $student->birth_date) }}" required>
+                                </div>
 
-                        <!-- البريد الإلكتروني -->
-                        <div class="col-md-6 mb-3">
-                            <label>البريد الإلكتروني <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" value="{{ $student->email }}" required>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>مكان الميلاد <span class="text-danger">*</span></label>
+                                    <input type="text" name="birth_place" class="form-control" 
+                                           value="{{ old('birth_place', $student->birth_place) }}" required>
+                                </div>
 
-                        <!-- الحالة -->
-                        <div class="col-md-6 mb-3">
-                            <label>الحالة <span class="text-danger">*</span></label>
-                            <select name="state" class="form-control" required>
-                                <option value="1" {{ $student->state ? 'selected' : '' }}>نشط</option>
-                                <option value="0" {{ !$student->state ? 'selected' : '' }}>غير نشط</option>
-                            </select>
-                        </div>
+                                <div class="col-md-6">
+                                    <label>العنوان <span class="text-danger">*</span></label>
+                                    <input type="text" name="address" class="form-control" 
+                                           value="{{ old('address', $student->address) }}" required>
+                                </div>
 
-                        <!-- صورة الطالب -->
-                        <div class="col-md-6 mb-3">
-                            <label>صورة الطالب</label>
-                            <input type="file" name="image" class="form-control">
-                            @if($student->image)
-                                <img src="{{ asset('storage/' . $student->image) }}" width="80" class="mt-2">
-                            @endif
+                                <div class="col-md-6">
+                                    <label>الحالة <span class="text-danger">*</span></label>
+                                    <select name="state" class="form-select">
+                                        <option value="1" {{ $student->state ? 'selected' : '' }}>نشط</option>
+                                        <option value="0" {{ !$student->state ? 'selected' : '' }}>غير نشط</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                                                <!-- اختيار القسم -->
-                        <div class="col-md-6 mb-3">
-                            <label>اختر القسم</label>
-                            <select name="department_id" id="department_id" class="form-control">
+                    </div>
+
+                    <!-- 🔹 Course & Session -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <label>القسم <span class="text-danger">*</span></label>
+                            <select name="department_id" id="department_id" class="form-select" required>
                                 <option value="">-- اختر القسم --</option>
                                 @foreach($departments as $department)
-                                    <option value="{{ $department->id }}" {{ $student->department_id == $department->id ? 'selected' : '' }}>
-                                        {{ $department->department_name }}
+                                <option value="{{ $department->id }}" 
+                                    {{ optional($student->courses->first())->department_id == $department->id ? 'selected' : '' }}>
+                                                                        {{ $department->department_name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <!-- اختيار الكورس -->
-                        <div class="col-md-6 mb-3">
-                            <label>اختر الكورس</label>
-                            <select name="course_id" id="course_id" class="form-control">
+                        <div class="col-md-6">
+                            <label>الكورس</label>
+                            <select name="course_id" id="course_id" class="form-select">
                                 <option value="">-- اختر الكورس --</option>
                                 @foreach($courses as $course)
-                                    <option value="{{ $course->id }}" {{ $student->course_id == $course->id ? 'selected' : '' }}>
+                                    <option value="{{ $course->id }}" {{ $student->courses->first()->id == $course->id ? 'selected' : '' }}>
                                         {{ $course->course_name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <!-- اختيار الجلسة -->
-                        <div class="col-md-6 mb-3">
-                            <label>اختر الجلسة</label>
-                            <select name="session_id" id="session_id" class="form-control">
+                        <div class="col-md-6">
+                            <label>الجلسة</label>
+                            <select name="course_session_id" id="session_id" class="form-select">
                                 <option value="">-- اختر الجلسة --</option>
                                 @foreach($sessions as $session)
-                                    <option value="{{ $session->id }}" {{ $student->session_id == $session->id ? 'selected' : '' }}>
-                                        {{ $session->start_date }} - {{ $session->end_date }} ({{ $session->start_time }} - {{ $session->end_time }})
+                                    <option value="{{ $session->id }}" {{ $student->sessions->first()->id == $session->id ? 'selected' : '' }}>
+                                        {{ $session->start_date }} - {{ $session->end_date }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
+                    </div>
 
-
-                        <!-- أزرار الحفظ والإلغاء -->
-                        <div class="col-md-12 mt-3">
-                            <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
-                            <a href="{{ route('students.index') }}" class="btn btn-secondary">إلغاء</a>
-                        </div>
+                    <!-- 🔹 Submit Button -->
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                        <a href="{{ route('students.index') }}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> إلغاء</a>
                     </div>
 
                 </form>
@@ -153,57 +162,30 @@
 
     </div>
 </div>
+
+<!-- 🔹 JavaScript لتحميل الكورسات والجلسات عند تغيير القسم -->
 <script>
-    document.getElementById('department_id').addEventListener('change', function () {
-        const departmentId = this.value;
-        const courseSelect = document.getElementById('course_id');
-        const sessionSelect = document.getElementById('session_id');
-
-        // تفريغ الخيارات السابقة
-        courseSelect.innerHTML = '<option value="">-- اختر الكورس --</option>';
-        sessionSelect.innerHTML = '<option value="">-- اختر الجلسة --</option>';
-        courseSelect.disabled = true;
-        sessionSelect.disabled = true;
-
-        if (departmentId) {
-            fetch(`/get-courses/${departmentId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(course => {
-                        const option = document.createElement('option');
-                        option.value = course.id;
-                        option.textContent = course.course_name;
-                        courseSelect.appendChild(option);
-                    });
-                    courseSelect.disabled = false;
-                })
-                .catch(error => console.error('Error fetching courses:', error));
-        }
+document.getElementById('department_id').addEventListener('change', function () {
+    fetch(`/get-courses/${this.value}`)
+        .then(response => response.json())
+        .then(data => {
+            const courseSelect = document.getElementById('course_id');
+            courseSelect.innerHTML = '<option value="">-- اختر الكورس --</option>';
+            data.forEach(course => {
+                courseSelect.innerHTML += `<option value="${course.id}">${course.course_name}</option>`;
+            });
+        });
+});
+    document.getElementById('add-phone').addEventListener('click', function () {
+        let container = document.getElementById('phone-container');
+        let newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.name = 'phones[]';
+        newInput.classList.add('form-control', 'mt-2');
+        newInput.placeholder = 'أدخل رقم هاتف آخر';
+        container.appendChild(newInput);
     });
 
-    document.getElementById('course_id').addEventListener('change', function () {
-        const courseId = this.value;
-        const sessionSelect = document.getElementById('session_id');
 
-        // تفريغ الجلسات السابقة
-        sessionSelect.innerHTML = '<option value="">-- اختر الجلسة --</option>';
-        sessionSelect.disabled = true;
-
-        if (courseId) {
-            fetch(`/get-sessions/${courseId}`)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(session => {
-                        const option = document.createElement('option');
-                        option.value = session.id;
-                        option.textContent = `${session.start_date} - ${session.end_date} (${session.start_time} - ${session.end_time})`;
-                        sessionSelect.appendChild(option);
-                    });
-                    sessionSelect.disabled = false;
-                })
-                .catch(error => console.error('Error fetching sessions:', error));
-        }
-    });
 </script>
-
 @endsection

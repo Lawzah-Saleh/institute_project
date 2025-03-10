@@ -9,7 +9,7 @@ class CourseSessionStudent extends Model
     use HasFactory;
 
     protected $fillable = [
-        'session_id',
+        'course_session_id',
         'student_id',
     ];
 

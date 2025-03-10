@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="page-wrapper">
+<div class="page-wrapper" style="background-color: #F9F9FB;">
     <div class="content container-fluid">
 
         <div class="page-header">
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="card comman-shadow">
+        <div class="card comman-shadow " style="background-color: white;">
             <div class="card-body">
                 @if ($errors->any())
                     <div class="alert alert-danger">
@@ -48,11 +48,14 @@
                             <input type="text" name="student_name_en" class="form-control" placeholder="Enter name in English" value="{{ old('student_name_en') }}" required>
                         </div>
 
-                        <!-- Phone -->
                         <div class="col-md-6 mb-3">
                             <label>رقم الهاتف <span class="text-danger">*</span></label>
-                            <input type="text" name="phone" class="form-control" placeholder="أدخل رقم الهاتف" value="{{ old('phone') }}" required>
+                            <div id="phone-container">
+                                <input type="text" name="phones[]" class="form-control" placeholder="أدخل رقم الهاتف" required>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-secondary mt-2" id="add-phone">+ إضافة رقم آخر</button>
                         </div>
+
 
                         <!-- Gender -->
                         <div class="col-md-6 mb-3">
@@ -91,7 +94,7 @@
                         <!-- Email -->
                         <div class="col-md-6 mb-3">
                             <label>البريد الإلكتروني <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" placeholder="example@email.com" value="{{ old('email') }}" required>
+                            <input type="email" name="email" class="form-control" placeholder="example@email.com" value="{{ old('email') }}" >
                         </div>
 
                      <!-- اختيار القسم -->
@@ -118,18 +121,20 @@
                         <div class="col-md-6 mb-3" id="study_time_container" style="display: none;">
                             <label>اختر وقت الدراسة <span class="text-danger">*</span></label>
                             <select name="study_time" class="form-select">
-                                <option value="08-10">08:00 - 10:00 صباحًا</option>
+                                <option value="8-10">08:00 - 10:00 صباحًا</option>
                                 <option value="10-12">10:00 - 12:00 ظهرًا</option>
-                                <option value="02-04">02:00 - 04:00 عصرًا</option>
-                                <option value="04-06">04:00 - 06:00 مساءً</option>
+                                <option value="12-2">12:00 - 02:00 ظهرًا</option>
+                                <option value="2-4">02:00 - 04:00 عصرًا</option>
+                                <option value="4-6">04:00 - 06:00 مساءً</option>
                             </select>
+                            
                         </div>
 
 
                         <!-- اختيار الجلسة -->
                         <div class="col-md-6 mb-3">
                             <label>اختر الجلسة <span class="text-danger">*</span></label>
-                            <select name="session_id" id="session_id" class="form-select" disabled>
+                            <select name="course_session_id" id="course_session_id" class="form-select" disabled>
                                 <option value="">-- اختر الجلسة --</option>
                             </select>
                         </div>
@@ -138,8 +143,8 @@
                         <div class="col-md-6 mb-3">
                             <label>الحالة <span class="text-danger">*</span></label>
                             <select name="state" class="form-select" required>
-                                <option value="active" {{ old('state') == 'active' ? 'selected' : '' }}>نشط</option>
-                                <option value="inactive" {{ old('state') == 'inactive' ? 'selected' : '' }}>غير نشط</option>
+                                <option value="1">نشط</option>
+                                <option value="0">غير نشط</option>
                             </select>
                         </div>
 
@@ -161,21 +166,22 @@
     </div>
 </div>
 <script>
-    document.getElementById('department_id').addEventListener('change', function () {
-        const departmentId = this.value;
-        const courseSelect = document.getElementById('course_id');
-        const sessionSelect = document.getElementById('session_id');
+document.getElementById('department_id').addEventListener('change', function () {
+    const departmentId = this.value;
+    const courseSelect = document.getElementById('course_id');
+    const sessionSelect = document.getElementById('course_session_id');
 
-        // تفريغ الخيارات
-        courseSelect.innerHTML = '<option value="">-- اختر الكورس --</option>';
-        sessionSelect.innerHTML = '<option value="">-- اختر الجلسة --</option>';
-        courseSelect.disabled = true;
-        sessionSelect.disabled = true;
+    // Reset options
+    courseSelect.innerHTML = '<option value="">-- اختر الكورس --</option>';
+    sessionSelect.innerHTML = '<option value="">-- اختر الجلسة --</option>';
+    courseSelect.disabled = true;
+    sessionSelect.disabled = true;
 
-        if (departmentId) {
-            fetch(`/get-courses/${departmentId}`)
-                .then(response => response.json())
-                .then(data => {
+    if (departmentId) {
+        fetch(`/get-courses/${departmentId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
                     data.forEach(course => {
                         const option = document.createElement('option');
                         option.value = course.id;
@@ -183,13 +189,20 @@
                         courseSelect.appendChild(option);
                     });
                     courseSelect.disabled = false;
-                })
-                .catch(error => console.error('Error fetching courses:', error));
-        }
-    });
+                } else {
+                    courseSelect.innerHTML = '<option value="">❌ لا توجد كورسات متاحة</option>';
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error fetching courses:', error);
+                courseSelect.innerHTML = '<option value="">⚠️ حدث خطأ، حاول مرة أخرى</option>';
+            });
+    }
+});
+
 document.getElementById('course_id').addEventListener('change', function () {
     const courseId = this.value;
-    const sessionSelect = document.getElementById('session_id');
+    const sessionSelect = document.getElementById('course_session_id');
 
     sessionSelect.innerHTML = '<option value="">-- اختر الجلسة --</option>';
     sessionSelect.disabled = true;
@@ -206,9 +219,15 @@ document.getElementById('course_id').addEventListener('change', function () {
                         sessionSelect.appendChild(option);
                     });
                     sessionSelect.disabled = false;
+                } else {
+                    sessionSelect.innerHTML = '<option value="">❌ لا توجد جلسات متاحة لهذا الكورس</option>';
+                    sessionSelect.disabled = true;
                 }
             })
-            .catch(error => console.error('Error fetching sessions:', error));
+            .catch(error => {
+                console.error('❌ Error fetching sessions:', error);
+                sessionSelect.innerHTML = '<option value="">⚠️ حدث خطأ، حاول مرة أخرى</option>';
+            });
     }
 });
 
@@ -221,12 +240,24 @@ document.getElementById('course_id').addEventListener('change', function () {
     }
 });
 
-document.getElementById('session_id').addEventListener('change', function () {
+document.getElementById('course_session_id').addEventListener('change', function () {
     const studyTimeContainer = document.getElementById('study_time_container');
     if (this.value) {
         studyTimeContainer.style.display = 'none';
     }
 });
+
+// Add Multiple Phone Numbers
+document.getElementById('add-phone').addEventListener('click', function () {
+    let container = document.getElementById('phone-container');
+    let newInput = document.createElement('input');
+    newInput.type = 'text';
+    newInput.name = 'phones[]';
+    newInput.classList.add('form-control', 'mt-2');
+    newInput.placeholder = 'أدخل رقم هاتف آخر';
+    container.appendChild(newInput);
+});
+
 
 </script>
 

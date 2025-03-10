@@ -25,7 +25,7 @@ use App\Http\Controllers\CourseSessionStudentController;
 
 
 
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 
 
@@ -202,6 +202,22 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 Route::patch('/holidays/{id}/toggle', [HolidayController::class, 'toggleState'])->name('holidays.toggle');
 
+
+
+
+use App\Http\Controllers\InstituteController;
+
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('institute', InstituteController::class);
+ 
+});
+
+use App\Http\Controllers\AdvertisementController;
+
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::resource('advertisements', AdvertisementController::class);
+});
 
 
 

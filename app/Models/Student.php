@@ -25,10 +25,11 @@ class Student extends Model
         'state',
     ];
     use HasFactory;
-    // public function sessions()
-    // {
-    //     return $this->belongsToMany(CourseSession::class, 'course_session_students');
-    // }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function department()
     {
@@ -41,11 +42,11 @@ class Student extends Model
 
     public function sessions()
     {
-        return $this->belongsToMany(CourseSession::class, 'course_session_students', 'student_id', 'session_id');
+        return $this->belongsToMany(CourseSession::class, 'course_session_students', 'student_id', 'course_session_id');
     }
 
 
- 
+
 
 
         public function courseSessions()

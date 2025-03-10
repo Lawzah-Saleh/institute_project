@@ -23,81 +23,61 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $query = Student::query();
-
-        // Fetch departments, courses, and sessions for filters
+    
+        // جلب جميع الأقسام والكورسات والجلسات
         $departments = Department::all();
-        $courses = []; // لا يتم عرض أي كورسات في البداية
-        if ($request->filled('department_id')) {
-            $courses = Course::where('department_id', $request->department_id)->get();
-        }
+        $courses = Course::all();
         $sessions = CourseSession::all();
+    
+        // 🔍 البحث عن الطلاب بالاسم أو الرقم
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('id', $search)
-                  ->orWhere('student_name_ar', 'LIKE', "%{$search}%")
-                  ->orWhere('student_name_en', 'LIKE', "%{$search}%");
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('id', $searchTerm)
+                  ->orWhere('student_name_ar', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('student_name_en', 'LIKE', "%{$searchTerm}%");
+            });
         }
-        // Apply filtering based on selected department
+    
+        // 🔍 فلترة الطلاب بناءً على القسم
         if ($request->filled('department_id')) {
             $query->whereHas('courses', function ($q) use ($request) {
                 $q->where('department_id', $request->department_id);
+            })->orWhereHas('sessions.course', function ($q) use ($request) {
+                $q->where('department_id', $request->department_id);
             });
         }
-
-        // Apply filtering based on selected course
+    
+        // 🔍 فلترة الطلاب بناءً على الكورس
         if ($request->filled('course_id')) {
             $query->whereHas('courses', function ($q) use ($request) {
                 $q->where('courses.id', $request->course_id);
+            })->orWhereHas('sessions', function ($q) use ($request) {
+                $q->whereHas('course', function ($q) use ($request) {
+                    $q->where('id', $request->course_id);
+                });
             });
         }
-
-        // Apply filtering based on selected session
-        if ($request->filled('session_id')) {
+    
+        // 🔍 فلترة الطلاب بناءً على الجلسة
+        if ($request->filled('course_session_id')) {
             $query->whereHas('sessions', function ($q) use ($request) {
-                $q->where('course_sessions.id', $request->session_id);
+                $q->where('course_sessions.id', $request->course_session_id);
             });
         }
-
-        $students = $query->get();
-
+    
+        // تحميل العلاقات لضمان ظهور البيانات
+        $students = $query->with(['courses', 'sessions.course'])->get();
+    
         return view('admin.pages.students.index', compact('students', 'departments', 'courses', 'sessions'));
     }
-
-    public function getAllStudents()
+    public function show($id)
     {
-        try {
-            $students = Student::with(['department', 'courses', 'sessions'])->get();
-            return response()->json($students);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'حدث خطأ أثناء تحميل بيانات الطلاب.'], 500);
-        }
+        // 🟢 Fetch the student along with related courses and sessions
+        $student = Student::with(['courses', 'sessions'])->findOrFail($id);
+
+        return view('admin.pages.students.show', compact('student'));
     }
-
-
-
-
-    public function searchStudents(Request $request)
-    {
-        $query = Student::with(['course.department', 'sessions']);
-
-        if ($request->has('id') && $request->id) {
-            $query->where('id', $request->id);
-        }
-
-        if ($request->has('name') && $request->name) {
-            $query->where('student_name_ar', 'like', '%' . $request->name . '%');
-        }
-
-        if ($request->has('department_id') && $request->department_id) {
-            $query->whereHas('course.department', function ($q) use ($request) {
-                $q->where('id', $request->department_id);
-            });
-        }
-
-        $students = $query->get();
-        return response()->json($students);
-    }
-
 
     public function create()
     {
@@ -110,78 +90,84 @@ class StudentController extends Controller
         $validated = $request->validate([
             'student_name_ar' => 'required|max:300',
             'student_name_en' => 'required|max:300',
-            'phone' => 'required|max:15',
+            'phones' => 'required|array', // Ensure phones is an array
+            'phones.*' => 'string|max:20', // Each phone number should be a valid string
             'gender' => 'required|in:male,female',
-            'qualification' => 'nullable|max:150',
+            'qualification' => 'required|max:255',
             'birth_date' => 'required|date',
             'birth_place' => 'required|max:150',
             'address' => 'required|max:300',
             'email' => 'nullable|email|unique:students,email',
-            'course_id' => 'nullable|exists:courses,id',
-            'session_id' => 'nullable|exists:course_sessions,id',
-            'state' => 'required|in:active,inactive',
+            'state' => 'required|boolean',
             'image' => 'nullable|image|max:2048',
+
+            // Course & Session
+            'course_id' => 'nullable|exists:courses,id',
+            'study_time' => 'nullable|in:8-10,10-12,12-2,2-4,4-6',
+            'course_session_id' => 'nullable|exists:course_sessions,id',
+
         ]);
 
-        $validated['state'] = $request->state === 'active' ? 1 : 0;
+        $validated['state'] = (bool) $request->state;
 
-        // إنشاء المستخدم
-        $email = $validated['email'] ?? $validated['student_name_en'] . '@default.com';
-        $user = User::where('email', $email)->first();
-
-        if (!$user) {
-            $user = User::create([
-                'name' => $validated['student_name_en'],
-                'email' => $email,
-                'password' => bcrypt('123456'),
-            ]);
+        if ($request->has('phones') && is_array($request->phones)) {
+            $validated['phones'] = json_encode($request->phones);
         }
 
-        // ✅ **إضافة دور الطالب للمستخدم إذا لم يكن موجودًا**
+        //  Create or Fetch User
+        $email = $validated['email'] ?? $validated['student_name_en'] . '@default.com';
+        $user = User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $validated['student_name_en'],
+                'password' => bcrypt('123456'),
+            ]
+        );
+
+        //  Assign Role (if not already assigned)
         if (!$user->hasRole('student')) {
             $user->assignRole('student');
         }
 
-        // إنشاء الطالب وربطه بالمستخدم
+        //  Create Student
         $validated['user_id'] = $user->id;
         $student = Student::create($validated);
 
-        // ✅ **حفظ الصورة إذا تم رفعها**
+        //  Upload Image
         if ($request->hasFile('image')) {
             $student->image = $request->file('image')->store('students');
             $student->save();
         }
 
+        //  Determine `course_id` based on session
         $courseId = $request->course_id;
-
-        // ✅ **إذا تم اختيار جلسة فقط، احصل على `course_id` من الجلسة المحددة**
-        if ($request->filled('session_id')) {
-            $session = CourseSession::find($request->session_id);
+        if ($request->filled('course_session_id')) {
+            $session = CourseSession::find($request->course_session_id);
             if ($session) {
-                $courseId = $session->course_id; // استخراج `course_id` من الجلسة
+                $courseId = $session->course_id;
             }
 
-            // ✅ **إضافة الطالب إلى `course_session_students`**
-            CourseSessionStudent::create([
-                'student_id' => $student->id,
-                'session_id' => $request->session_id,
-                'status' => 'active',
-            ]);
+            //  Register Student in `course_session_students` ONLY
+            CourseSessionStudent::updateOrCreate(
+                ['student_id' => $student->id, 'course_session_id' => $request->course_session_id],
+                ['status' => 'active']
+            );
         }
 
-        // ✅ **إضافة الطالب إلى `course_students` إذا لم يكن مسجلًا بالفعل**
-        if ($courseId) {
+        //  Register Student in `course_students` ONLY if not already in a session
+        if ($courseId && !$request->filled('course_session_id')) {
             CourseStudent::updateOrCreate(
                 ['student_id' => $student->id, 'course_id' => $courseId],
                 [
                     'register_at' => now(),
-                    'study_time' => $request->input('study_time', '08-10'),
-                ]
+                    'study_time' => in_array($request->input('study_time'), ['8-10', '10-12', '12-2', '2-4', '4-6']) ? $request->input('study_time') : '8-10',
+                    ]
             );
         }
 
         return redirect()->route('students.index')->with('success', 'تم تسجيل الطالب بنجاح.');
     }
+
 
 
 
@@ -202,8 +188,8 @@ class StudentController extends Controller
         $validated = $request->validate([
             'student_name_ar' => 'required|max:300',
             'student_name_en' => 'required|max:300',
-            'phone' => 'required|max:15',
-            'gender' => 'required|in:male,female',
+            'phones' => 'nullable|array',
+            'phones.*' => 'string|max:20',            'gender' => 'required|in:male,female',
             'qualification' => 'nullable|max:150',
             'birth_date' => 'required|date',
             'birth_place' => 'required|max:150',
@@ -211,7 +197,7 @@ class StudentController extends Controller
             'email' => 'nullable|email|unique:students,email,'.$id,
             'department_id' => 'required|exists:departments,id',
             'course_id' => 'nullable|exists:courses,id',
-            'session_id' => 'nullable|exists:course_sessions,id',
+            'course_session_id' => 'nullable|exists:course_sessions,id',
             'state' => 'required|in:active,inactive,suspended,expelled,graduated',
         ]);
 
@@ -220,14 +206,14 @@ class StudentController extends Controller
         $student->update($validated);
 
         // 🔹 تحديث الكورسات والجلسات
-        if ($request->filled('session_id')) {
+        if ($request->filled('course_session_id')) {
             // حذف أي تسجيل قديم للطالب في الجلسات
             CourseSessionStudent::where('student_id', $student->id)->delete();
 
             // تسجيل الطالب في الجلسة الجديدة
             CourseSessionStudent::create([
                 'student_id' => $student->id,
-                'session_id' => $request->session_id,
+                'course_session_id' => $request->course_session_id,
                 'status' => 'active',
             ]);
         } elseif ($request->filled('course_id')) {

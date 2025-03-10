@@ -9,31 +9,53 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $table = 'attendances'; // تحديد الجدول المرتبط بالموديل
+    protected $table = 'attendances';
 
     protected $fillable = [
         'student_id',
         'session_id',
         'employee_id',
         'attendance_date',
-        'status'
+        'status',
     ];
 
-    // العلاقة مع الطلاب
+    protected $casts = [
+        'attendance_date' => 'datetime',
+        'status' => 'boolean',
+    ];
+
+
     public function student()
     {
-        return $this->belongsTo(Student::class, 'student_id');
+        return $this->belongsTo(Student::class);
     }
 
-    // العلاقة مع الجلسات
+ 
     public function session()
     {
-        return $this->belongsTo(CourseSession::class, 'session_id');
+        return $this->belongsTo(CourseSession::class);
     }
 
-    // العلاقة مع الموظفين (المعلمين)
+  
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id');
+        return $this->belongsTo(Employee::class);
+    }
+
+  
+    public function scopePresent($query)
+    {
+        return $query->where('status', true);
+    }
+
+    public function scopeAbsent($query)
+    {
+        return $query->where('status', false);
+    }
+
+
+    public function isPresent()
+    {
+        return $this->status === true;
     }
 }

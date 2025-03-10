@@ -6,9 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
@@ -16,9 +14,7 @@ return new class extends Migration
             $table->foreign('payment_sources_id')->references('id')->on('payment_sources')->onDelete('cascade');         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
         Schema::table('invoices', function (Blueprint $table) {

@@ -6,7 +6,7 @@
                 <img src="{{ asset('admin/assets/img/logo.png') }}" alt="اسم المعهد" style="width: 200px; height: auto; max-height: 120px; margin: 0 auto; display: block; border-radius: 10%; background-color: rgba(255, 255, 255, 0.9);box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
             </div>
             <ul>
-                <li><a href="{{ url('/') }}"><i class="feather-grid"></i> <span> وحدة التحكم </span></a></li>
+                <li><a href="{{ route('dashboard') }}"><i class="feather-grid"></i> <span> وحدة التحكم </span></a></li>
                 <li class="submenu">
                     <a href="#"><i class="fas fa-graduation-cap"></i> <span>الطلاب</span> <span
                         class="menu-arrow"></span</a>
@@ -55,6 +55,28 @@
                             </ul>
 
                 </li>
+
+
+
+                <li class="submenu">
+                    <a href="#"><i class="fa fa-newspaper"></i> <span> اعدادات الصفحة الرئيسية</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('institute.create') }}">أضافة معلومات المعهد</a></li>
+                        <li><a href="{{ route('institute.index') }}">عرض معلومات المعهد</a></li>
+                        {{-- <li><a href="{{ route('institute.edit') }}">تعديل معلومات المعهد</a></li> --}}
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="#"><i class="fa fa-newspaper"></i> <span> الاعلانات</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('advertisements.index') }}">كل الإعلانات</a></li>
+                        <li><a href="{{ route('advertisements.create') }}">إضافة إعلان</a></li>
+                    </ul>
+                </li>
                 <li class="submenu">
                     <a href="#"><i class="fas fa-clipboard"></i> <span>المالية</span> <span
                             class="menu-arrow"></span></a>
@@ -73,22 +95,6 @@
 
                 <li>
                     <a href="add-fees.html"><i class="fas fa-clipboard-list"></i> <span>أضافة رسوم للطالب</span></a>
-                </li>
-
-
-
-                <li class="submenu">
-                    <a href="#"><i class="fa fa-newspaper"></i> <span> الاعلانات</span>
-                        <span class="menu-arrow"></span>
-                    </a>
-                    <ul>
-                        <li><a href="blog.html">عرض الاأعلانات</a></li>
-                        <li><a href="add-blog.html">أضافة أعلان</a></li>
-                        <li><a href="edit-blog.html"> تعديل أعلان</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="settings.html"><i class="fas fa-cog"></i> <span>اعدادات الموقع</span></a>
                 </li>
                 {{-- <li class="submenu">
                     <a href="#"><i class="fas fa-shield-alt"></i> <span> Authentication </span> <span

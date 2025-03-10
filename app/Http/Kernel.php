@@ -69,6 +69,8 @@ class Kernel extends HttpKernel
             // ✅ Add Spatie Permission Middleware
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
+
 
 
     ];
