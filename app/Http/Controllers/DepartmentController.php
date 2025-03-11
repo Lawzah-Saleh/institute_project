@@ -19,7 +19,7 @@ class DepartmentController extends Controller
 
         $departments = $query->get(); // تنفيذ الاستعلام وجلب النتائج
 
-        return view('admin.pages.departments', compact('departments'));
+        return view('admin.pages.departments.index', compact('departments'));
     }
 
     public function toggleState(Department $department)
@@ -43,7 +43,7 @@ class DepartmentController extends Controller
     public function create()
     {
         // Show the create department form
-        return view('admin.pages.add-department');
+        return view('admin.pages.departments.create');
     }
 
     public function store(Request $request)
@@ -65,7 +65,7 @@ class DepartmentController extends Controller
     public function edit(Department $department)
     {
         // Show the edit department form
-        return view('admin.pages.edit-department', compact('department'));
+        return view('admin.pages.departments.edit', compact('department'));
     }
 
     public function update(Request $request, Department $department)

@@ -17,6 +17,7 @@ class AdminDashboardController extends Controller
         $departmentsCount = Department::count();
         $coursesCount = Course::count();
 
+
         return view('admin.pages.dashboard', compact('studentsCount', 'teachersCount', 'departmentsCount', 'coursesCount'));
     }
 

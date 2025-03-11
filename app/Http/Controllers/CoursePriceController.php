@@ -14,7 +14,7 @@ class CoursePriceController extends Controller
     public function index()
     {
         $coursePrices = CoursePrice::with('course')->get();
-        return view('admin.pages.course-prices', compact('coursePrices'));
+        return view('admin.pages.course_prices.index', compact('coursePrices'));
     }
     public function toggle($id)
     {
@@ -31,7 +31,7 @@ class CoursePriceController extends Controller
     public function create()
     {
         $courses = Course::all();
-        return view('admin.pages.add-course-price', compact('courses'));
+        return view('admin.pages.course_prices.create', compact('courses'));
     }
 
     /**
@@ -60,7 +60,7 @@ class CoursePriceController extends Controller
     {
         $price = CoursePrice::findOrFail($id);
         $courses = Course::all();
-        return view('admin.pages.edit-course-price', compact('price', 'courses'));
+        return view('admin.pages.course_prices.edit', compact('price', 'courses'));
     }
 
     /**

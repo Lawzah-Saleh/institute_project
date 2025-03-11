@@ -27,7 +27,7 @@
 
                 <li>
 
-                    <a href="{{ route('teacher.students') }}"><i class="fas fa-graduation-cap"></i> <span> الطلاب</span>
+                    {{-- <a href="{{ route('teacher.students') }}"><i class="fas fa-graduation-cap"></i> <span> الطلاب</span> --}}
                         <span></span>
                     </a>
                 </li>

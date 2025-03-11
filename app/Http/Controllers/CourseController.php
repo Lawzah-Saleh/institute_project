@@ -22,7 +22,7 @@ class CourseController extends Controller
 
         $departments = Department::all();
 
-        return view('admin.pages.courses', compact('courses', 'departments'));
+        return view('admin.pages.courses.index', compact('courses', 'departments'));
     }
 
 
@@ -36,7 +36,7 @@ class CourseController extends Controller
             public function create()
         {
             $departments = Department::all(); // جلب الأقسام لإضافتها في القائمة المنسدلة
-            return view('admin.pages.add-course', compact('departments'));
+            return view('admin.pages.courses.create', compact('departments'));
         }
 
         public function store(Request $request)
@@ -68,7 +68,7 @@ class CourseController extends Controller
             $departments = Department::all();
 
             // عرض صفحة التعديل
-            return view('admin.pages.edit-course', compact('course', 'departments'));
+            return view('admin.pages.courses.edit', compact('course', 'departments'));
         }
 
 

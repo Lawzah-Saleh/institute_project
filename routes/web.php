@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\HomeController;
@@ -73,7 +74,7 @@ use App\Http\Controllers\AdminDashboardController;
 
 
 Route::group(['middleware' => ['role:admin']], function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 });
 use App\Http\Controllers\TeacherDashboardController;
 
@@ -86,6 +87,7 @@ Route::group(['middleware' => ['role:teacher']], function () {
 Route::group(['middleware' => ['role:student']], function () {
     Route::get('/student/enroll', [StudentController::class, 'enroll']);
 });
+
 //employees route
 Route::middleware(['auth', 'admin'])->group(function () {
 
