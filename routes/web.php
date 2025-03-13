@@ -125,16 +125,17 @@ Route::get('/get-courses/{departmentId}', [CourseController::class, 'getCoursesB
 Route::get('/get-sessions/{courseId}', [CourseSessionController::class, 'getSessionsByCourse']);
 
 
-
+// holiidays route
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('holidays', HolidayController::class);
+    Route::patch('/holidays/{id}/toggle', [HolidayController::class, 'toggleState'])->name('holidays.toggle');
+
 });
 
-Route::patch('/holidays/{id}/toggle', [HolidayController::class, 'toggleState'])->name('holidays.toggle');
 
 
-
+//  institute info routes
 
 use App\Http\Controllers\InstituteController;
 
@@ -143,20 +144,49 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('institute', InstituteController::class);
  
 });
-
+// adv routes
 use App\Http\Controllers\AdvertisementController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('advertisements', AdvertisementController::class);
 });
 
+// // addendance routes
+// use App\Http\Controllers\AttendanceController;
 
+// Route::middleware(['auth', 'role:teacher'])->group(function () {
+//     Route::get('/teacher/sessions', [AttendanceController::class, 'getTeacherSessions'])->name('teacher.sessions');
+//     Route::get('/attendance/session/{sessionId}', [AttendanceController::class, 'getSessionAttendance'])->name('attendance.session');
+//     Route::post('/attendance/mark', [AttendanceController::class, 'markAttendance'])->name('attendance.mark');
+// });
+
+// use App\Http\Controllers\AdminAttendanceController;
+
+// Route::middleware(['auth', 'role:admin'])->group(function () {
+//     Route::get('/admin/attendance', [AdminAttendanceController::class, 'index'])->name('admin.attendance.index');
+//     Route::patch('/admin/attendance/{id}/update', [AdminAttendanceController::class, 'update'])->name('admin.attendance.update');
+// });
 
 use App\Http\Controllers\AttendanceController;
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/teacher/sessions', [AttendanceController::class, 'getTeacherSessions']); // عرض الجلسات التي يدرسها المعلم
-    Route::post('/attendance/mark', [AttendanceController::class, 'markAttendance']); // تسجيل الحضور
-    Route::get('/attendance/session/{sessionId}', [AttendanceController::class, 'getSessionAttendance']); // عرض الحضور لجلسة
+// ✅ إدارة الحضور عبر لوحة الإدارة (Admin Panel)
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('attendance', AttendanceController::class);
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('admin.attendance.index');
+    Route::patch('/attendance/{id}/toggle', [AttendanceController::class, 'toggleAttendance'])->name('attendance.toggle');
+
+    // 🔹 جلب الكورسات بناءً على القسم المختار
+    Route::get('/get-courses/{departmentId}', [AttendanceController::class, 'getCoursesByDepartment']);
+    
+    // 🔹 جلب الجلسات بناءً على الكورس المختار
+    Route::get('/get-sessions/{courseId}', [AttendanceController::class, 'getSessionsByCourse']);
+        // Route::get('/admin/attendance/report', [AttendanceController::class, 'report'])->name('admin.attendance.report');
+        Route::get('/admin/attendance/monthly-report', [AttendanceController::class, 'monthlyAttendanceReport'])->name('attendance.monthly_report');
+        Route::get('/admin/attendance/report', [AttendanceController::class, 'report'])->name('attendance.report');
+
+        Route::get('/get-courses/{departmentId}', [CourseController::class, 'getCoursesByDepartment']);
+        
 });
+
+
 

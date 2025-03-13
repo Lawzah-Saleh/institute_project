@@ -3,7 +3,7 @@
         <!-- Logo Section -->
         <a href="{{ route('home') }}" class="logo d-flex align-items-center">
             <img src="{{ asset('assets/img/efi.png') }}" alt="">
-            <h1 class="sitename ms-2">{{ $institute->name ?? 'Default Name' }}</h1>
+            <h1 class="sitename ms-2">{{ $institute->institute_name ?? ' معهد التعليم أولاّ' }}</h1>
         </a>
 
         <!-- Navigation Menu -->

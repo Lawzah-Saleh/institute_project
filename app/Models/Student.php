@@ -42,9 +42,16 @@ class Student extends Model
 
     public function sessions()
     {
-        return $this->belongsToMany(CourseSession::class, 'course_session_students', 'student_id', 'course_session_id');
+        return $this->belongsToMany(CourseSession::class, 'attendances')
+                    ->withPivot('attendance_status')
+                    ->withTimestamps();
     }
-
+    
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+    
 
 
 

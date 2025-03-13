@@ -12,8 +12,8 @@
       </div>
       <div class="container text-center">
         <div class="d-flex flex-column justify-content-center align-items-center">
-          <h1 data-aos="fade-up">  مرحباً بكم <span> {{ $institute->name }} </span></h1>
-          <p data-aos="fade-up" data-aos-delay="100"> {{ $institute->description }} <br></p>
+          <h1 data-aos="fade-up">  مرحباً بكم <span> {{ $institute->institute_name }} </span></h1>
+          <p data-aos="fade-up" data-aos-delay="100"> {{ $institute->institute_description }} <br></p>
           <div class="d-flex" data-aos="fade-up" data-aos-delay="200">
             <a href="#about" class="btn-get-started">أبدا </a>
           </div>
@@ -76,7 +76,7 @@
 
           <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="100">
             <p class="who-we-are">من نحن</p>
-            <h3>معهد التعليم أولاً </h3>
+            <h3>{{$institute->institute_name}}</h3>
             <p class="fst-italic"> {{ $institute->about_us }}            </p>
           </div>
 
@@ -121,7 +121,7 @@
                 </div>
                 <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
                     <img src="assets/img/{{ $advertisement->image }}" class="img-fluid" alt="">
-                    
+
                 </div>
 
             </div><!-- Features Item -->
@@ -150,7 +150,7 @@
               <div>
                 <h3>{{ $department->department_name }}</h3>
                 <p>{{ $department->department_info }}</p>
-                
+
                 </div>
             </div>
           </div><!-- End Service Item -->
@@ -159,7 +159,7 @@
           <div class="container text-center mt-5">
             <a href="{{ url('/courses') }}" style=" background-color: #196098; border: none; padding: 15px 30px;font-size: 18px; border-radius: 50px; transition: all 0.3s ease;     color: #fff; ">معرفة المزيد</a>
         </div>
-        
+
 
         </div>
 

@@ -33,9 +33,8 @@
                 </li>
 
                 <li>
-
-                    <a href="{{ url('/Teacher-dashboard/presence and absence') }}"><i class="fas fa-clipboard"></i> <span> الحضور والغياب</span> <span></span>
-
+                    <a href="{{ route('teacher.sessions') }}">
+                        <i class="fas fa-clipboard"></i> <span>الحضور و الغياب</span>
                     </a>
                 </li>
 

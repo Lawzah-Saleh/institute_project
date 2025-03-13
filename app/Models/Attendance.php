@@ -9,8 +9,6 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $table = 'attendances';
-
     protected $fillable = [
         'student_id',
         'session_id',
@@ -19,43 +17,18 @@ class Attendance extends Model
         'status',
     ];
 
-    protected $casts = [
-        'attendance_date' => 'datetime',
-        'status' => 'boolean',
-    ];
-
-
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
- 
     public function session()
     {
-        return $this->belongsTo(CourseSession::class);
+        return $this->belongsTo(CourseSession::class, 'session_id');
     }
 
-  
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
-    }
-
-  
-    public function scopePresent($query)
-    {
-        return $query->where('status', true);
-    }
-
-    public function scopeAbsent($query)
-    {
-        return $query->where('status', false);
-    }
-
-
-    public function isPresent()
-    {
-        return $this->status === true;
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 }

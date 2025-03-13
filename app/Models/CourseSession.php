@@ -49,7 +49,17 @@ class CourseSession extends Model
 
         return $currentDate->toDateString();
     }
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'course_students', 'course_session_id', 'student_id');
+    }
+    
 
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'session_id');
+    }
+    
     
 
 
