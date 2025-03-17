@@ -1,16 +1,16 @@
 @extends('admin.layouts.app')
 
-@section('title', 'إدارة الحضور')
+@section('title', 'إدارة الدرجات')
 
 @section('content')
 <div class="page-wrapper" style="background-color: #F9F9FB;">
     <div class="content container-fluid">
         <div class="page-header">
-            <h3 class="page-title">إدارة الحضور</h3>
+            <h3 class="page-title">إدارة الدرجات</h3>
         </div>
 
         <!-- 🔍 البحث -->
-        <form method="GET" action="{{ route('admin.attendance.index') }}" class="mb-4">
+        <form method="GET" action="{{ route('degrees.index') }}" class="mb-4">
             <div class="row">
                 <div class="col-md-4">
                     <label>القسم</label>
@@ -35,23 +35,19 @@
                         <option value="">-- اختر الجلسة --</option>
                     </select>
                 </div>
+
                 <div class="col-md-4 mt-3">
-                    <label>البحث باسم الكورس</label>
-                    <input type="text" name="course_name" class="form-control" placeholder="أدخل اسم الكورس">
+                    <label>البحث باسم الطالب</label>
+                    <input type="text" name="student_name" class="form-control" placeholder="أدخل اسم الطالب">
                 </div>
 
                 <div class="col-md-4 mt-3">
                     <label>الحالة</label>
                     <select name="status" class="form-control">
                         <option value="">-- اختر الحالة --</option>
-                        <option value="1">حاضر</option>
-                        <option value="0">غائب</option>
+                        <option value="pass">ناجح</option>
+                        <option value="fail">راسب</option>
                     </select>
-                </div>
-
-                <div class="col-md-4 mt-3">
-                    <label>ابحث عن الطالب</label>
-                    <input type="text" name="student_name" class="form-control" placeholder="ابحث عن اسم الطالب">
                 </div>
 
                 <div class="col-md-12 mt-3">
@@ -60,53 +56,63 @@
             </div>
         </form>
 
-        <!-- 📋 عرض قائمة الحضور -->
+        <!-- 📋 عرض قائمة الدرجات -->
         <table class="table table-striped">
             <thead>
                 <tr>
                     <th>الطالب</th>
                     <th>الكورس</th>
                     <th>الجلسة</th>
-                    <th>التاريخ</th>
+                    <th>درجة العملي</th>
+                    <th>درجة النهائي</th>
+                    <th>درجة الحضور</th>
+                    <th>الدرجة الكلية</th>
                     <th>الحالة</th>
+                    <th>الإجراءات</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($attendances as $attendance)
+                @foreach($degrees as $degree)
                 <tr>
-                    <td>{{ $attendance->student->student_name_ar }}</td>
-                    <td>{{ $attendance->session->course->course_name }}</td>
-                    <td>{{ $attendance->session->start_date }} - {{ $attendance->session->end_date }}</td>
-                    <td>{{ $attendance->attendance_date }}</td>
+                    <td>{{ $degree->student->student_name_ar }}</td>
+                    <td>{{ $degree->session->course->course_name }}</td>
+                    <td>{{ $degree->session->start_date }} - {{ $degree->session->end_date }}</td>
+                    <td>{{ $degree->practical_degree }}</td>
+                    <td>{{ $degree->final_degree }}</td>
+                    <td>{{ $degree->attendance_degree }}</td>
+                    <td>{{ $degree->total_degree }}</td>
                     <td>
-                        <span class="badge {{ $attendance->status ? 'bg-success' : 'bg-danger' }}">
-                            {{ $attendance->status ? 'حاضر' : 'غائب' }}
+                        <span class="badge {{ $degree->status == 'pass' ? 'bg-success' : 'bg-danger' }}">
+                            {{ $degree->status == 'pass' ? 'ناجح' : 'راسب' }}
                         </span>
                     </td>
                     <td>
 
                         <!-- 🔹 زر تعديل -->
-                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAttendanceModal-{{ $attendance->id }}">
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editDegreeModal-{{ $degree->id }}">
                             تعديل
                         </button>
 
-                        <!-- 🔹 نموذج تعديل الحضور -->
-                        <div class="modal fade" id="editAttendanceModal-{{ $attendance->id }}" tabindex="-1">
+                        <!-- 🔹 نموذج تعديل الدرجات -->
+                        <div class="modal fade" id="editDegreeModal-{{ $degree->id }}" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form method="POST" action="{{ route('attendance.update', $attendance->id) }}">
+                                    <form method="POST" action="{{ route('degrees.update', $degree->id) }}">
                                         @csrf
                                         @method('PUT')
                                         <div class="modal-header">
-                                            <h5 class="modal-title">تعديل الحضور</h5>
+                                            <h5 class="modal-title">تعديل الدرجات</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <label>الحالة</label>
-                                            <select name="status" class="form-control">
-                                                <option value="1" {{ $attendance->status ? 'selected' : '' }}>حاضر</option>
-                                                <option value="0" {{ !$attendance->status ? 'selected' : '' }}>غائب</option>
-                                            </select>
+                                            <label>درجة العملي</label>
+                                            <input type="number" name="practical_degree" class="form-control" value="{{ $degree->practical_degree }}" required>
+
+                                            <label>درجة النهائي</label>
+                                            <input type="number" name="final_degree" class="form-control" value="{{ $degree->final_degree }}" required>
+
+                                            <label>درجة الحضور</label>
+                                            <input type="number" name="attendance_degree" class="form-control" value="{{ $degree->attendance_degree }}" required>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
@@ -116,56 +122,9 @@
                             </div>
                         </div>
 
-
                     </td>
                 </tr>
                 @endforeach
-                {{-- <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAttendanceModal">
-                    إضافة حضور
-                </button>
-
-                <!-- 🔹 نافذة إدخال الحضور -->
-                <div class="modal fade" id="addAttendanceModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">إضافة حضور</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" action="{{ route('attendance.store') }}">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label>الطالب</label>
-                                        <select name="student_id" class="form-control" required>
-                                            @foreach($students as $student)
-                                                <option value="{{ $student->id }}">{{ $student->student_name_ar }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>الجلسة</label>
-                                        <select name="session_id" class="form-control" required>
-                                            @foreach($sessions as $session)
-                                                <option value="{{ $session->id }}">{{ $session->start_date }} - {{ $session->end_date }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>الحالة</label>
-                                        <select name="status" class="form-control">
-                                            <option value="1">حاضر</option>
-                                            <option value="0">غائب</option>
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">إضافة</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
-
-
             </tbody>
         </table>
 

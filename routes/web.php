@@ -115,7 +115,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/course-sessions/{id}/toggle', [CourseSessionController::class, 'toggleState'])->name('course-sessions.toggle');
 
     });
-//department routes 
+//department routes
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('departments', DepartmentController::class);
     Route::patch('/departments/{department}/toggle', [DepartmentController::class, 'toggleState'])->name('departments.toggle');
@@ -142,7 +142,7 @@ use App\Http\Controllers\InstituteController;
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('institute', InstituteController::class);
- 
+
 });
 // adv routes
 use App\Http\Controllers\AdvertisementController;
@@ -177,7 +177,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // 🔹 جلب الكورسات بناءً على القسم المختار
     Route::get('/get-courses/{departmentId}', [AttendanceController::class, 'getCoursesByDepartment']);
-    
+
     // 🔹 جلب الجلسات بناءً على الكورس المختار
     Route::get('/get-sessions/{courseId}', [AttendanceController::class, 'getSessionsByCourse']);
         // Route::get('/admin/attendance/report', [AttendanceController::class, 'report'])->name('admin.attendance.report');
@@ -185,7 +185,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/admin/attendance/report', [AttendanceController::class, 'report'])->name('attendance.report');
 
         Route::get('/get-courses/{departmentId}', [CourseController::class, 'getCoursesByDepartment']);
-        
+
+});
+use App\Http\Controllers\DegreeController;
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('degrees', DegreeController::class);
 });
 
 

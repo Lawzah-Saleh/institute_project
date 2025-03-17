@@ -121,11 +121,11 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label>📅 تاريخ الميلاد *</label>
-                        <input type="date" name="Day_birth" class="form-control" value="{{ old('Day_birth') }}" required>
+                        <input type="date" name="birth_date" class="form-control" value="{{ old('birth_date') }}" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label> مكان الميلاد *</label>
-                        <input type="text" name="place_birth" class="form-control" value="{{ old('place_birth') }}" required>
+                        <input type="text" name="birth_place" class="form-control" value="{{ old('birth_place') }}" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label>🚻 الجنس *</label>
@@ -143,7 +143,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label>🎓 المؤهل العلمي *</label>
-                            <input type="text" name="qulification" class="form-control" value="{{ old('qulification') }}" required>
+                            <input type="text" name="qualification" class="form-control" value="{{ old('qualification') }}" required>
                         </div>
                     </div>
                     <div class="card-body text-center">
@@ -316,18 +316,18 @@
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label for="birth_date" class="form-label fw-bold">Date of Birth *</label>
-                <input type="date" name="Day_birth" class="form-control" required>
+                <input type="date" name="birth_date" class="form-control" required>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="birth_place" class="form-label fw-bold">Place of Birth *</label>
-                <input type="text" name="place_birth" class="form-control" required>
+                <input type="text" name="birth_place" class="form-control" required>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label for="qualification" class="form-label fw-bold">Qualification *</label>
-                <input type="text" name="qulification" class="form-control" required>
+                <input type="text" name="qualification" class="form-control" required>
             </div>
 
             <div class="col-md-6 mb-3">
