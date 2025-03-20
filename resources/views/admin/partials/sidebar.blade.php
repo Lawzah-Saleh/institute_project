@@ -58,7 +58,8 @@
                 <li class="submenu">
                     <a href="#"><i class="fas fa-calendar-check"></i> <span> إدارة الحضور </span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="{{ route('admin.attendance.index') }}"> قائمة الحضور </a></li>
+                        <li><a href="{{ route('attendance.index') }}"> قائمة الحضور </a></li>
+                        <li><a href="{{ route('attendance.create') }}"> أضافة الحضور </a></li>
                         <li><a href="{{ route('attendance.report') }}"> تقرير الحضور </a></li>
                         <li><a href="{{ route('attendance.monthly_report') }}"> شهري تقرير الحضور </a></li>
                     </ul>

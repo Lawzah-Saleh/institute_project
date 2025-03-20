@@ -7,60 +7,87 @@ use App\Models\Course;
 use App\Models\CourseSession;
 use App\Models\Attendance;
 use App\Models\Student;
+use App\Models\Holiday;
+use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
     // 🔹 عرض صفحة إدارة الحضور
     public function index(Request $request)
     {
-        $departments = Department::all(); 
-        $courses = Course::all();
+        $departments = Department::all();
 
+        // Fetch the request parameters
+        $departmentId = $request->get('department_id');
+        $courseId = $request->get('course_id');
+        $sessionId = $request->get('session_id');
+        $attendanceDay = $request->get('attendance_day'); // The selected day
+        $studentName = $request->get('student_name');
+        $status = $request->get('status');
 
-        $query = Attendance::query();
+        // Fetch holidays
+        $holidays = Holiday::where('state', 1)->pluck('date')->toArray();
 
-        // 🔹 تصفية حسب القسم
-        if ($request->filled('department_id')) {
-            $query->whereHas('session.course', function ($q) use ($request) {
-                $q->where('department_id', $request->department_id);
-            });
-        }
+        // Only proceed if session_id is selected, else show empty fields and no session days
+        if ($sessionId) {
+            $session = CourseSession::find($sessionId);
 
-        // 🔹 تصفية حسب الكورس
-        if ($request->filled('course_id')) {
-            $query->whereHas('session', function ($q) use ($request) {
-                $q->where('course_id', $request->course_id);
-            });
-        }
+            if ($session) {
+                $startDate = Carbon::parse($session->start_date);
+                $endDate = Carbon::parse($session->end_date);
 
-        // 🔹 تصفية حسب الجلسة
-        if ($request->filled('session_id')) {
-            $query->where('session_id', $request->session_id);
-        }
+                // Fetch holidays
+                $holidays = Holiday::where('state', 1)->pluck('date')->toArray();
 
-        // 🔹 تصفية حسب الحالة (حاضر أو غائب)
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // 🔹 تصفية حسب اسم الطالب
-        if ($request->filled('student_name')) {
-            $query->whereHas('student', function ($q) use ($request) {
-                $q->where('student_name_ar', 'LIKE', "%{$request->student_name}%")
-                  ->orWhere('student_name_en', 'LIKE', "%{$request->student_name}%");
-            });
-        }
-                // 🔹 تصفية حسب اسم الكورس
-                if ($request->filled('course_name')) {
-                    $query->whereHas('session.course', function ($q) use ($request) {
-                        $q->where('course_name', 'LIKE', "%{$request->course_name}%");
-                    });
+                // Generate valid session days
+                $session_days = [];
+                for ($date = $startDate; $date <= $endDate; $date->addDay()) {
+                    // Skip Fridays and holidays
+                    if ($date->dayOfWeek != Carbon::FRIDAY && !in_array($date->toDateString(), $holidays)) {
+                        $session_days[] = $date->toDateString();
+                    }
                 }
 
-        $attendances = $query->with(['student', 'session.course'])->get();
+                // Fetch the attendances for the selected session
+                $attendances = Attendance::with(['student', 'session'])
+                                         ->where('session_id', $sessionId)
+                                         ->when($request->get('attendance_day'), function ($query) use ($request) {
+                                             return $query->whereDate('attendance_date', $request->get('attendance_day'));
+                                         })
+                                         ->get();
+            } else {
+                // Handle error if session is not found
+                return back()->with('error', 'الجلسة غير موجودة');
+            }
+        } else {
+            // If no session selected, return empty session days
+            $session_days = [];
+            $attendances = collect();
+        }
 
-        return view('admin.pages.attendance.index', compact('departments','courses', 'attendances'));
+        return view('admin.pages.attendance.index', compact('attendances', 'departmentId', 'courseId', 'sessionId', 'session_days','departments'));
     }
+    public function getSessionDays($sessionId)
+{
+    $session = CourseSession::find($sessionId);
+
+    if (!$session) {
+        return response()->json(['error' => 'الجلسة غير موجودة'], 404);
+    }
+
+    $startDate = Carbon::parse($session->start_date);
+    $endDate = Carbon::parse($session->end_date);
+    $holidays = Holiday::where('state', 1)->pluck('date')->toArray();
+
+    $session_days = [];
+    for ($date = $startDate; $date <= $endDate; $date->addDay()) {
+        if ($date->dayOfWeek != Carbon::FRIDAY && !in_array($date->toDateString(), $holidays)) {
+            $session_days[] = $date->toDateString();
+        }
+    }
+
+    return response()->json($session_days);
+}
 
     // 🔹 تغيير حالة الحضور
     public function toggleAttendance($id)
@@ -69,39 +96,106 @@ class AttendanceController extends Controller
         $attendance->status = !$attendance->status;
         $attendance->save();
 
-        return redirect()->route('admin.attendance.index')->with('success', 'تم تحديث حالة الحضور بنجاح.');
+        return redirect()->route('attendance.index')->with('success', 'تم تحديث حالة الحضور بنجاح.');
     }
 
-    // 🔹 إحضار الكورسات بناءً على القسم المختار
     public function getCoursesByDepartment($departmentId)
     {
         $courses = Course::where('department_id', $departmentId)->get();
         return response()->json($courses);
     }
 
-    // 🔹 إحضار الجلسات بناءً على الكورس المختار
     public function getSessionsByCourse($courseId)
     {
         $sessions = CourseSession::where('course_id', $courseId)->get();
         return response()->json($sessions);
     }
+
+    public function getStudentsBySession($sessionId)
+    {
+        // تأكد من أن الجلسة موجودة
+        $session = CourseSession::find($sessionId);
+        if (!$session) {
+            return response()->json(['error' => 'Session not found'], 404);
+        }
+
+        // استرجاع الطلاب المسجلين في الجلسة
+        $students = $session->students; // العلاقة بين الجلسة والطلاب
+
+        return response()->json($students);
+    }
+    public function create(Request $request)
+    {
+        $departmentId = $request->get('department_id');
+        $courseId = $request->get('course_id');
+        $sessionId = $request->get('session_id'); // Get the selected session_id
+
+        $departments = Department::all();
+        $courses = Course::where('department_id', $departmentId)->get();
+        $sessions = CourseSession::where('course_id', $courseId)->get();
+
+        // Fetch students who belong to the selected session
+        $students = Student::whereHas('courseSessionStudents', function ($query) use ($sessionId) {
+            $query->where('course_sessions.id', $sessionId);  // Specify the table for 'id'
+        })->get();
+
+        return view('admin.pages.attendance.create', compact('departments', 'courses', 'sessions', 'students', 'sessionId'));
+    }
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'student_id' => 'required|exists:students,id',
-        'session_id' => 'required|exists:course_sessions,id',
-        'status' => 'required|boolean',
-    ]);
+    {
+        // تحقق من تحديد الجلسة
+        if (!$request->has('session_id') || !$request->session_id) {
+            return redirect()->back()->with('error', 'يجب اختيار جلسة.');
+        }
 
-    Attendance::create([
-        'student_id' => $request->student_id,
-        'session_id' => $request->session_id,
-        'attendance_date' => now(),
-        'status' => $request->status,
-    ]);
+        $sessionId = $request->session_id;
+        $session = CourseSession::find($sessionId);
 
-    return redirect()->back()->with('success', 'تم تسجيل الحضور بنجاح.');
-}
+        // تحقق من وجود الجلسة
+        if (!$session) {
+            return redirect()->back()->with('error', 'الجلسة غير موجودة.');
+        }
+
+        // تاريخ اليوم
+        $today = Carbon::today();
+        $startDate = Carbon::parse($session->start_date);
+        $endDate = Carbon::parse($session->end_date);
+
+        // جلب أيام الإجازات
+        $holidays = Holiday::where('state', 1)->pluck('date')->toArray();
+
+        // جلب جميع الطلاب في هذه الجلسة
+        $students = Student::whereHas('courseSessionStudents', function ($query) use ($sessionId) {
+            $query->where('course_sessions.id', $sessionId);
+        })->get();
+
+        // التأكد من عدم تكرار تسجيل الحضور لكل طالب بشكل منفصل
+        foreach ($request->status as $studentId => $status) {
+            // تحقق إذا كان الحضور مسجل لهذا الطالب في نفس الجلسة واليوم
+            $attendanceExists = Attendance::where('student_id', $studentId)
+                                          ->where('session_id', $sessionId)
+                                          ->whereDate('attendance_date', $today)
+                                          ->exists();
+
+            // إذا كان الحضور مسجل بالفعل، إرجاع رسالة خطأ
+            if ($attendanceExists) {
+                return redirect()->back()->with('error', 'تم تسجيل الحضور لهذا الطالب في هذا اليوم بالفعل.');
+            }
+
+            // إذا لم يكن الحضور مسجل، قم بتسجيل الحضور
+            Attendance::create([
+                'student_id' => $studentId,
+                'session_id' => $sessionId,
+                'attendance_date' => $today,
+                'status' => $status,
+                'employee_id' => auth()->id(),
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'تم تسجيل الحضور بنجاح.');
+    }
+
+
 public function update(Request $request, $id)
 {
     $validated = $request->validate([
@@ -121,43 +215,47 @@ public function destroy($id)
 }
 public function report(Request $request)
 {
-    // جلب الأقسام من قاعدة البيانات
-    $departments = Department::all();
-
-    // جلب قيم الطلب من النموذج
     $departmentId = $request->input('department_id');
     $courseId = $request->input('course_id');
     $sessionId = $request->input('session_id');
+    $attendanceDay = $request->input('attendance_day');
+    $month = $request->input('month');
+    $year = $request->input('year', now()->format('Y')); // إذا لم يتم تحديد السنة، يتم استخدام السنة الحالية
 
-    // جلب الكورسات بناءً على القسم المحدد
+    // الحصول على الأقسام والكورسات
+    $departments = Department::all();
     $courses = Course::where('department_id', $departmentId)->get();
-
-    // جلب الجلسات بناءً على الكورس المحدد
     $sessions = CourseSession::where('course_id', $courseId)->get();
 
-    // جلب بيانات الحضور بناءً على الجلسات المحددة
-    $attendanceData = [];
-    foreach ($sessions as $session) {
-        $presentCount = Attendance::where('session_id', $session->id)
-                                  ->where('status', true)
-                                  ->count();
-        $absentCount = Attendance::where('session_id', $session->id)
-                                 ->where('status', false)
-                                 ->count();
+    // بناء الاستعلام بناءً على المدخلات
+    $attendancesQuery = Attendance::with(['student', 'session.course']);
 
-        $attendanceData[] = [
-            'session' => $session->session_name,
-            'present' => $presentCount,
-            'absent' => $absentCount
-        ];
+    // إذا تم تحديد الجلسة، نضيف فلتر الجلسة
+    if ($sessionId) {
+        $attendancesQuery->where('session_id', $sessionId);
     }
 
-    // إرجاع البيانات إلى الـ View
-    return view('admin.pages.attendance.report', compact('attendanceData', 'courses', 'departments', 'sessions', 'departmentId', 'courseId', 'sessionId'));
+    if ($attendanceDay) {
+        // تحويل التاريخ من المدخل إلى تنسيق متوافق مع قاعدة البيانات
+        $attendanceDay = Carbon::parse($attendanceDay)->format('Y-m-d');
+        $attendancesQuery->whereDate('attendance_date', $attendanceDay);
+    }
+
+    // إذا تم تحديد الشهر والسنة، نضيف فلتر الشهر والسنة
+    if ($month) {
+        $attendancesQuery->whereMonth('attendance_date', $month)
+                         ->whereYear('attendance_date', $year);
+    }
+
+    $attendances = $attendancesQuery->get();
+
+    // حساب نسبة الحضور
+    $totalStudents = $attendances->count();
+    $presentCount = $attendances->where('status', true)->count();
+    $attendancePercentage = ($totalStudents > 0) ? ($presentCount / $totalStudents) * 100 : 0;
+
+    return view('admin.pages.attendance.report', compact('attendances', 'departments', 'courses', 'sessions', 'departmentId', 'courseId', 'sessionId', 'attendancePercentage'));
 }
-
-
-
 
 
 public function monthlyAttendanceReport(Request $request)
@@ -188,50 +286,11 @@ public function monthlyAttendanceReport(Request $request)
     return view('admin.pages.attendance.monthly_report', compact('attendances', 'departments', 'courses', 'month', 'year', 'departmentId', 'courseId'));
 }
 
+// public function studentAttendanceHistory($studentId)
+// {
+//     $attendances = Attendance::where('student_id', $studentId)->get();
+//     return view('admin.pages.attendance.history', compact('attendances'));
+// }
 
 
 }
-
-
-
-    // 📌 ✅ Admin: Store Attendance Manually
-//     public function store(Request $request)
-//     {
-//         $request->validate([
-//             'student_id' => 'required|exists:students,id',
-//             'session_id' => 'required|exists:course_sessions,id',
-//             'status' => 'required|boolean',
-//         ]);
-
-//         Attendance::create([
-//             'student_id' => $request->student_id,
-//             'session_id' => $request->session_id,
-//             'employee_id' => Auth::id(),
-//             'attendance_date' => now(),
-//             'status' => $request->status,
-//         ]);
-
-//         return redirect()->back()->with('success', 'تم تسجيل الحضور بنجاح');
-//     }
-
-//     // 📌 ✅ Admin: Update Attendance Status
-//     public function update(Request $request, $id)
-//     {
-//         $request->validate([
-//             'status' => 'required|boolean',
-//         ]);
-
-//         $attendance = Attendance::findOrFail($id);
-//         $attendance->update(['status' => $request->status]);
-
-//         return redirect()->back()->with('success', 'تم تحديث حالة الحضور بنجاح');
-//     }
-
-//     // 📌 ✅ Admin: Delete Attendance Record
-//     public function destroy($id)
-//     {
-//         Attendance::findOrFail($id)->delete();
-//         return redirect()->back()->with('success', 'تم حذف سجل الحضور بنجاح');
-//     }
-
-//    

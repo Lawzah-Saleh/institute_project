@@ -28,19 +28,18 @@ class Degree extends Model
         'total_degree' => 'decimal:2',
     ];
 
-
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
 
-    public function courseSession()
+    public function session()
     {
         return $this->belongsTo(CourseSession::class, 'course_session_id');
     }
 
- 
+
     public function calculateTotal()
     {
         $this->total_degree = $this->practical_degree + $this->final_degree + $this->attendance_degree;
@@ -54,7 +53,7 @@ class Degree extends Model
         $this->save();
     }
 
- 
+
     public function scopePassed($query)
     {
         return $query->where('status', 'pass');

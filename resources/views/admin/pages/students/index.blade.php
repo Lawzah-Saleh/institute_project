@@ -19,17 +19,17 @@
                 <div class="col-md-4">
                     <label>القسم</label>
                     <select name="department_id" id="department_id" class="form-control">
-                        <option value="" selected>-- اختر القسم --</option> 
+                        <option value="" selected>-- اختر القسم --</option>
                         @foreach($departments as $department)
                             <option value="{{ $department->id }}">
                                 {{ $department->department_name }}
                             </option>
                         @endforeach
                     </select>
-                    
-                    
+
+
                 </div>
-                
+
                 <!-- اختيار الكورسات بناءً على القسم -->
                 <div class="col-md-4">
                     <label>الكورس</label>
@@ -41,9 +41,9 @@
                             </option>
                         @endforeach
                     </select>
-                    
+
                 </div>
-                
+
                 <!-- اختيار الجلسات بناءً على الكورس -->
                 <div class="col-md-4">
                     <label>الجلسة</label>
@@ -54,9 +54,9 @@
                                 {{ $session->start_date }} - {{ $session->end_date }}
                             </option>
                         @endforeach
-                    </select>                    
+                    </select>
                 </div>
-                
+
                 <div class="col-md-8 mt-3">
                     <input type="text" name="search" class="form-control" placeholder="ابحث عن الطالب بالاسم أو الرقم" value="">
                 </div>
@@ -135,12 +135,12 @@
                                             <span">لا توجد جلسات</span>
                                         @endif
                                     </td>
-                                    
+
                                     <td>
                                         <a href="{{ route('students.show', $student->id) }}" class="btn btn-sm btn-success">
                                             <i class="feather-eye"></i> عرض
                                         </a>
-                                    
+
                                         <a href="{{ route('students.edit', $student->id) }}" class="btn btn-sm btn-success">
                                             <i class="feather-edit"></i> تعديل
                                         </a>
@@ -153,12 +153,12 @@
                                 @endforelse
                             </tbody>
                         </table>
-                    </div> 
-                </div> 
-            </div> 
-        </div> 
-    </div> 
-</div> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 document.getElementById('department_id').addEventListener('change', function () {
     const departmentId = this.value;

@@ -8,7 +8,17 @@
         <div class="page-header">
             <h3 class="page-title">إدارة الدرجات</h3>
         </div>
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
 
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
         <!-- 🔍 البحث -->
         <form method="GET" action="{{ route('degrees.index') }}" class="mb-4">
             <div class="row">

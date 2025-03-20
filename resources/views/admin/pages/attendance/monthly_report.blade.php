@@ -17,7 +17,7 @@
                             @endfor
                         </select>
                     </div>
-        
+
                     <div class="col-md-3">
                         <label for="year" class="form-label">اختر السنة:</label>
                         <select name="year" id="year" class="form-select">
@@ -26,7 +26,7 @@
                             @endfor
                         </select>
                     </div>
-        
+
                     <div class="col-md-3">
                         <label for="department_id" class="form-label">اختر القسم:</label>
                         <select name="department_id" id="department_id" class="form-select">
@@ -38,7 +38,7 @@
                             @endforeach
                         </select>
                     </div>
-        
+
                     <div class="col-md-3">
                         <label for="course_id" class="form-label">اختر الكورس:</label>
                         <select name="course_id" id="course_id" class="form-select">
@@ -50,13 +50,13 @@
                             @endforeach
                         </select>
                     </div>
-        
+
                     <div class="col-12 text-center">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> عرض التقرير</button>
                     </div>
                 </form>
             </div>
-        
+
             <div class="card shadow-sm mt-4 p-4">
                 <h5 class="mb-3">📌 بيانات الحضور</h5>
                 <table class="table table-bordered table-hover text-center">

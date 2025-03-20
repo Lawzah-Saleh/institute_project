@@ -9,9 +9,10 @@
             <h3 class="page-title">إدارة الحضور</h3>
         </div>
 
-        <!-- 🔍 البحث -->
-        <form method="GET" action="{{ route('admin.attendance.index') }}" class="mb-4">
+        <form method="GET" action="{{ route('attendance.index') }}">
+            @csrf
             <div class="row">
+                <!-- قسم -->
                 <div class="col-md-4">
                     <label>القسم</label>
                     <select name="department_id" id="department_id" class="form-control">
@@ -22,6 +23,7 @@
                     </select>
                 </div>
 
+                <!-- كورس -->
                 <div class="col-md-4">
                     <label>الكورس</label>
                     <select name="course_id" id="course_id" class="form-control" disabled>
@@ -29,29 +31,24 @@
                     </select>
                 </div>
 
+                <!-- جلسة -->
                 <div class="col-md-4">
                     <label>الجلسة</label>
                     <select name="session_id" id="session_id" class="form-control" disabled>
                         <option value="">-- اختر الجلسة --</option>
                     </select>
                 </div>
-                <div class="col-md-4 mt-3">
-                    <label>البحث باسم الكورس</label>
-                    <input type="text" name="course_name" class="form-control" placeholder="أدخل اسم الكورس">
-                </div>
 
+                <!-- تحديد اليوم -->
                 <div class="col-md-4 mt-3">
-                    <label>الحالة</label>
-                    <select name="status" class="form-control">
-                        <option value="">-- اختر الحالة --</option>
-                        <option value="1">حاضر</option>
-                        <option value="0">غائب</option>
+                    <label>اليوم</label>
+                    <select name="attendance_day" class="form-control">
+                        <option value="">-- اختر اليوم --</option>
+                        @foreach($session_days as $day)
+                            <option value="{{ $day }}">{{ $day }}</option>
+                        @endforeach
                     </select>
-                </div>
 
-                <div class="col-md-4 mt-3">
-                    <label>ابحث عن الطالب</label>
-                    <input type="text" name="student_name" class="form-control" placeholder="ابحث عن اسم الطالب">
                 </div>
 
                 <div class="col-md-12 mt-3">
@@ -84,88 +81,41 @@
                         </span>
                     </td>
                     <td>
+            <!-- 🔹 زر تعديل -->
+            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAttendanceModal-{{ $attendance->id }}">
+                تعديل
+            </button>
 
-                        <!-- 🔹 زر تعديل -->
-                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editAttendanceModal-{{ $attendance->id }}">
-                            تعديل
-                        </button>
-
-                        <!-- 🔹 نموذج تعديل الحضور -->
-                        <div class="modal fade" id="editAttendanceModal-{{ $attendance->id }}" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form method="POST" action="{{ route('attendance.update', $attendance->id) }}">
-                                        @csrf
-                                        @method('PUT')
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">تعديل الحضور</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <label>الحالة</label>
-                                            <select name="status" class="form-control">
-                                                <option value="1" {{ $attendance->status ? 'selected' : '' }}>حاضر</option>
-                                                <option value="0" {{ !$attendance->status ? 'selected' : '' }}>غائب</option>
-                                            </select>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
-                                        </div>
-                                    </form>
-                                </div>
+            <!-- 🔹 نموذج تعديل الحضور -->
+            <div class="modal fade" id="editAttendanceModal-{{ $attendance->id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form method="POST" action="{{ route('attendance.update', $attendance->id) }}">
+                            @csrf
+                            @method('PUT')
+                            <div class="modal-header">
+                                <h5 class="modal-title">تعديل الحضور</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                        </div>
+                            <div class="modal-body">
+                                <label>الحالة</label>
+                                <select name="status" class="form-control">
+                                    <option value="1" {{ $attendance->status ? 'selected' : '' }}>حاضر</option>
+                                    <option value="0" {{ !$attendance->status ? 'selected' : '' }}>غائب</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 
 
                     </td>
                 </tr>
                 @endforeach
-                {{-- <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAttendanceModal">
-                    إضافة حضور
-                </button>
-
-                <!-- 🔹 نافذة إدخال الحضور -->
-                <div class="modal fade" id="addAttendanceModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">إضافة حضور</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form method="POST" action="{{ route('attendance.store') }}">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label>الطالب</label>
-                                        <select name="student_id" class="form-control" required>
-                                            @foreach($students as $student)
-                                                <option value="{{ $student->id }}">{{ $student->student_name_ar }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>الجلسة</label>
-                                        <select name="session_id" class="form-control" required>
-                                            @foreach($sessions as $session)
-                                                <option value="{{ $session->id }}">{{ $session->start_date }} - {{ $session->end_date }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>الحالة</label>
-                                        <select name="status" class="form-control">
-                                            <option value="1">حاضر</option>
-                                            <option value="0">غائب</option>
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">إضافة</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
-
-
             </tbody>
         </table>
 
@@ -215,6 +165,38 @@
                 });
         }
     });
+
+    document.getElementById('session_id').addEventListener('change', function () {
+    let sessionId = this.value;
+    let daySelect = document.querySelector('select[name="attendance_day"]');
+
+    if (sessionId) {
+        // Fetch the valid days dynamically
+        fetch(`/get-session-days/${sessionId}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched session days:", data); // Debugging
+
+                // Clear previous options
+                daySelect.innerHTML = '<option value="">-- اختر اليوم --</option>';
+
+                // If data contains an error message
+                if (data.error) {
+                    console.error(data.error);
+                    return;
+                }
+
+                // Populate the dropdown with new days
+                data.forEach(day => {
+                    let option = new Option(day, day);
+                    daySelect.add(option);
+                });
+            })
+            .catch(error => console.error('Error fetching session days:', error));
+    } else {
+        daySelect.innerHTML = '<option value="">-- اختر اليوم --</option>';
+    }
+});
 </script>
 
 @endsection

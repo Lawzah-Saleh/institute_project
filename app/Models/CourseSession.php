@@ -51,16 +51,17 @@ class CourseSession extends Model
     }
     public function students()
     {
-        return $this->belongsToMany(Student::class, 'course_students', 'course_session_id', 'student_id');
+        return $this->belongsToMany(Student::class, 'course_session_students', 'course_session_id', 'student_id');
     }
-    
+
+
 
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'session_id');
     }
-    
-    
+
+
 
 
 

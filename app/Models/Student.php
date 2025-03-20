@@ -46,25 +46,26 @@ class Student extends Model
                     ->withPivot('attendance_status')
                     ->withTimestamps();
     }
-    
+
     public function attendances()
     {
         return $this->hasMany(Attendance::class);
     }
-    
+
+    // public function courseSessions()
+    // {
+    //     return $this->belongsToMany(CourseSessionStudent::class);
+    // }
+    public function courseSessionStudents()
+    {
+        return $this->belongsToMany(CourseSession::class, 'course_session_students');
+    }
 
 
-
-
-        public function courseSessions()
-        {
-            return $this->belongsToMany(CourseSessionStudent::class);
-        }
-
-        public function invoices()
-{
-    return $this->hasMany(Invoice::class, 'student_id');
-}
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'student_id');
+    }
 
 
 

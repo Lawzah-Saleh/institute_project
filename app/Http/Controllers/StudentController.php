@@ -23,11 +23,11 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $query = Student::query();
-    
+
         $departments = Department::all();
         $courses = Course::all();
         $sessions = CourseSession::all();
-    
+
         // 🔍 البحث عن الطلاب بالاسم أو الرقم
         if ($request->filled('search')) {
             $searchTerm = $request->search;
@@ -37,7 +37,7 @@ class StudentController extends Controller
                   ->orWhere('student_name_en', 'LIKE', "%{$searchTerm}%");
             });
         }
-    
+
         // 🔍 فلترة الطلاب بناءً على القسم
         if ($request->filled('department_id')) {
             $query->whereHas('courses', function ($q) use ($request) {
@@ -46,7 +46,7 @@ class StudentController extends Controller
                 $q->where('department_id', $request->department_id);
             });
         }
-    
+
         // 🔍 فلترة الطلاب بناءً على الكورس
         if ($request->filled('course_id')) {
             $query->whereHas('courses', function ($q) use ($request) {
@@ -57,17 +57,17 @@ class StudentController extends Controller
                 });
             });
         }
-    
+
         // 🔍 فلترة الطلاب بناءً على الجلسة
         if ($request->filled('course_session_id')) {
             $query->whereHas('sessions', function ($q) use ($request) {
                 $q->where('course_sessions.id', $request->course_session_id);
             });
         }
-    
+
         // تحميل العلاقات لضمان ظهور البيانات
         $students = $query->with(['courses', 'sessions.course'])->get();
-    
+
         return view('admin.pages.students.index', compact('students', 'departments', 'courses', 'sessions'));
     }
     public function show($id)
