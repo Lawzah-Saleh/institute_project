@@ -22,4 +22,8 @@ class CourseSessionStudent extends Model
     {
         return $this->belongsTo(Student::class);
     }
+    public function course()
+    {
+        return $this->belongsTo(Course::class, 'course_id'); // Adjust the 'course_id' column if necessary
+    }
 }

@@ -1,108 +1,102 @@
 @extends('admin.layouts.app')
 
-@section('title', 'إضافة درجات الطلاب')
+@section('title', 'إضافة الدرجات')
 
 @section('content')
-<div class="container mt-4">
-    <h3 class="text-center mb-4">📊 إضافة درجات الطلاب</h3>
+<div class="page-wrapper" style="background-color: #F9F9FB;">
+    <div class="content container-fluid">
+        <div class="page-header">
+            <h3 class="page-title">إضافة الدرجات</h3>
+        </div>
 
-    <div class="card shadow-sm p-4">
         @if(session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
-    @endif
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-        <form method="GET" action="{{ route('degrees.create') }}">
-            @csrf
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <form method="GET" id="degreeForm">
             <div class="row">
-                <!-- اختيار القسم -->
                 <div class="col-md-4">
-                    <label for="department_id" class="form-label">اختر القسم:</label>
-                    <select name="department_id" id="department_id" class="form-select">
+                    <label>القسم</label>
+                    <select name="department_id" id="department_id" class="form-control">
                         <option value="">-- اختر القسم --</option>
-                        @foreach ($departments as $department)
+                        @foreach($departments as $department)
                             <option value="{{ $department->id }}">{{ $department->department_name }}</option>
                         @endforeach
                     </select>
                 </div>
 
-                <!-- اختيار الكورس -->
                 <div class="col-md-4">
-                    <label for="course_id" class="form-label">اختر الكورس:</label>
-                    <select name="course_id" id="course_id" class="form-select" disabled>
+                    <label>الكورس</label>
+                    <select name="course_id" id="course_id" class="form-control" disabled>
                         <option value="">-- اختر الكورس --</option>
                     </select>
                 </div>
 
-                <!-- اختيار الجلسة -->
                 <div class="col-md-4">
-                    <label for="session_id" class="form-label">اختر الجلسة:</label>
-                    <select name="session_id" id="session_id" class="form-select" disabled>
+                    <label>الجلسة</label>
+                    <select name="session_id" id="session_id" class="form-control" disabled>
                         <option value="">-- اختر الجلسة --</option>
                     </select>
                 </div>
 
-                <div class="col-12 text-center">
+                <div class="col-md-12 mt-3">
                     <button type="submit" class="btn btn-primary">عرض الطلاب</button>
                 </div>
             </div>
         </form>
+
+        @if(isset($students))
+            <form action="{{ route('degrees.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="session_id" value="{{ $session->id }}">
+                <table class="table table-striped mt-3">
+                    <thead>
+                        <tr>
+                            <th>الطالب</th>
+                            <th>الدرجة العملية</th>
+                            <th>الدرجة النهائية</th>
+                            <th>درجة الحضور</th>
+                            <th>المجموع</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($students as $student)
+                        <tr>
+                            <td>{{ $student->name }}</td>
+                            <td>
+                                <input type="number" name="practical_degree[{{ $student->id }}]" class="form-control"
+                                    value="{{ $student->degrees->first()->practical_degree ?? 0 }}" required>
+                            </td>
+                            <td>
+                                <input type="number" name="final_degree[{{ $student->id }}]" class="form-control"
+                                    value="{{ $student->degrees->first()->final_degree ?? 0 }}" required>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="{{ $student->attendance_degree ?? 0 }}" readonly>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" value="{{ $student->total_degree ?? 0 }}" readonly>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-success">حفظ الدرجات</button>
+            </form>
+        @endif
     </div>
-
-    <!-- عرض الطلاب لإدخال الدرجات -->
-    @if(isset($students) && $students->count() > 0)
-    <form method="POST" action="{{ route('degrees.store') }}">
-        @csrf
-        <input type="hidden" name="session_id" value="{{ old('session_id') }}">
-
-        <div class="card shadow-sm mt-4 p-4">
-            <h5 class="mb-3">📌 درجات الطلاب</h5>
-            <table class="table table-bordered table-hover text-center">
-                <thead class="table-dark">
-                    <tr>
-                        <th>📛 رقم الطالب</th>
-                        <th>📛 اسم الطالب</th>
-                        <th>🎓 درجة الامتحان النهائي</th>
-                        <th>💡 درجة العملية</th>
-                        <th>📝 درجة الحضور</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($students as $student)
-                    <tr>
-                        <td>{{ $student->id }}</td>
-
-                        <td>{{ $student->student_name_ar }}</td>
-
-                        <td><input type="number" name="final_degree[{{ $student->id }}]" class="form-control" value="{{ old('final_degree.'.$student->id) }}" step="any"></td>
-                        <td><input type="number" name="practical_degree[{{ $student->id }}]" class="form-control" value="{{ old('practical_degree.'.$student->id) }}" step="any"></td>
-                        <td><input type="number" name="attendance_degree[{{ $student->id }}]" class="form-control" value="{{ $student->attendance_degree }}" disabled></td>
-
-                        <input type="hidden" name="session_id" value="{{ old('session_id', $sessionId) }}">
-                        <td><input type="hidden" name="student_id[]" value="{{ $student->id }}"></td>
-
-
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-
-            <div class="col-12 text-center mt-3">
-                <button type="submit" class="btn btn-success">تسجيل الدرجات</button>
-            </div>
-        </div>
-    </form>
-    @endif
 </div>
+
 <script>
-    // التعامل مع اختيار القسم لتحميل الكورسات
-    document.getElementById('department_id').addEventListener('change', function () {
+document.getElementById('department_id').addEventListener('change', function () {
     let departmentId = this.value;
     let courseSelect = document.getElementById('course_id');
     let sessionSelect = document.getElementById('session_id');
@@ -120,9 +114,8 @@
                     let option = new Option(course.course_name, course.id);
                     courseSelect.add(option);
                 });
-                courseSelect.disabled = false; // Enable the course select
-            })
-            .catch(error => console.error('Error fetching courses:', error));
+                courseSelect.disabled = false;
+            });
     }
 });
 
@@ -141,12 +134,26 @@ document.getElementById('course_id').addEventListener('change', function () {
                     let option = new Option(session.start_date + " - " + session.end_date, session.id);
                     sessionSelect.add(option);
                 });
-                sessionSelect.disabled = false; // Enable the session select
-            })
-            .catch(error => console.error('Error fetching sessions:', error));
+                sessionSelect.disabled = false;
+            });
+    }
+});
+document.getElementById('session_id').addEventListener('change', function () {
+    let sessionId = this.value;
+    let degreeForm = document.getElementById('degreeForm');
+
+    if (sessionId) {
+        degreeForm.action = `/admin/degrees/${sessionId}`;
+    }
+});
+
+document.getElementById('degreeForm').addEventListener('submit', function (event) {
+    let sessionId = document.getElementById('session_id').value;
+    if (!sessionId) {
+        event.preventDefault(); // منع إرسال الفورم إذا لم يتم تحديد الجلسة
+        alert("يرجى اختيار جلسة قبل عرض الطلاب.");
     }
 });
 
 </script>
 @endsection
-

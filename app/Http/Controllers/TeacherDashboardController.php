@@ -27,7 +27,7 @@ class TeacherDashboardController extends Controller
 
         // ✅ Count distinct students enrolled in these sessions
         $students_count = DB::table('course_session_students')
-                            ->whereIn('session_id', $sessionIds)
+                            ->whereIn('course_session_id', $sessionIds)
                             ->distinct()
                             ->count('student_id');
 

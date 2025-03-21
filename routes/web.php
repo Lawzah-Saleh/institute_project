@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\DashboardController;
@@ -55,16 +54,36 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 
-
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+use App\Http\Controllers\ProfileController;
+Route::middleware(['auth'])->group(function () {
+    Route::get('/student/profile', [ProfileController::class, 'showStudentProfile'])->name('profile.student.show');
 });
+// Route::middleware(['auth'])->group(function () {
+//     // المسارات الخاصة بالطالب
+//         // Routes for the student profile
+//         Route::prefix('student')->middleware('role:student')->group(function () {
+//             Route::get('student/profile', [ProfileController::class, 'showStudentProfile'])->name('profile.student.show');
+//             Route::post('student/profile/update', [ProfileController::class, 'updateStudentProfile'])->name('profile.student.update');
+//             Route::post('student/profile/update-password', [ProfileController::class, 'updateStudentPassword'])->name('profile.student.updatePassword');
+//         });
+    
+
+//     // المسارات الخاصة بالمدرس
+//     Route::prefix('teacher')->middleware('role:teacher')->group(function () {
+//         Route::get('/profile', [ProfileController::class, 'showTeacherProfile'])->name('profile.teacher.show');
+//         Route::post('/profile/update', [ProfileController::class, 'updateTeacherProfile'])->name('profile.teacher.update');
+//         Route::post('/profile/update-password', [ProfileController::class, 'updateTeacherPassword'])->name('profile.teacher.updatePassword');
+//     });
+
+//     // المسارات الخاصة بالإداري
+//     Route::prefix('admin')->middleware('role:admin')->group(function () {
+//         Route::get('/profile', [ProfileController::class, 'showAdminProfile'])->name('profile.admin.show');
+//         Route::post('/profile/update', [ProfileController::class, 'updateAdminProfile'])->name('profile.admin.update');
+//         Route::post('/profile/update-password', [ProfileController::class, 'updateAdminPassword'])->name('profile.admin.updatePassword');
+//     });
+// });
 
 
 
@@ -79,13 +98,14 @@ Route::group(['middleware' => ['role:admin']], function () {
 use App\Http\Controllers\TeacherDashboardController;
 
 Route::group(['middleware' => ['role:teacher']], function () {
-    Route::get('/teacher/classes', [TeacherDashboardController::class, 'index']);
+    Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');  
+    Route::get('/teacher/classes', [TeacherDashboardController::class, 'index'])->name('teacher.classes');
     Route::get('/teacher/sessions', [TeacherDashboardController::class, 'getTeacherSessions'])->name('teacher.sessions');
 
 });
-
+use App\Http\Controllers\StudentDashboardController;
 Route::group(['middleware' => ['role:student']], function () {
-    Route::get('/student/enroll', [StudentController::class, 'enroll']);
+    Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])->name('student.dashboard');
 });
 
 //employees route
@@ -172,6 +192,9 @@ use App\Http\Controllers\DegreeController;
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('degrees', DegreeController::class);
     Route::get('/get-courses/{departmentId}', [DegreeController::class, 'getCourses']);
+    Route::get('/get-sessions/{courseId}', [DegreeController::class, 'getSessions']);
+    Route::get('/get-students/{sessionId}', [DegreeController::class, 'getStudents']);
+    Route::get('/admin/degrees/{sessionId}', [DegreeController::class, 'show'])->name('degrees.show');
 
 
 

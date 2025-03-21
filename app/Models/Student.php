@@ -52,10 +52,10 @@ class Student extends Model
         return $this->hasMany(Attendance::class);
     }
 
-    // public function courseSessions()
-    // {
-    //     return $this->belongsToMany(CourseSessionStudent::class);
-    // }
+    public function courseSessions()
+    {
+        return $this->belongsToMany(CourseSessionStudent::class);
+    }
     public function courseSessionStudents()
     {
         return $this->belongsToMany(CourseSession::class, 'course_session_students');
@@ -67,6 +67,10 @@ class Student extends Model
         return $this->hasMany(Invoice::class, 'student_id');
     }
 
+    public function degrees()
+    {
+        return $this->hasMany(Degree::class, 'student_id');
+    }
 
 
 }

@@ -22,80 +22,30 @@ class DegreeController extends Controller
     }
 
     // عرض نموذج إضافة درجة
-    public function create(Request $request)
+    public function create()
     {
         $departments = Department::all();
-        $courses = collect();
-        $sessions = collect();
-        $students = collect();
-        $sessionId = null; // Initialize $sessionId to null
-
-        // If course_id is selected, load courses
-        if ($request->has('course_id')) {
-            $courseId = $request->course_id;
-            $courses = Course::where('department_id', $request->department_id)->get();
-        }
-
-        // If session_id is selected, load sessions and students
-        if ($request->has('session_id')) {
-            $sessionId = $request->session_id;  // Set sessionId to the selected session
-            $sessions = CourseSession::where('course_id', $request->course_id)->get();
-
-            // Get the students for the selected session
-            $students = Student::whereHas('courseSessionStudents', function ($query) use ($sessionId) {
-                $query->where('course_sessions.id', $sessionId);
-            })->get();
-        }
-
-        return view('admin.pages.degrees.create', compact('departments', 'courses', 'sessions', 'students', 'sessionId'));
+        return view('admin.pages.degrees.create', compact('departments'));
     }
-    public function store(Request $request)
+    public function show($sessionId)
     {
-        // التحقق من البيانات
- // Validate request data
-$request->validate([
-    'final_degree.*' => 'nullable|numeric|min:0|max:100',
-    'practical_degree.*' => 'nullable|numeric|min:0|max:100',
-    'attendance_degree.*' => 'nullable|numeric|min:0|max:10',
-]);
+        // جلب الجلسة المحددة
+        $session = CourseSession::findOrFail($sessionId);
 
-// Ensure session_id is not null
-if (!$request->has('session_id') || !$request->session_id) {
-    return redirect()->back()->with('error', 'يجب اختيار الجلسة.');
-}
+        // جلب الطلاب المسجلين في الجلسة
+        $students = Student::join('course_session_students', 'students.id', '=', 'course_session_students.student_id')
+            ->where('course_session_students.course_session_id', $sessionId)
+            ->select('students.*')
+            ->with(['degrees' => function ($query) use ($sessionId) {
+                $query->where('course_session_id', $sessionId);
+            }])->get();
 
-// Ensure student_id is in an array format before processing
-if ($request->has('student_id') && is_array($request->student_id)) {
-    foreach ($request->student_id as $index => $studentId) {
-        // Check if the index exists in the arrays
-        $finalDegree = isset($request->final_degree[$index]) ? $request->final_degree[$index] : 0; // Default to 0 if not set
-        $practicalDegree = isset($request->practical_degree[$index]) ? $request->practical_degree[$index] : 0;
-        $attendanceDegree = isset($request->attendance_degree[$index]) ? $request->attendance_degree[$index] : 0;
+        // جلب جميع الأقسام
+        $departments = Department::all();
 
-        // Calculate total degree
-        $totalDegree = $finalDegree + $practicalDegree + $attendanceDegree;
-
-        // Update or create the degree record for each student
-        Degree::updateOrCreate(
-            [
-                'student_id' => $studentId,
-                'course_session_id' => $request->session_id
-            ],
-            [
-                'final_degree' => $finalDegree,
-                'practical_degree' => $practicalDegree,
-                'attendance_degree' => $attendanceDegree,
-                'total_degree' => $totalDegree, // Store the total degree
-            ]
-        );
+        return view('admin.pages.degrees.create', compact('departments', 'session', 'students'));
     }
 
-    return redirect()->route('degrees.index')->with('success', 'تم تسجيل الدرجات بنجاح.');
-}
-
-return redirect()->back()->with('error', 'لم يتم العثور على الطلاب.');
-
-    }
 
 
 
@@ -105,7 +55,6 @@ return redirect()->back()->with('error', 'لم يتم العثور على الط
         return response()->json($courses);
     }
 
-
     public function getSessions($courseId)
     {
         $sessions = CourseSession::where('course_id', $courseId)->get();
@@ -114,24 +63,96 @@ return redirect()->back()->with('error', 'لم يتم العثور على الط
 
     public function getStudents($sessionId)
     {
+        // التحقق مما إذا كانت الجلسة موجودة
+        if (!CourseSession::find($sessionId)) {
+            return response()->json(['error' => 'الجلسة غير موجودة!'], 404);
+        }
+
+        // جلب الطلاب المسجلين في هذه الجلسة من جدول `course_session_students`
         $students = Student::whereHas('courseSessionStudents', function ($query) use ($sessionId) {
-            $query->where('course_sessions.id', $sessionId);
-        })->get();
+            $query->where('course_session_students.course_session_id', $sessionId);
+        })->with(['degree' => function ($query) use ($sessionId) {
+            $query->where('course_session_id', $sessionId);
+        }])->get();
 
-        // حساب درجة الحضور من جدول الحضور
-        $students->map(function ($student) use ($sessionId) {
-            $attendanceDegree = Attendance::where('student_id', $student->id)
+        // التحقق مما إذا كان هناك طلاب
+        if ($students->isEmpty()) {
+            return response()->json(['message' => 'لا يوجد طلاب مسجلين في هذه الجلسة.'], 200);
+        }
+
+        // حساب درجة الحضور لكل طالب
+        foreach ($students as $student) {
+            $totalSessions = Attendance::where('session_id', $sessionId)->count();
+            $attendedSessions = Attendance::where('student_id', $student->id)
                 ->where('session_id', $sessionId)
-                ->where('status', true)
-                ->count() * 2; // مثال: كل حضور يعادل درجتين
+                ->where('status', 'present')
+                ->count();
 
-            $student->attendance_degree = $attendanceDegree;
-            return $student;
-        });
+            $student->attendance_degree = ($totalSessions > 0) ? ($attendedSessions / $totalSessions) * 100 : 0;
+            $student->total_degree = ($student->degree->practical_degree ?? 0) +
+                                     ($student->degree->final_degree ?? 0) +
+                                     $student->attendance_degree;
+        }
 
-        return view('admin.pages.degrees.partials.students', compact('students'))->render();
+        return response()->json($students);
     }
 
+    public function store(Request $request)
+    {
+        foreach ($request->practical_degree as $studentId => $practicalDegree) {
+            $finalDegree = $request->final_degree[$studentId];
+
+            $totalSessions = Attendance::where('session_id', $request->session_id)->count();
+            $attendedSessions = Attendance::where('student_id', $studentId)
+                ->where('session_id', $request->session_id)
+                ->where('status', 'present')
+                ->count();
+                $attendanceDegree = $this->calculateAttendance($studentId, $request->session_id);
+
+                $totalDegree = $this->calculateTotalDegree($practicalDegree, $finalDegree, $attendanceDegree);
+
+
+        $status = $totalDegree >= 50 ? 'pass' : 'fail';
+
+        Degree::updateOrCreate(
+            [
+                'student_id' => $studentId,
+                'course_session_id' => $request->session_id
+            ],
+            [
+                'practical_degree' => $practicalDegree,
+                'final_degree' => $finalDegree,
+                'attendance_degree' => $attendanceDegree,  // تم استخدام المتغير هنا
+                'total_degree' => $totalDegree,  // تم إضافة المتغير هنا
+                'status' => $status,
+            ]
+        );
+    }
+
+
+        return redirect()->back()->with('success', 'تم حفظ الدرجات بنجاح!');
+    }
+// حساب درجة الحضور بناءً على عدد الحضور
+// حساب درجة الحضور بناءً على عدد الجلسات التي حضرها الطالب
+public function calculateAttendance($studentId, $sessionId)
+{
+    // عدد الجلسات التي تم عقدها في الجلسة المحددة
+    $totalSessions = Attendance::where('session_id', $sessionId)->count();
+
+    // عدد الجلسات التي حضرها الطالب
+    $attendedSessions = Attendance::where('student_id', $studentId)
+                                   ->where('session_id', $sessionId)
+                                   ->where('status', 'present') // هنا نحسب الجلسات التي كان الطالب حاضر فيها
+                                   ->count();
+
+    // حساب درجة الحضور
+    return ($totalSessions > 0) ? ($attendedSessions / $totalSessions) * 10 : 0;
+}
+
+    public function calculateTotalDegree($practicalDegree, $finalDegree, $attendanceDegree)
+    {
+        return $practicalDegree + $finalDegree + $attendanceDegree;
+    }
 
 
     // عرض نموذج تعديل الدرجة

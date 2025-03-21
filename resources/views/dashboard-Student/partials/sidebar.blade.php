@@ -32,10 +32,16 @@
                         </div>
                         <li>
                             <li>
-                                <a href="{{ url('/') }}" style="color: white;"><i class="feather-grid" style="color: white;"></i> <span>لوحة التحكم </span>
+                                <a href="{{ url('student/dashboard') }}" style="color: white;"><i class="feather-grid" style="color: white;"></i> <span>لوحة التحكم </span>
                                     <span></span>
                                 </a>
                             </li>
+                            <li>
+                                <a href="{{ route('profile.student.show') }}" style="color: white;"><i class="fas fa-user-circle" style="font-size: 1.2rem;"></i><span> الملف الشخصي</span> <span></span>
+                                </a>
+                            
+                            </li>
+                            
                 <li>
                     <a href="{{ url('degree') }}" style="color: white;"><i class="fas fa-file-alt" style="color:white"></i> <span> الدرجات</span>
                         <span></span>
@@ -49,11 +55,7 @@
                     <a href="{{ url('add-result') }}" style="color: orange;"><i class="fas fa-clipboard-list" style="color: orange;"></i><span> اضافة الدرجات</span> <span></span>
                     </a>
                 </li> --}}
-                <li>
-                    <a href="{{url('profile')}}" style="color: white;"><i class="fas fa-user-circle" style="font-size: 1.2rem;"></i><span> الملف الشخصي</span> <span></span>
-                    </a>
-                
-                </li>
+
                 <li>
                     <a href="{{ url('payment') }}" style="color: white;"><i class="fas fa-clipboard" style="color: white;"></i> <span> الدفع</span> <span></span>
                     </a>

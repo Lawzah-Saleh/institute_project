@@ -37,5 +37,4 @@ public function invoices()
     return $this->hasMany(Invoice::class, 'course_id');
 }
 
-
 }

@@ -25,11 +25,34 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+  // عملية التحقق من بيانات تسجيل الدخول
+  $request->validate([
+    'email' => ['required', 'email'],
+    'password' => ['required'],
+]);
 
-        $request->session()->regenerate();
+// التحقق من صحة البيانات وتسجيل الدخول
+if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
+    $request->session()->regenerate();
 
-        return redirect()->intended(RouteServiceProvider::HOME);
+    // توجيه المستخدم بناءً على دوره
+    if (Auth::user()->hasRole('admin')) {
+        return redirect()->route('admin.dashboard');
+    } elseif (Auth::user()->hasRole('teacher')) {
+        return redirect()->route('teacher.dashboard');
+    } elseif (Auth::user()->hasRole('student')) {
+        return redirect()->route('student.dashboard');
+    }
+    
+
+    // توجيه افتراضي إذا لم يكن لديه أي دور
+    return redirect()->route('home');
+    }   
+
+    // إذا فشل تسجيل الدخول
+    return back()->withErrors([
+        'email' => 'The provided credentials do not match our records.',
+    ]);
     }
 
     /**
