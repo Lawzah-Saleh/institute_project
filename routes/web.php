@@ -59,6 +59,9 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name
 use App\Http\Controllers\ProfileController;
 Route::middleware(['auth'])->group(function () {
     Route::get('/student/profile', [ProfileController::class, 'showStudentProfile'])->name('profile.student.show');
+    Route::post('/profile/update', [ProfileController::class, 'updateStudentProfile'])->name('profile.student.update'); // ✅ Add this
+    Route::post('student/profile/update-password', [ProfileController::class, 'updateStudentPassword'])->name('profile.student.updatePassword');
+
 });
 // Route::middleware(['auth'])->group(function () {
 //     // المسارات الخاصة بالطالب
@@ -68,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
 //             Route::post('student/profile/update', [ProfileController::class, 'updateStudentProfile'])->name('profile.student.update');
 //             Route::post('student/profile/update-password', [ProfileController::class, 'updateStudentPassword'])->name('profile.student.updatePassword');
 //         });
-    
+
 
 //     // المسارات الخاصة بالمدرس
 //     Route::prefix('teacher')->middleware('role:teacher')->group(function () {
@@ -98,7 +101,7 @@ Route::group(['middleware' => ['role:admin']], function () {
 use App\Http\Controllers\TeacherDashboardController;
 
 Route::group(['middleware' => ['role:teacher']], function () {
-    Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');  
+    Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher.dashboard');
     Route::get('/teacher/classes', [TeacherDashboardController::class, 'index'])->name('teacher.classes');
     Route::get('/teacher/sessions', [TeacherDashboardController::class, 'getTeacherSessions'])->name('teacher.sessions');
 

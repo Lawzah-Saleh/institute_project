@@ -6,7 +6,7 @@
                 <img src="{{ asset('admin/assets/img/logo.png') }}" alt="اسم المعهد" style="width: 200px; height: auto; max-height: 120px; margin: 0 auto; display: block; border-radius: 10%; background-color: rgba(255, 255, 255, 0.9);box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
             </div>
             <ul>
-                <li><a href="{{ route('dashboard') }}"><i class="feather-grid"></i> <span> وحدة التحكم </span></a></li>
+                <li><a href="{{ route('admin.dashboard') }}"><i class="feather-grid"></i> <span> وحدة التحكم </span></a></li>
                 <li class="submenu">
                     <a href="#"><i class="fas fa-graduation-cap"></i> <span>الطلاب</span> <span
                         class="menu-arrow"></span</a>

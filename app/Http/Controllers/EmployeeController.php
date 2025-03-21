@@ -45,7 +45,7 @@ class EmployeeController extends Controller
         $employee = Employee::findOrFail($id);
         return view('admin.pages.employees.show', compact('employee'));
     }
-    
+
     /**
      * Show the form for creating a new employee.
      */
@@ -83,7 +83,7 @@ class EmployeeController extends Controller
              'obtained_date' => 'nullable|array',
              'obtained_date.*' => 'nullable|date',
          ]);
-     
+
          // Create User First
          $defaultPassword = 'password123'; // Set default password
          $user = User::create([
@@ -91,31 +91,31 @@ class EmployeeController extends Controller
              'email' => $request->email,
              'password' => Hash::make($defaultPassword),
          ]);
-     
+
          // Assign Role to User
          $role = Role::find($request->role_id);
          if ($role) {
              $user->assignRole($role->name); // Assign employee role
          }
-     
+
          // Prepare Employee Data
          $data = $request->all();
          $data['user_id'] = $user->id; // Link Employee to User
-     
+
          if ($request->hasFile('image')) {
              $data['image'] = $request->file('image')->store('employees', 'public');
          }
-     
+
          // Create Employee & Link to User
          $employee = Employee::create($data);
-     
+
          // Save Qualifications
          foreach ($request->qualification_name as $index => $qualification) {
              $certificationPath = null;
              if ($request->hasFile("certification.$index")) {
                  $certificationPath = $request->file("certification.$index")->store('qualifications', 'public');
              }
-     
+
              Qualification::create([
                  'employee_id' => $employee->id,
                  'qualification_name' => $qualification,
@@ -124,13 +124,13 @@ class EmployeeController extends Controller
                  'obtained_date' => $request->obtained_date[$index] ?? null,
              ]);
          }
-     
+
          return redirect()->route('employees.index')->with('success', 'Employee, User, and Qualifications created successfully');
      }
      public function toggleStatus($id)
 {
     $employee = Employee::findOrFail($id);
-    
+
     // Toggle activation status
     $employee->state = !$employee->state;
     $employee->save();
@@ -189,7 +189,7 @@ class EmployeeController extends Controller
                     'qualification_name' => $name,
                     'issuing_authority' => $request->issuing_authority[$index],
                     'obtained_date' => $request->obtained_date[$index] ?? null,
-                    'certification' => $request->hasFile("certification.$index") ? 
+                    'certification' => $request->hasFile("certification.$index") ?
                         $request->file("certification.$index")->store('qualifications', 'public') : null
                 ]);
             }

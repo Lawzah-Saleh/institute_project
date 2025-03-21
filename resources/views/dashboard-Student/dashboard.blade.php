@@ -34,42 +34,25 @@
         </div>
     </div>
 
-    <!-- Attendance Percentage -->
+
+
+<!-- Enrolled Courses -->
+<!-- Dashboard Stats -->
+<div class="row">
+    <!-- Total Courses -->
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-header">
-                <h4>Attendance</h4>
+                <h4>إجمالي الدورات المسجلة</h4>
             </div>
             <div class="card-body">
-                <p class="lead">{{ $attendancePercentage > 0 ? round($attendancePercentage, 2) . '%' : 'No attendance data available' }}</p>
+                <p class="lead">
+                    {{ $totalCourses > 0 ? $totalCourses : 'لم يتم التسجيل في أي دورة' }}
+                </p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Enrolled Courses -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4>Your Enrolled Courses</h4>
-            </div>
-            <div class="card-body">
-                @forelse($sessions as $session)
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5>{{ $session['course_name'] }}</h5>
-                        <div class="progress">
-                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ $session['progress'] }}%" aria-valuenow="{{ $session['progress'] }}" aria-valuemin="0" aria-valuemax="100">{{ $session['progress'] }}%</div>
-                        </div>
-                    </div>
-                </div>
-                @empty
-                <p>No enrolled courses found.</p>
-                @endforelse
-            </div>
-        </div>
-    </div>
-</div>
 
 @endsection

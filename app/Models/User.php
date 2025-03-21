@@ -35,6 +35,10 @@ class User extends Authenticatable
     return $this->hasOne(Employee::class);
 }
 
+public function student()
+{
+    return $this->hasOne(Student::class, 'user_id');  // Make sure 'user_id' is correct
+}
 
     /**
      * The attributes that should be hidden for serialization.
@@ -56,5 +60,5 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    
+
 }

@@ -18,34 +18,44 @@ class ProfileController extends Controller
         if (!$student) {
             return redirect()->route('home')->with('error', 'Student not found');
         }
-        return view('student.profile', compact('student'));
+        return view('dashboard-Student.profile', compact('student'));
     }
-    
+    public function updateStudentProfile(Request $request)
+    {
+        $request->validate([
+            'student_name_en' => 'required|string|max:300',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'phones' => 'nullable|json',
+            'qualification' => 'required|string|max:255',
+            'birth_date' => 'required|date',
+            'birth_place' => 'required|string|max:255',
+            'address' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:students,email,' . Auth::user()->student->id,
+        ]);
+
+        // Fetch the logged-in student's profile
+        $student = Auth::user()->student;
+
+        if (!$student) {
+            return redirect()->route('profile.student.show')->with('error', 'Student profile not found.');
+        }
+
+        // Allow updates for everything **except** `student_name_ar` and `gender`
+        $student->update([
+            'student_name_en' => $request->student_name_en,
+            'image' => $request->file('image') ? $request->file('image')->store('profile_images', 'public') : $student->image,
+            'phones' => $request->phones,
+            'qualification' => $request->qualification,
+            'birth_date' => $request->birth_date,
+            'birth_place' => $request->birth_place,
+            'address' => $request->address,
+            'email' => $request->email,
+        ]);
+
+        return redirect()->route('profile.student.show')->with('success', 'Profile updated successfully.');
+    }
 
 
-       // Update student's personal details
-       public function updateStudentProfile(Request $request)
-       {
-           $request->validate([
-               'student_name_en' => 'required|string|max:255',
-               'student_name_ar' => 'required|string|max:255',
-               'email' => 'required|email|unique:students,email,' . Auth::id(),
-               'phones' => 'nullable|json',
-               'address' => 'required|string|max:255',
-           ]);
-   
-           $student = Auth::user()->student;
-           $student->update([
-               'student_name_en' => $request->student_name_en,
-               'student_name_ar' => $request->student_name_ar,
-               'email' => $request->email,
-               'phones' => $request->phones,
-               'address' => $request->address,
-           ]);
-   
-           return redirect()->route('profile.student.show')->with('success', 'تم تحديث البروفايل بنجاح');
-       }
-   
        // Update student's password
        public function updateStudentPassword(Request $request)
        {
@@ -53,19 +63,19 @@ class ProfileController extends Controller
                'old_password' => 'required|string|min:8',
                'new_password' => 'required|string|min:8|confirmed',
            ]);
-   
+
            $user = Auth::user();
-   
+
            // Check if the old password is correct
            if (!Hash::check($request->old_password, $user->password)) {
                return back()->withErrors(['old_password' => 'كلمة المرور القديمة غير صحيحة.']);
            }
-   
+
            // Update the password
            $user->update([
                'password' => Hash::make($request->new_password),
            ]);
-   
+
            return redirect()->route('profile.student.show')->with('success', 'تم تغيير كلمة المرور بنجاح');
        }
     // للمدرس

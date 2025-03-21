@@ -113,7 +113,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                
+
 
                                 <!-- Role Selection -->
                                 <div class="col-12 col-sm-4">
@@ -172,8 +172,9 @@
                                             <input type="text" name="issuing_authority[]" class="form-control" required>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                                <label>تاريخ الميلاد <span class="text-danger">*</span></label>
-                                                <input type="date" name="obtained_date[]" class="form-control" value="{{ old('obtained_date') }}" >
+                                                <label>تاريخ المنح <span class="text-danger">*</span></label>
+                                                <input type="date" name="obtained_date[]" class="form-control"        value="{{ old('obtained_date.0') ?? '' }}">
+
                                             </div>
                                         </div>
                                         <div class="col-md-4 mb-3">
