@@ -216,3 +216,12 @@ use App\Http\Controllers\StudentDegreeController;
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/degrees', [StudentDegreeController::class, 'index'])->name('student.degrees');
 });
+
+use App\Http\Controllers\StudentPaymentController;
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/student/payments', [StudentPaymentController::class, 'show'])->name('student.payments');
+});
+use App\Http\Controllers\StudentNotificationsController;
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/student/notifications', [StudentNotificationsController::class, 'index'])->name('student.notifications');
+});

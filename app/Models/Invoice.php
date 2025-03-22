@@ -28,38 +28,25 @@ class Invoice extends Model
         'paid_at' => 'datetime' // Convert 'paid_at' to a Carbon datetime object
     ];
 
-     //Get the student related to this invoice.
-    public function student()
-    {
-        return $this->belongsTo(Student::class, 'student_id');
-    }
-    public function paymentSource()
-    {
-        return $this->belongsTo(PaymentSource::class, 'payment_sources_id');
-    }
+     public function student()
+     {
+         return $this->belongsTo(Student::class);
+     }
 
-    // Scope to get only paid invoices.
-   
-    public function scopePaid($query)
-    {
-        return $query->where('status', 1);
-    }
+     public function paymentSource()
+     {
+         return $this->belongsTo(PaymentSource::class);
+     }
+     public function items()
+     {
+         return $this->hasMany(InvoiceItem::class);
+     }
 
-     // Scope to get only unpaid invoices.
-    public function scopeUnpaid($query)
-    {
-        return $query->where('status', 0);
-    }
 
-     // Mark the invoice as paid.
-     public function isPaid()
-    {
-        return $this->status === true;
-    }
+     public function payments()
+     {
+         return $this->hasMany(Payment::class);
+     }
 
-     // Check if the invoice is overdue.
-    public function isOverdue()
-    {
-        return $this->due_date && $this->due_date->isPast() && !$this->status;
-    }
+
 }

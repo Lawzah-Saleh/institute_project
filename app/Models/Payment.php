@@ -25,13 +25,13 @@ class Payment extends Model
         'amount' => 'decimal:2',
     ];
 
- 
+
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
- 
+
     public function session()
     {
         return $this->belongsTo(CourseSession::class, 'session_id');
@@ -42,6 +42,7 @@ class Payment extends Model
     {
         return $this->belongsTo(Invoice::class);
     }
+
 
 
     public function scopeCompleted($query)
@@ -66,4 +67,9 @@ class Payment extends Model
     {
         return $this->status === 'completed';
     }
+    public function source()
+{
+    return $this->belongsTo(PaymentSource::class, 'payment_source_id');
+}
+
 }

@@ -5,11 +5,18 @@
 
     <!-- Student Menu -->
     <ul class="nav user-menu">
-        <li class="nav-item zoom-screen me-2">
-            <a href="#" class="nav-link header-nav-list win-maximize">
-                <img src="{{ asset('student/assets/img/icons/header-icon-04.svg') }}" alt="">
-            </a>
+
+                 <!-- Notification Icon -->
+
         </li>
+        <li class="nav-item notification-icon" style="position: relative; display: flex;">
+            <a href="{{ route('student.notifications') }}"  class="nav-link header-nav-list" style="display: flex; align-items: center;">
+                <div style="width: 40px; height: 40px; background-color: #f2f2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s ease-in-out;">
+                    <i class="fas fa-bell" style="font-size: 20px; color: #196098; transition: transform 0.2s ease-in-out;"></i>
+                    </div>
+
+                </a>
+                </li>
 
         @auth
         <!-- Authenticated Student Links -->

@@ -7,25 +7,24 @@
 
             <ul>
                 <li class="nav-item dropdown has-arrow new-user-menus">
-                        <span class="user-img">
-                            <div class="" style="margin-top: 10px;">
-                                <img class="rounded-circle img" src="{{ asset('storage/' . ($student->image ?? 'default_profile.png')) }}"
+                    <span class="user-img">
+                        <div class="" style="margin-top: 10px;">
+                            <img class="rounded-circle img" src="{{ asset('storage/' . ($student->image ?? 'default_profile.png')) }}"
                                     style="width: 80% ;height: 80%;" alt="Soeng Souy">
-                            </div>
-                        </span>
+                        </div>
+                    </span>
                 </li>
-                <li class="nav-item dropdown has-arrow new-user-menus">
                 <li>
                 <a href="{{ url('student/dashboard') }}" style="color: white;"><i class="feather-grid" style="color: white;"></i> <span>لوحة التحكم </span>
                     <span></span>
-                        </a>
+                    </a>
                 </li>
 
                 <li>
-                                <a href="{{ route('profile.student.show') }}" style="color: white;"><i class="fas fa-user-circle" style="font-size: 1.2rem;"></i><span> الملف الشخصي</span> <span></span>
-                                </a>
-                            
-                </li>  
+                    <a href="{{ route('profile.student.show') }}" style="color: white;"><i class="fas fa-user-circle" style="font-size: 1.2rem;"></i><span> الملف الشخصي</span> <span></span>
+                    </a>
+
+                </li>
 
                 <li>
                     <a href="{{ route('student.attendance') }}" style="color: white;"><i class="fas fa-clipboard" style="color: white;"></i> <span> الحضور والغياب</span> <span></span>
@@ -39,7 +38,7 @@
                 </li>
 
                 <li>
-                    <a href="{{ url('payment') }}" style="color: white;"><i class="fas fa-clipboard" style="color: white;"></i> <span> الدفع</span> <span></span>
+                    <a href="{{ route('student.payments') }}" style="color: white;"><i class="fas fa-clipboard" style="color: white;"></i> <span> الدفع</span> <span></span>
                     </a>
                 </li>
 
@@ -47,6 +46,7 @@
         </div>
     </div>
 </div>
+
 <style>
     /* تأثير التمرير لعناصر الشريط الجانبي */
 .sidebar-menu ul li a {
