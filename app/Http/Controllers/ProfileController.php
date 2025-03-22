@@ -24,60 +24,76 @@ class ProfileController extends Controller
     {
         $request->validate([
             'student_name_en' => 'required|string|max:300',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'phones' => 'nullable|json',
+            'phones' => 'nullable|array',
+            'phones.*' => 'nullable|string|max:20',
             'qualification' => 'required|string|max:255',
             'birth_date' => 'required|date',
             'birth_place' => 'required|string|max:255',
             'address' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:students,email,' . Auth::user()->student->id,
+            'email' => 'nullable|email|unique:users,email,' . Auth::id(),
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Fetch the logged-in student's profile
-        $student = Auth::user()->student;
+        $user = Auth::user();
+        $student = $user->student;
 
         if (!$student) {
             return redirect()->route('profile.student.show')->with('error', 'Student profile not found.');
         }
 
-        // Allow updates for everything **except** `student_name_ar` and `gender`
+        // ✅ Clean and encode phones
+        $phones = array_filter($request->phones); // Remove blanks
+        $phonesJson = json_encode(array_values($phones));
+
+        // ✅ Handle image
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('profile_images', 'public');
+        } else {
+            $imagePath = $student->image;
+        }
+
+        // ✅ Update student
         $student->update([
             'student_name_en' => $request->student_name_en,
-            'image' => $request->file('image') ? $request->file('image')->store('profile_images', 'public') : $student->image,
-            'phones' => $request->phones,
+            'phones' => $phonesJson, // ✅ Save here
             'qualification' => $request->qualification,
             'birth_date' => $request->birth_date,
             'birth_place' => $request->birth_place,
             'address' => $request->address,
             'email' => $request->email,
+            'image' => $imagePath,
         ]);
 
-        return redirect()->route('profile.student.show')->with('success', 'Profile updated successfully.');
+        // ✅ Also update the email in the users table
+        $user->email = $request->email;
+        $user->save();
+
+        return redirect()->route('profile.student.show')->with('success', 'تم تحديث البيانات بنجاح.');
     }
 
 
        // Update student's password
+
        public function updateStudentPassword(Request $request)
        {
            $request->validate([
-               'old_password' => 'required|string|min:8',
-               'new_password' => 'required|string|min:8|confirmed',
+               'old_password' => 'required',
+               'new_password' => 'required|min:8|confirmed',
            ]);
-
+       
            $user = Auth::user();
-
-           // Check if the old password is correct
+       
            if (!Hash::check($request->old_password, $user->password)) {
-               return back()->withErrors(['old_password' => 'كلمة المرور القديمة غير صحيحة.']);
+               return redirect()->back()->with('error', 'كلمة المرور الحالية غير صحيحة.');
            }
-
-           // Update the password
-           $user->update([
-               'password' => Hash::make($request->new_password),
-           ]);
-
-           return redirect()->route('profile.student.show')->with('success', 'تم تغيير كلمة المرور بنجاح');
+       
+           $user->password = Hash::make($request->new_password);
+           $user->save();
+       
+           return redirect()->route('profile.student.show')->with('success', 'تم تغيير كلمة المرور بنجاح.');
        }
+
+
     // للمدرس
     public function showTeacherProfile()
     {

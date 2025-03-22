@@ -16,15 +16,31 @@
             </div>
         </div>
     </div>
+    @if (session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+@endif
+
+@if ($errors->any())
+    <div class="alert alert-warning">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 
     <div class="row">
         <div class="col-md-12">
             <div class="profile-header text-center mb-4">
                 <div class="profile-image mb-3">
-                    <a href="#">
-                        <img class="rounded-circle img-thumbnail" alt="User Image"
-                        src="{{ asset('storage/profile_images/' . ($student->image ?? 'default.jpg')) }}">
-                                       </a>
+                    <img src="{{ asset('storage/' . $student->image) }}" alt="User Image" class="rounded-circle img-thumbnail" width="150">
+
                 </div>
                 <h4>{{ $student->student_name_en }}</h4>
                 <p class="text-muted">طالب</p>
@@ -73,10 +89,21 @@
                                     <input type="email" class="form-control" name="email" value="{{ $student->email }}">
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label">الهاتف</label>
-                                    <input type="text" class="form-control" name="phones" value="{{ $student->phones }}">
+                                <div id="phone-fields">
+                                    @php
+                                    $phones = json_decode($student->phones, true) ?? [''];
+                                @endphp
+
+                                @foreach ($phones as $phone)
+                                <input type="text" name="phones[]" value="{{ old('phones.0', $phones[0] ?? '') }}" class="form-control">
+                                @endforeach
+
+                                <!-- For adding a new number -->
+                                <input type="text" name="phones[]" class="form-control mb-2" placeholder="رقم هاتف جديد">
+
+
                                 </div>
+
 
                                 <div class="mb-3">
                                     <label class="form-label">المؤهل</label>
@@ -100,7 +127,7 @@
 
                                 <div class="mb-3">
                                     <label class="form-label">الصورة الشخصية</label>
-                                    <input type="file" class="form-control" name="image">
+                                    <input type="file" name="image" class="form-control">
                                 </div>
 
                                 <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
@@ -116,25 +143,31 @@
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">تغيير كلمة المرور</h5>
-                            <form action="{{ route('profile.student.updatePassword') }}" method="POST">
+                            <form method="POST" action="{{ route('profile.student.password.update') }}">
                                 @csrf
+                            
                                 <div class="mb-3">
-                                    <label for="old_password" class="form-label">كلمة المرور القديمة</label>
-                                    <input type="password" name="old_password" id="old_password" class="form-control">
+                                    <label class="form-label">كلمة المرور الحالية</label>
+                                    <input type="password" name="old_password" class="form-control" required>
                                 </div>
+                            
                                 <div class="mb-3">
-                                    <label for="new_password" class="form-label">كلمة المرور الجديدة</label>
-                                    <input type="password" name="new_password" id="new_password" class="form-control">
+                                    <label class="form-label">كلمة المرور الجديدة</label>
+                                    <input type="password" name="new_password" class="form-control" required>
                                 </div>
+                            
                                 <div class="mb-3">
-                                    <label for="new_password_confirmation" class="form-label">تأكيد كلمة المرور</label>
-                                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="form-control">
+                                    <label class="form-label">تأكيد كلمة المرور الجديدة</label>
+                                    <input type="password" name="new_password_confirmation" class="form-control" required>
                                 </div>
+                            
                                 <button type="submit" class="btn btn-primary">حفظ</button>
                             </form>
+                            
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

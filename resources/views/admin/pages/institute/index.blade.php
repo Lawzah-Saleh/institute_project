@@ -46,9 +46,9 @@
                             <td class="d-flex justify-content-between">
                                 <span>{{ $institute->about_us }}</span>
                                 @if ($institute->about_image)
-                                    <img src="{{ asset('storage/' . $institute->about_image) }}" 
-                                         class="img-fluid rounded shadow" 
-                                         style="max-width: 200px; height: auto;" 
+                                    <img src="{{ asset('storage/' . $institute->about_image) }}"
+                                         class="img-fluid rounded shadow"
+                                         style="max-width: 200px; height: auto;"
                                          alt="صورة المعهد">
                                 @endif
                             </td>
@@ -60,7 +60,7 @@
 
         <!-- 🔙 زر العودة -->
         <div class="mt-4 text-center">
-            <a href="{{ route('dashboard') }}" class="btn btn-danger px-5"> رجوع</a>
+            <a href="{{ route('admin.dashboard') }}" class="btn btn-danger px-5"> رجوع</a>
             <a href="{{ route('institute.edit', $institute->id) }}" class="btn btn-warning">
                  تعديل
             </a>

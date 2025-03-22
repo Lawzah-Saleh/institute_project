@@ -15,7 +15,7 @@ class Student extends Model
         'student_name_en',
         'student_name_ar',
         'image',
-        'phone',
+        'phones',
         'gender',
         'qualification',
         'birth_date',

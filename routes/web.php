@@ -60,9 +60,12 @@ use App\Http\Controllers\ProfileController;
 Route::middleware(['auth'])->group(function () {
     Route::get('/student/profile', [ProfileController::class, 'showStudentProfile'])->name('profile.student.show');
     Route::post('/profile/update', [ProfileController::class, 'updateStudentProfile'])->name('profile.student.update'); // ✅ Add this
-    Route::post('student/profile/update-password', [ProfileController::class, 'updateStudentPassword'])->name('profile.student.updatePassword');
+    Route::post('/student/profile/password-update', [ProfileController::class, 'updateStudentPassword'])->name('profile.student.password.update');
 
 });
+
+
+
 // Route::middleware(['auth'])->group(function () {
 //     // المسارات الخاصة بالطالب
 //         // Routes for the student profile
@@ -203,5 +206,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 });
 
+use App\Http\Controllers\StudentAttendanceController;
+Route::prefix('student')->middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance');
+    Route::get('/attendance/data/{course_id}', [StudentAttendanceController::class, 'getAttendanceData']);
+});
 
-
+use App\Http\Controllers\StudentDegreeController;
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/student/degrees', [StudentDegreeController::class, 'index'])->name('student.degrees');
+});

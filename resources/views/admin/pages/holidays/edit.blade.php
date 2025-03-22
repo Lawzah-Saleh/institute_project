@@ -12,7 +12,6 @@
                 <div class="col">
                     <h3 class="page-title">تعديل الإجازة</h3>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">لوحة التحكم</a></li>
                         <li class="breadcrumb-item"><a href="{{ route('holidays.index') }}">الإجازات</a></li>
                         <li class="breadcrumb-item active">تعديل الإجازة</li>
                     </ul>

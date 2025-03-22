@@ -1,6 +1,3 @@
-
-
-{{-- ======= --}}
 <div class="sidebar" id="sidebar" style="background-color: #196098; " >
     <div class="sidebar-inner slimscroll">
         <div id="sidebar-menu" class="sidebar-menu">
@@ -10,62 +7,42 @@
 
             <ul>
                 <li class="nav-item dropdown has-arrow new-user-menus">
-                    <a href="#" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
                         <span class="user-img">
                             <div class="" style="margin-top: 10px;">
-                                {{-- <img class="rounded-circle img" src="{{ asset('student/assets/img/profiles/avatar-01.jpg') }}" --}}
-                                <img class="rounded-circle img" src="{{ asset('student/assets/img/profiles/st.jpg') }}"
+                                <img class="rounded-circle img" src="{{ asset('storage/' . ($student->image ?? 'default_profile.png')) }}"
                                     style="width: 80% ;height: 80%;" alt="Soeng Souy">
                             </div>
                         </span>
-                    </a>
-                    <div class="dropdown-menu">
-                        <div class="user-header">
-                            <div class="avatar avatar-sm">
-                                <img src="{{ asset('student/assets/img/profiles/st.jpg') }}" alt="User Image"
-                                    class="avatar-img rounded-circle">
-                            </div>
-                            <div class="user-text">
-                                <h6>Farah</h6>
-                                <p class="text-muted mb-0">Student</p>
-                            </div>
-                        </div>
-                        <li>
-                            <li>
-                                <a href="{{ url('student/dashboard') }}" style="color: white;"><i class="feather-grid" style="color: white;"></i> <span>لوحة التحكم </span>
-                                    <span></span>
-                                </a>
-                            </li>
-                            <li>
+                </li>
+                <li class="nav-item dropdown has-arrow new-user-menus">
+                <li>
+                <a href="{{ url('student/dashboard') }}" style="color: white;"><i class="feather-grid" style="color: white;"></i> <span>لوحة التحكم </span>
+                    <span></span>
+                        </a>
+                </li>
+
+                <li>
                                 <a href="{{ route('profile.student.show') }}" style="color: white;"><i class="fas fa-user-circle" style="font-size: 1.2rem;"></i><span> الملف الشخصي</span> <span></span>
                                 </a>
                             
-                            </li>
-                            
+                </li>  
+
                 <li>
-                    <a href="{{ url('degree') }}" style="color: white;"><i class="fas fa-file-alt" style="color:white"></i> <span> الدرجات</span>
+                    <a href="{{ route('student.attendance') }}" style="color: white;"><i class="fas fa-clipboard" style="color: white;"></i> <span> الحضور والغياب</span> <span></span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('student.degrees') }}" style="color: white;"><i class="fas fa-file-alt" style="color:white"></i> <span> الدرجات</span>
                         <span></span>
                     </a>
                 </li>
-                <li>
-                    <a href="{{ url('attendance') }}" style="color: white;"><i class="fas fa-clipboard" style="color: white;"></i> <span> الحضور والغياب</span> <span></span>
-                    </a>
-                </li>
-                {{-- <li>
-                    <a href="{{ url('add-result') }}" style="color: orange;"><i class="fas fa-clipboard-list" style="color: orange;"></i><span> اضافة الدرجات</span> <span></span>
-                    </a>
-                </li> --}}
 
                 <li>
                     <a href="{{ url('payment') }}" style="color: white;"><i class="fas fa-clipboard" style="color: white;"></i> <span> الدفع</span> <span></span>
                     </a>
                 </li>
-                {{-- <li>
-                    <a href="{{url('courses')}}" style="color: orange;"><i class="fas fa-book-reader" style="color: orange;"></i> <span > المواد</span> <span></span>
-                    </a>
-                </li > --}}
-            </ul>
-            </li>
+
             </ul>
         </div>
     </div>

@@ -38,7 +38,7 @@ class StudentDashboardController extends Controller
                 ->distinct()
                 ->count('course_session_id');
 
-            return view('dashboard-Student.dashboard', compact('totalCourses'));
+            return view('dashboard-Student.dashboard', compact('totalCourses', 'student'));
         }
 
         abort(403, 'Unauthorized action.');
