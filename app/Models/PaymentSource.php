@@ -15,32 +15,9 @@ class PaymentSource extends Model
         'name',
         'status',
     ];
-
-    protected $casts = [
-        'status' => 'string',
-    ];
-
-    /**
-     * Scope to get only active payment sources.
-     */
-    public function scopeActive($query)
+    // مصدر الدفع يمكن أن يكون مرتبطًا بعدة دفعات
+    public function payments()
     {
-        return $query->where('status', 'active');
-    }
-
-    /**
-     * Scope to get only inactive payment sources.
-     */
-    public function scopeInactive($query)
-    {
-        return $query->where('status', 'inactive');
-    }
-
-    /**
-     * Check if the payment source is active.
-     */
-    public function isActive()
-    {
-        return $this->status === 'active';
+        return $this->hasMany(Payment::class);
     }
 }

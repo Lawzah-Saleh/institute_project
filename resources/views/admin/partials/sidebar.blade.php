@@ -98,7 +98,18 @@
                     </ul>
                 </li>
                 <li class="submenu">
-                    <a href="#"><i class="fas fa-clipboard"></i> <span>المالية</span> <span
+                    <a href="#"><i class="fas fa-clipboard"></i> <span>أدارة الدفع</span> <span
+                            class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('admin.payments.index') }}">Invoices List</a></li>
+                        <li><a href="add-invoice.html">Add Invoices</a></li>
+                        <li><a href="edit-invoice.html">Edit Invoices</a></li>
+                        <li><a href="view-invoice.html">Invoices Details</a></li>
+                        <li><a href="invoices-settings.html">Invoices Settings</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="#"><i class="fas fa-clipboard"></i> <span>أدارة الحوافظ</span> <span
                             class="menu-arrow"></span></a>
                     <ul>
                         {{-- <li><a href="invoices.html">Invoices List</a></li>

@@ -125,6 +125,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('students', StudentController::class);
+    // routes/web.php
+    Route::get('/students/{student}/invoice', [StudentController::class, 'showInvoice'])->name('students.invoice');
+    Route::get('/students/{student}/invoice/print', [StudentController::class, 'printInvoice'])->name('students.invoice.print');
+
 
 });
 
@@ -205,6 +209,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 
 });
+
+use App\Http\Controllers\PaymentController;
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/payments', [PaymentController::class, 'index'])->name('admin.payments.index');
+    Route::get('/admin/payments/{payment}', [PaymentController::class, 'show'])->name('admin.payments.show');
+
+
+});
+
+
 
 use App\Http\Controllers\StudentAttendanceController;
 Route::prefix('student')->middleware(['auth', 'role:student'])->group(function () {

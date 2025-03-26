@@ -40,12 +40,18 @@ class Student extends Model
         return $this->belongsToMany(Course::class, 'course_students', 'student_id', 'course_id');
     }
 
-    public function sessions()
-    {
-        return $this->belongsToMany(CourseSession::class, 'attendances')
-                    ->withPivot('attendance_status')
-                    ->withTimestamps();
-    }
+    // public function sessions()
+    // {
+    //     return $this->belongsToMany(CourseSession::class, 'attendances')
+    //                 ->withPivot('attendance_status')
+    //                 ->withTimestamps();
+    // }
+    // Student.php
+public function sessions()
+{
+    return $this->belongsToMany(CourseSession::class, 'course_session_students');
+}
+
 
     public function attendances()
     {
@@ -60,6 +66,13 @@ class Student extends Model
     {
         return $this->belongsToMany(CourseSession::class, 'course_session_students');
     }
+    // الطلاب يمكنهم الحصول على عدة دفعات
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    // الطلاب يمكنهم الحصول على عدة فواتير
     public function invoices()
     {
         return $this->hasMany(Invoice::class);

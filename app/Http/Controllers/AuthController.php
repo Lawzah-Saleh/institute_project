@@ -26,11 +26,11 @@ class AuthController extends Controller
 
             // توجيه المستخدم حسب دوره
             if ($user->hasRole('admin')) {
-                return redirect()->route('admin_dashboard');
+                return redirect()->route('admin.dashboard');
             } elseif ($user->hasRole('teacher')) {
-                return redirect()->route('teacher_dashboard');
+                return redirect()->route('Teacher-dashboard.dashboard');
             } else {
-                return redirect()->route('student_dashboard');
+                return redirect()->route('dashboard-Student.dashboard');
             }
         }
 

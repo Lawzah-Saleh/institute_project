@@ -28,25 +28,17 @@ class Invoice extends Model
         'paid_at' => 'datetime' // Convert 'paid_at' to a Carbon datetime object
     ];
 
-     public function student()
-     {
-         return $this->belongsTo(Student::class);
-     }
+    // الفاتورة مرتبطة بالطالب
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
 
-     public function paymentSource()
-     {
-         return $this->belongsTo(PaymentSource::class);
-     }
-     public function items()
-     {
-         return $this->hasMany(InvoiceItem::class);
-     }
-
-
-     public function payments()
-     {
-         return $this->hasMany(Payment::class);
-     }
+    // الفاتورة يمكن أن تحتوي على عدة دفعات
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 
 
 }

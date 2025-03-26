@@ -24,52 +24,22 @@ class Payment extends Model
         'payment_date' => 'date',
         'amount' => 'decimal:2',
     ];
-
-
+    // الدفع مرتبط بالطالب
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
-
-    public function session()
-    {
-        return $this->belongsTo(CourseSession::class, 'session_id');
-    }
-
-
+    // الدفع مرتبط بالفاتورة
     public function invoice()
     {
         return $this->belongsTo(Invoice::class);
     }
 
-
-
-    public function scopeCompleted($query)
+    // الدفع مرتبط بمصدر الدفع
+    public function paymentSource()
     {
-        return $query->where('status', 'completed');
+        return $this->belongsTo(PaymentSource::class, 'payment_sources_id');
     }
-
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-
-    public function scopeFailed($query)
-    {
-        return $query->where('status', 'failed');
-    }
-
-
-    public function isCompleted()
-    {
-        return $this->status === 'completed';
-    }
-    public function source()
-{
-    return $this->belongsTo(PaymentSource::class, 'payment_source_id');
-}
 
 }
