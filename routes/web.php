@@ -231,11 +231,35 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/degrees', [StudentDegreeController::class, 'index'])->name('student.degrees');
 });
 
-use App\Http\Controllers\StudentPaymentController;
-Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('/student/payments', [StudentPaymentController::class, 'show'])->name('student.payments');
-});
+
+
 use App\Http\Controllers\StudentNotificationsController;
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/notifications', [StudentNotificationsController::class, 'index'])->name('student.notifications');
 });
+
+use App\Http\Controllers\StudentPaymentController;
+
+Route::middleware(['auth', 'role:student'])->group(function () {
+    // Display index page with Paid and Unpaid options
+    Route::get('student/payments', [StudentPaymentController::class, 'index'])->name('student.payments');
+
+    // Show paid invoices
+    Route::get('student/payments/paid', [StudentPaymentController::class, 'showPaid'])->name('student.payment.paid');
+
+    // Show unpaid invoices
+    Route::get('student/payments/unpaid', [StudentPaymentController::class, 'showUnpaid'])->name('student.payment.unpaid');
+
+    // Show the payment page for a specific invoice
+    Route::get('student/payments/pay/{invoice_id}', [StudentPaymentController::class, 'showPaymentPage'])->name('student.payment.pay');
+
+    // Store payment data
+    Route::get('/student/payment/receipt', [StudentPaymentController::class, 'storePayment'])->name('student.payment.receipt');
+
+    Route::post('/payment/receipt/{invoice_id}', [StudentPaymentController::class, 'payInvoice'])->name('student.payment.pay.invoice');
+    // Mark invoice as paid
+    Route::post('student/payments/pay/{invoice_id}/mark-as-paid', [StudentPaymentController::class, 'markAsPaid'])->name('student.payment.markAsPaid');
+
+
+});
+
