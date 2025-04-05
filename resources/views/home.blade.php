@@ -15,7 +15,7 @@
           <h1 data-aos="fade-up">  مرحباً بكم <span> {{ $institute->institute_name }} </span></h1>
           <p data-aos="fade-up" data-aos-delay="100"> {{ $institute->institute_description }} <br></p>
           <div class="d-flex" data-aos="fade-up" data-aos-delay="200">
-            <a href="#about" class="btn-get-started">أبدا </a>
+            <a href="{{ route('students.register.form') }}" class="btn-get-started">أبدا </a>
           </div>
           <img src="assets/img/hero-services-img.webp" class="img-fluid hero-img" alt="" data-aos="zoom-out" data-aos-delay="300">
         </div>

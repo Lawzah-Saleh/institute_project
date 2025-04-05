@@ -81,12 +81,14 @@ class StudentController extends Controller
         return view('admin.pages.students.show', compact('student'));
     }
 
-  
+
   public function create()
     {
-        $departments = Department::all(); // جلب جميع الأقسام
-        $courses = Course::all(); // جلب جميع الكورسات
-        return view('admin.pages.students.create', compact('departments', 'courses'));
+        $departments = Department::with(['courses' => function ($query) {
+            $query->orderBy('id')->limit(1);
+        }])->get();
+
+        return view('admin.pages.students.create', compact('departments',));
     }
     public function store(Request $request)
     {
@@ -103,43 +105,43 @@ class StudentController extends Controller
             'email' => 'nullable|email|unique:students,email',
             'state' => 'required|boolean',
             'image' => 'nullable|image|max:2048',
-    
+
             // الكورس والجلسة
             'course_id' => 'required|exists:courses,id',
             'study_time' => 'nullable|in:8-10,10-12,12-2,2-4,4-6',
             'course_session_id' => 'nullable|exists:course_sessions,id',
-    
+
             // الدفع
             'amount_paid' => 'required|numeric|min:0',
             'payment_method' => 'required|in:cash,mail',
         ]);
-    
+
         DB::beginTransaction();
-    
+
         try {
             // ✅ إنشاء المستخدم
-            $email = $validated['email'] ?? $validated['student_name_en'] . '@default.com';
+            $email = $validated['email'] ?? strtolower(str_replace(' ', '_', $validated['student_name_en'])) . '@gmail.com';
             $user = User::firstOrCreate(
                 ['email' => $email],
                 ['name' => $validated['student_name_en'], 'password' => bcrypt('123456')]
             );
             if (!$user->hasRole('student')) $user->assignRole('student');
-    
+
             // ✅ إنشاء الطالب
             $validated['user_id'] = $user->id;
             $validated['phones'] = json_encode($validated['phones']);
             $student = Student::create($validated);
-    
+
             if ($request->hasFile('image')) {
                 $student->image = $request->file('image')->store('students');
                 $student->save();
             }
-    
+
             $courseId = $request->course_id;
-    
+
             // ✅ منطق الجلسة / الكورس
             $registeredToSession = false;
-    
+
             if ($request->filled('course_session_id')) {
                 $session = CourseSession::find($request->course_session_id);
                 if ($session) {
@@ -155,7 +157,7 @@ class StudentController extends Controller
                     }
                 }
             }
-    
+
             if (!$registeredToSession) {
                 CourseStudent::updateOrCreate([
                     'student_id' => $student->id,
@@ -165,16 +167,16 @@ class StudentController extends Controller
                     'study_time' => $request->study_time ?? '8-10',
                 ]);
             }
-    
+
             // ✅ السعر من جدول course_prices
             $coursePrice = CoursePrice::where('course_id', $courseId)
                 ->orderByDesc('id')
                 ->first();
-    
+
             if (!$coursePrice) {
                 return back()->withErrors(['course_id' => '⚠️ لا يوجد سعر محدد لهذا الكورس.'])->withInput();
             }
-    
+
             // ✅ إنشاء الفاتورة
             $invoice = Invoice::create([
                 'student_id' => $student->id,
@@ -186,7 +188,7 @@ class StudentController extends Controller
                 'paid_at' => ($request->amount_paid >= $coursePrice->price) ? now() : null,
                 'payment_sources_id' => PaymentSource::where('name', $request->payment_method)->value('id'),
             ]);
-    
+
             // ✅ إنشاء الدفع
             Payment::create([
                 'student_id' => $student->id,
@@ -196,9 +198,9 @@ class StudentController extends Controller
                 'status' => 'completed',
                 'payment_sources_id' => $invoice->payment_sources_id,
             ]);
-    
+
             DB::commit();
-            return redirect()->route('students.invoice', $student->id)->with('success', 'تم تسجيل الطالب بنجاح!');    
+            return redirect()->route('students.invoice', $student->id)->with('success', 'تم تسجيل الطالب بنجاح!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withErrors(['error' => '❌ حدث خطأ أثناء الحفظ: ' . $e->getMessage()])->withInput();
@@ -209,26 +211,26 @@ class StudentController extends Controller
         $student = Student::findOrFail($studentId);
         $invoice = $student->invoices()->latest()->first();
         $payment = $invoice ? $invoice->payments()->latest()->first() : null;
-    
+
         return view('admin.pages.students.invoice', compact('student', 'invoice', 'payment'));
     }
-    
+
     public function printInvoice($studentId)
     {
         // جلب الطالب
         $student = Student::findOrFail($studentId);
-    
+
         // جلب أحدث فاتورة للطالب
         $invoice = $student->invoices()->latest()->first();
-    
+
         // التحقق من وجود الفاتورة
         if (!$invoice) {
             return redirect()->back()->with('error', '⚠️ لا توجد فاتورة لطباعتها.');
         }
-    
+
         // جلب آخر عملية دفع مرتبطة بهذه الفاتورة (إن وجدت)
         $payment = $invoice->payments()->latest()->first();
-    
+
         // عرض صفحة الطباعة
         return view('admin.pages.students.print_invoice', compact('student', 'invoice', 'payment'));
     }
@@ -303,14 +305,13 @@ class StudentController extends Controller
             $departments = Department::with('courses')->get();
             return view('admin.pages.students.register', compact('departments'));
         }
-
         public function register(Request $request)
         {
-            return DB::transaction(function () use ($request) {
-                Log::info('Starting student registration.', ['request_data' => $request->all()]);
+            try {
+                $request->merge(['payment_method' => 'mail']);
 
-                // ✅ التحقق من صحة البيانات
-                $request->validate([
+                // ✅ تحقق من صحة البيانات
+                $validated = $request->validate([
                     'student_name_ar' => 'required|string|max:255',
                     'student_name_en' => 'required|string|max:255',
                     'email' => 'required|email|unique:users,email|unique:students,email',
@@ -323,88 +324,122 @@ class StudentController extends Controller
                     'image' => 'nullable|image|max:2048',
                     'department' => 'required|exists:departments,id',
                     'course_id' => 'required|exists:courses,id',
-                    'time' => 'required|in:8-10,10-12,2-4,4-6',
-                    'amount_paid' => 'required|numeric|min:0'
+                    'course_session_id' => 'nullable|exists:course_sessions,id',
+                    'time' => 'nullable|in:8-10,10-12,2-4,4-6',
+                    'amount_paid' => 'required|numeric|min:0',
+                    'payment_method' => 'required|in:cash,mail'
                 ]);
 
-                Log::info('Validation passed.');
+                DB::beginTransaction();
 
-                // ✅ رفع الصورة إن وجدت
+                // ✅ رفع الصورة
                 $imagePath = $request->hasFile('image') ? $request->file('image')->store('students/images', 'public') : null;
 
-                Log::info('Image uploaded successfully.', ['image_path' => $imagePath]);
-
-                // ✅ إنشاء مستخدم للطالب
+                // ✅ إنشاء المستخدم
                 $user = User::create([
-                    'name' => $request->student_name_en,
-                    'email' => $request->email,
+                    'name' => $validated['student_name_en'],
+                    'email' => $validated['email'],
                     'password' => Hash::make('123456'),
                 ]);
+                $user->assignRole('student');
 
-                Log::info('User created.', ['user_id' => $user->id]);
-
-                // ✅ إنشاء الطالب وربطه بالمستخدم
+                // ✅ إنشاء الطالب
                 $student = Student::create([
                     'user_id' => $user->id,
-                    'student_name_ar' => $request->student_name_ar,
-                    'student_name_en' => $request->student_name_en,
-                    'email' => $request->email,
-                    'phone' => $request->phone,
-                    'address' => $request->address,
-                    'gender' => $request->gender,
-                    'qualification' => $request->qualification,
-                    'birth_date' => $request->birth_date,
-                    'birth_place' => $request->birth_place,
+                    'student_name_ar' => $validated['student_name_ar'],
+                    'student_name_en' => $validated['student_name_en'],
+                    'email' => $validated['email'],
+                    'phone' => $validated['phone'],
+                    'address' => $validated['address'],
+                    'gender' => $validated['gender'],
+                    'qualification' => $validated['qualification'],
+                    'birth_date' => $validated['birth_date'],
+                    'birth_place' => $validated['birth_place'],
                     'image' => $imagePath,
                     'state' => '0',
                 ]);
 
-                Log::info('Student created.', ['student_id' => $student->id]);
+                $courseId = $validated['course_id'];
+                $registeredToSession = false;
 
-                // ✅ التأكد من أن المدفوعات لا تتجاوز سعر الكورس
-                $coursePrice = DB::table('course_prices')
-                    ->where('course_id', $request->course_id)
-                    ->orderByDesc('id')
-                    ->value('price') ?? 0;
-
-                if (!$coursePrice) {
-                    Log::error('No price found for course.', ['course_id' => $request->course_id]);
-                    throw new \Exception('No price found for the selected course.');
+                // ✅ تسجيل في الجلسة إن وجدت وصالحة
+                if ($request->filled('course_session_id')) {
+                    $session = CourseSession::find($validated['course_session_id']);
+                    if ($session) {
+                        $sessionStart = \Carbon\Carbon::parse($session->start_date);
+                        if (now()->lessThanOrEqualTo($sessionStart->copy()->addDays(5))) {
+                            CourseSessionStudent::updateOrCreate([
+                                'student_id' => $student->id,
+                                'course_session_id' => $session->id,
+                            ], ['status' => 'active']);
+                            $registeredToSession = true;
+                            $courseId = $session->course_id;
+                        }
+                    }
                 }
 
-                if ($request->amount_paid > $coursePrice) {
+                // ✅ تسجيل في الكورس إن لم يسجل في جلسة
+                if (!$registeredToSession) {
+                    CourseStudent::create([
+                        'student_id' => $student->id,
+                        'course_id' => $courseId,
+                        'time' => $validated['time'] ?? '8-10',
+                        'status' => 'waiting',
+                    ]);
+                }
+
+                // ✅ جلب السعر
+                $coursePrice = CoursePrice::where('course_id', $courseId)->latest()->first();
+                if (!$coursePrice) {
+                    throw new \Exception('⚠️ لا يوجد سعر للكورس المحدد.');
+                }
+
+                if ($validated['amount_paid'] > $coursePrice->price) {
                     return back()->withErrors([
-                        'amount_paid' => '⚠️ المبلغ المدفوع لا يمكن أن يكون أكبر من سعر الكورس: ' . $coursePrice . ' ريال'
+                        'amount_paid' => '⚠️ المبلغ المدفوع لا يمكن أن يتجاوز سعر الكورس: ' . $coursePrice->price . ' ريال'
                     ])->withInput();
                 }
 
-
-                // ✅ إنشاء الحافظة (`Invoice`)
+                // ✅ إنشاء الفاتورة
                 $invoice = Invoice::create([
                     'student_id' => $student->id,
-                    'amount' => $request->amount_paid, // المبلغ المدفوع من الطالب
+                    'amount' => $coursePrice->price,
                     'status' => '0',
-                    'invoice_number' => 'INV-' . time(),
-                    'invoice_details' => "Fees for course: " . Course::find($request->course_id)->course_name,
-                    'due_date' => now()->addDays(7),
-                    'paid_at' => null,
+                    'invoice_number' => '25' . time(),
+                    'invoice_details' => "رسوم الكورس: " . Course::find($courseId)->course_name,
+                    'due_date' => now()->addDays(60),
+                    'paid_at' => ($validated['amount_paid'] >= $coursePrice->price) ? now() : null,
+                    'payment_sources_id' => PaymentSource::where('name', $validated['payment_method'])->value('id'),
                 ]);
 
-                Log::info('Invoice created.', ['invoice_id' => $invoice->id]);
-
-                // ✅ تسجيل الطالب في `course_students` مع الوقت الذي اختاره
-                CourseStudent::create([
+                // ✅ تسجيل الدفع
+                Payment::create([
                     'student_id' => $student->id,
-                    'course_id' => $request->course_id,
-                    'time' => $request->time,
+                    'invoice_id' => $invoice->id,
+                    'amount' => $validated['amount_paid'],
+                    'payment_date' => now(),
                     'status' => 'pending',
+                    'payment_sources_id' => $invoice->payment_sources_id,
                 ]);
 
-                Log::info('Course registration successful.');
+                DB::commit();
 
-                return redirect()->route('students.index')->with('success', 'Student, invoice, and course registration created successfully!');
-            }, 5);
+                return redirect()->route('students.invoice.view', $invoice->id)
+                    ->with('success', '✅ تم التسجيل بنجاح، وتم إصدار الحافظة  !');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('❌ فشل في تسجيل الطالب: ' . $e->getMessage());
+                return back()->withErrors(['error' => 'حدث خطأ أثناء التسجيل: ' . $e->getMessage()])->withInput();
+            }
         }
+        public function showInvoiceConfirmation($invoiceId)
+        {
+            $invoice = Invoice::with('student')->findOrFail($invoiceId);
+            $payment = Payment::where('invoice_id', $invoice->id)->first(); // أو مجموع الدفع إن وجد أكثر من دفعة
+
+            return view('admin.pages.students.invoicestudent', compact('invoice', 'payment'));
+        }
+
 
     public function destroy(Student $student)
     {

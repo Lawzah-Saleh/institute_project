@@ -99,12 +99,16 @@ class CourseController extends Controller
     $sessions = CourseSession::where('course_id', $courseId)->get();
     return response()->json($sessions);
 }
+public function getFirstCourseInDepartment($departmentId)
+{
+    $course = Course::where('department_id', $departmentId)->orderBy('id')->first();
 
+    if ($course) {
+        return response()->json([$course]);
+    }
 
-
-
-
-
+    return response()->json([]);
+}
 
 
 }

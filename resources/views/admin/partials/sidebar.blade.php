@@ -6,9 +6,12 @@
                 <img src="{{ asset('admin/assets/img/logo.png') }}" alt="اسم المعهد" style="width: 200px; height: auto; max-height: 120px; margin: 0 auto; display: block; border-radius: 10%; background-color: rgba(255, 255, 255, 0.9);box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
             </div>
             <ul>
+                <li class="menu-title">
+               <br/>
+                </li>
                 <li><a href="{{ route('admin.dashboard') }}"><i class="feather-grid"></i> <span> وحدة التحكم </span></a></li>
                 <li class="submenu">
-                    <a href="#"><i class="fas fa-graduation-cap"></i> <span>الطلاب</span> <span
+                    <a href="#"><i class="fas fa-graduation-cap"></i> <span>الطلاب</span><span
                         class="menu-arrow"></span</a>
                     <ul>
                         <li><a href="{{ route('students.index') }}">عرض الطلاب</a></li>
@@ -76,6 +79,27 @@
 
 
 
+                <li class="submenu">
+                    <a href="#"><i class="fas fa-clipboard"></i> <span>إدارة جهات السداد </span> <span
+                        class="menu-arrow"></span></a>
+                        <ul>
+                            <li><a href="{{ route('payment_sources.index') }}">جهات السداد</a></li>
+                            <li><a href="{{ route('payment_sources.create') }}">إضافة جهة سداد</a></li>
+                        </ul>
+                </li>
+                <li class="submenu">
+                    <a href="#"><i class="fas fa-comment-dollar"></i> <span>أدارة رسوم الطلاب</span><span
+                         class="menu-arrow"></span></a>
+
+                    <ul>
+                        <li><a href="{{ route('admin.payments.index') }}"> قائمة الرسوم </a></li>
+                        <li><a href="{{ route('admin.payments.create') }}">إضافة رسوم</a></li>
+                        <li><a href="edit-invoice.html">Edit Invoices</a></li>
+                        <li><a href="view-invoice.html">Invoices Details</a></li>
+                        <li><a href="invoices-settings.html">Invoices Settings</a></li>
+                    </ul>
+                </li>
+
 
 
                 <li class="submenu">
@@ -97,54 +121,7 @@
                         <li><a href="{{ route('advertisements.create') }}">إضافة إعلان</a></li>
                     </ul>
                 </li>
-                <li class="submenu">
-                    <a href="#"><i class="fas fa-clipboard"></i> <span>أدارة الدفع</span> <span
-                            class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="{{ route('admin.payments.index') }}">Invoices List</a></li>
-                        <li><a href="add-invoice.html">Add Invoices</a></li>
-                        <li><a href="edit-invoice.html">Edit Invoices</a></li>
-                        <li><a href="view-invoice.html">Invoices Details</a></li>
-                        <li><a href="invoices-settings.html">Invoices Settings</a></li>
-                    </ul>
-                </li>
-                <li class="submenu">
-                    <a href="#"><i class="fas fa-clipboard"></i> <span>أدارة الحوافظ</span> <span
-                            class="menu-arrow"></span></a>
-                    <ul>
-                        {{-- <li><a href="invoices.html">Invoices List</a></li>
-                        <li><a href="add-invoice.html">Add Invoices</a></li>
-                        <li><a href="edit-invoice.html">Edit Invoices</a></li>
-                        <li><a href="view-invoice.html">Invoices Details</a></li>
-                        <li><a href="invoices-settings.html">Invoices Settings</a></li> --}}
-                    </ul>
-                </li>
 
-                <li>
-                    <a href="fees.html"><i class="fas fa-comment-dollar"></i> <span>أدارة رسوم الطلاب</span></a>
-                </li>
-
-                <li>
-                    <a href="add-fees.html"><i class="fas fa-clipboard-list"></i> <span>أضافة رسوم للطالب</span></a>
-                </li>
-                {{-- <li class="submenu">
-                    <a href="#"><i class="fas fa-shield-alt"></i> <span> Authentication </span> <span
-                            class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="register.html">Register</a></li>
-                        <li><a href="forgot-password.html">Forgot Password</a></li>
-                        <li><a href="error-404.html">Error Page</a></li>
-                    </ul>
-                </li> --}}
-                {{-- <li class="submenu">
-                    <a href="#"><i class="fab fa-get-pocket"></i> <span>Base UI </span> <span
-                            class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="placeholders.html">Placeholders</a></li>
-                        <li><a href="sweetalerts.html">Sweet Alerts</a></li>
-                        <li><a href="toastr.html">Toasts</a></li>
-                    </ul>--}}
 
             </ul>
         </div>

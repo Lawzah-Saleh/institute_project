@@ -84,11 +84,32 @@
             <div class="card-header"style="background: rgba(25, 96, 152, 0.8);">صفحة تسجيل طالب </div>
         </div>
 
-    <form action="{{ route('students.register') }}" method="POST" enctype="multipart/form-data">
-        @csrf
+        <form action="{{ route('students.register.submit') }}" method="POST" >
+            @csrf
 
         <!-- 📷 صورة الطالب -->
+        @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>⚠️ حدثت أخطاء أثناء الإرسال:</strong>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>• {{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    @if (session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
 
         <!-- 👤 المعلومات الشخصية -->
         <div class="card">
@@ -149,6 +170,8 @@
                     <div class="card-body text-center">
                         <input type="file" name="photo" id="image" class="form-control">
                         <p class="text-muted mt-2">قم بالسحب والإفلات أو انقر هنا لاختيار صورة</p>
+                        <img id="preview" class="img-thumbnail mt-2" style="max-height: 200px; display:none;">
+
                     </div>
                 </div>
             </div>
@@ -177,7 +200,7 @@
                     </div>
                     <div class="mb-3">
                         <label>💰 سعر الدورة *</label>
-                        <input type="number" name="amount_paid" class="form-control" value="{{ old('amount_paid') }}" readonly>
+                        <input type="number" name="course_price" class="form-control" value="{{ old('course_price') }}" readonly>
                     </div>
                     <div class="mb-3">
                         <label for="study_time">وقت الدراسة *</label>
@@ -210,32 +233,30 @@
         let coursesSelect = document.getElementById('courses');
         coursesSelect.innerHTML = '<option value="">جاري التحميل ...</option>';
 
-        fetch(`/get-courses/${departmentId}`)
-            .then(response => response.json())
-            .then(data => {
-                coursesSelect.innerHTML = '<option value="">اختر دورة</option>';
-                if (data.length === 0) {
-                    coursesSelect.innerHTML = '<option value="">لا توجد دورات متاحة</option>';
-                } else {
-                    data.forEach(course => {
-                        let option = document.createElement('option');
-                        option.value = course.id;
-                        option.textContent = course.course_name; // استخدام الاسم الصحيح
-                        coursesSelect.appendChild(option);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("خطأ في جلب الدورات:", error);
-                coursesSelect.innerHTML = '<option value="">خطأ في تحميل الدورات</option>';
+        fetch(`/department/${departmentId}/first-course`)
+    .then(response => response.json())
+    .then(data => {
+        coursesSelect.innerHTML = '<option value="">اختر دورة</option>';
+        if (data.length === 0) {
+            coursesSelect.innerHTML = '<option value="">لا توجد دورات متاحة</option>';
+        } else {
+            data.forEach(course => {
+                let option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = course.course_name;
+                coursesSelect.appendChild(option);
             });
+        }
+    })
+    .catch(error => {
+        console.error("خطأ في جلب الدورات:", error);
+        coursesSelect.innerHTML = '<option value="">خطأ في تحميل الدورات</option>';
     });
-</script>
+    });
 
-<script>
     document.getElementById('courses').addEventListener('change', function() {
         let courseId = this.value;
-        let amountInput = document.querySelector('input[name="amount_paid"]');
+        let amountInput = document.querySelector('input[name="course_price"]');
 
         if (!courseId) {
             amountInput.value = ''; // إذا لم يتم اختيار كورس، يترك الحقل فارغًا
@@ -252,6 +273,16 @@
                 amountInput.value = 'Error';
             });
     });
+    document.getElementById('image').addEventListener('change', function (event) {
+    let reader = new FileReader();
+    reader.onload = function () {
+        let preview = document.getElementById('preview');
+        preview.src = reader.result;
+        preview.style.display = 'block';
+    };
+    reader.readAsDataURL(event.target.files[0]);
+});
+
 </script>
 
 

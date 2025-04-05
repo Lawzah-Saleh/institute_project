@@ -18,7 +18,7 @@
                 <li class="list-group-item"><strong>اسم الطالب:</strong> {{ $invoice->student->student_name_ar }}</li>
                 <li class="list-group-item"><strong>المبلغ الإجمالي:</strong> {{ number_format($invoice->amount, 2) }} ريال</li>
                 <li class="list-group-item"><strong>تاريخ الاستحقاق:</strong> {{ $invoice->due_date }}</li>
-                <li class="list-group-item"><strong>حالة الفاتورة:</strong> 
+                <li class="list-group-item"><strong>حالة الفاتورة:</strong>
                     <span class="badge {{ $invoice->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
                         {{ $invoice->status == 'paid' ? 'مدفوعة' : 'غير مدفوعة' }}
                     </span>
@@ -31,7 +31,7 @@
                     <li class="list-group-item"><strong>المبلغ المدفوع:</strong> {{ number_format($payment->amount, 2) }} ريال</li>
                     <li class="list-group-item"><strong>تاريخ الدفع:</strong> {{ $payment->payment_date }}</li>
                     <li class="list-group-item"><strong>طريقة الدفع:</strong> {{ $payment->source->name ?? 'غير محدد' }}</li>
-                    <li class="list-group-item"><strong>حالة الدفع:</strong> 
+                    <li class="list-group-item"><strong>حالة الدفع:</strong>
                         <span class="badge {{ $payment->status == 'completed' ? 'bg-success' : 'bg-warning text-dark' }}">
                             {{ $payment->status == 'completed' ? 'مكتمل' : 'قيد المعالجة' }}
                         </span>
@@ -48,7 +48,7 @@
             </div>
         @endif
         </div>
-        
+
     </div>
 </div>
 @endsection

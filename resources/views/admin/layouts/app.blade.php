@@ -13,11 +13,17 @@
     <link rel="stylesheet" href="{{ asset('admin/assets/plugins/fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/assets/css/style.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Toastr JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 
 
@@ -31,7 +37,18 @@
 
         <div class="page-wrapper">
             <div class="content container-fluid">
+                <script>
+                    @if (session('success'))
+                        toastr.success("{{ session('success') }}");
+                    @endif
+
+                    @if (session('error'))
+                        toastr.error("{{ session('error') }}");
+                    @endif
+                </script>
+
                 @yield('content') <!-- Page Content -->
+
             </div>
             <footer>
                 <p>معهد التعليم أولاً          صنعاء - سعوان - جولة النصر</p>

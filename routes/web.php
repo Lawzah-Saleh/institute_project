@@ -19,22 +19,26 @@ use App\Http\Controllers\HolidayController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 
+// web.php
+Route::get('/students/register', [StudentController::class, 'showRegistrationForm'])->name('students.register.form');
+Route::post('/students/register', [StudentController::class, 'register'])->name('students.register.submit');
+Route::get('/students/invoice/{invoiceId}', [StudentController::class, 'showInvoiceConfirmation'])->name('students.invoice.view');
 
-Route::get('/registeration', [StudentController::class, 'showRegistrationForm'])->name('students.register');
-Route::post('/registeration', [StudentController::class, 'register']);
 
-Route::get('/get-courses/{department}', function ($department) {
-    try {
-        $courses = DB::table('courses')
-            ->where('department_id', $department)
-            ->select('id', 'course_name') // تعديل الاسم الصحيح
-            ->get();
 
-        return response()->json($courses);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-});
+
+// Route::get('/get-courses/{department}', function ($department) {
+//     try {
+//         $courses = DB::table('courses')
+//             ->where('department_id', $department)
+//             ->select('id', 'course_name') // تعديل الاسم الصحيح
+//             ->get();
+
+//         return response()->json($courses);
+//     } catch (\Exception $e) {
+//         return response()->json(['error' => $e->getMessage()], 500);
+//     }
+// });
 Route::get('/get-course-price/{course_id}', function ($course_id) {
     try {
         $price = DB::table('course_prices')
@@ -131,6 +135,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 
 });
+Route::get('/department/{department}/first-course', [CourseController::class, 'getFirstCourseInDepartment'])->name('department.first_course');
 
 // courses routes
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -211,12 +216,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 use App\Http\Controllers\PaymentController;
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/payments', [PaymentController::class, 'index'])->name('admin.payments.index');
-    Route::get('/admin/payments/{payment}', [PaymentController::class, 'show'])->name('admin.payments.show');
 
-
-});
 
 
 
@@ -262,4 +262,30 @@ Route::middleware(['auth', 'role:student'])->group(function () {
 
 
 });
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/payments', [PaymentController::class, 'index'])->name('admin.payments.index');
+    Route::get('/admin/student/payments/{student}', [PaymentController::class, 'studentPaymentDetails'])
+    ->name('admin.student.payment.details');
+    Route::get('/admin/payments/invoice/{id}', [PaymentController::class, 'showInvoiceDetails'])->name('admin.payments.invoice.show');
+    Route::get('/admin/payments/create', [PaymentController::class, 'create'])->name('admin.payments.create');
+    Route::post('/admin/payments', [PaymentController::class, 'store'])->name('admin.payments.store');
+// مسار البحث عن الطالب
+Route::get('/admin/payments/search', [PaymentController::class, 'search'])->name('admin.payments.search');
+
+// مسار عرض تفاصيل الدفع
+Route::get('/admin/payments/details/{studentId}', [PaymentController::class, 'showDetails'])->name('admin.payments.details');
+
+// إضافة الدفع للطالب
+Route::post('/admin/payments/store', [PaymentController::class, 'store'])->name('admin.payments.store');
+
+    Route::patch('/payments/{invoice}/mark-paid', [PaymentController::class, 'markInvoicePaid'])->name('admin.payments.markPaid');
+});
+
+
+use App\Http\Controllers\PaymentSourceController;
+
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('payment_sources', PaymentSourceController::class);
+    });
 
