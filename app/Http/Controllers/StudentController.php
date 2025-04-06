@@ -113,7 +113,7 @@ class StudentController extends Controller
 
             // الدفع
             'amount_paid' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,mail',
+            'payment_method' => 'required|exists:payment_sources,name',  // Validate payment method from the payment_sources table
         ]);
 
         DB::beginTransaction();
@@ -123,7 +123,7 @@ class StudentController extends Controller
             $email = $validated['email'] ?? strtolower(str_replace(' ', '_', $validated['student_name_en'])) . '@gmail.com';
             $user = User::firstOrCreate(
                 ['email' => $email],
-                ['name' => $validated['student_name_en'], 'password' => bcrypt('123456')]
+                ['name' => $validated['student_name_ar'], 'password' => bcrypt('123456')]
             );
             if (!$user->hasRole('student')) $user->assignRole('student');
 

@@ -13,17 +13,11 @@ class Payment extends Model
 
     protected $fillable = [
         'student_id',
-        'session_id',
-        'invoice_id',
+        'course_id',
+        'total_amount',  // المبلغ الكلي
         'status',
-        'payment_date',
-        'amount',
     ];
 
-    protected $casts = [
-        'payment_date' => 'date',
-        'amount' => 'decimal:2',
-    ];
     // الدفع مرتبط بالطالب
     public function student()
     {
@@ -33,13 +27,15 @@ class Payment extends Model
     // الدفع مرتبط بالفاتورة
     public function invoice()
     {
-        return $this->belongsTo(Invoice::class);
+        return $this->hasMany(Invoice::class);
     }
 
     // الدفع مرتبط بمصدر الدفع
-    public function paymentSource()
+
+        // تعريف العلاقة مع الكورس
+    public function course()
     {
-        return $this->belongsTo(PaymentSource::class, 'payment_sources_id');
+        return $this->belongsTo(Course::class);
     }
 
 }

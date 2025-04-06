@@ -13,13 +13,15 @@ class Invoice extends Model
 
     protected $fillable = [
         'student_id',
-        'payment_sources_id', // مصدر الدفع
+        'payment_id',  // ربط الفاتورة بالدفع
         'amount',
         'status',
         'invoice_number',
         'invoice_details',
         'due_date',
         'paid_at',
+        'payment_sources_id',
+
     ];
 
     protected $casts = [
@@ -34,10 +36,13 @@ class Invoice extends Model
         return $this->belongsTo(Student::class);
     }
 
-    // الفاتورة يمكن أن تحتوي على عدة دفعات
-    public function payments()
+    public function payment()
     {
-        return $this->hasMany(Payment::class);
+        return $this->belongsTo(Payment::class);
+    }
+    public function paymentSource()
+    {
+        return $this->belongsTo(PaymentSource::class, 'payment_sources_id');
     }
 
 

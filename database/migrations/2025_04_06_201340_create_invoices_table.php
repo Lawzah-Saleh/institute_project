@@ -6,16 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('payment_id'); // ربط الحافظة بسجل الدفع الأساسي
-            $table->unsignedBigInteger('payment_sources_id')->nullable()->after('id');
+            $table->unsignedBigInteger('payment_sources_id')->nullable();
 
             $table->unsignedBigInteger('amount');
             $table->boolean('status')->default(0);
@@ -31,9 +29,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('invoices');
