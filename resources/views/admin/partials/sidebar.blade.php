@@ -100,8 +100,26 @@
                     </ul>
                 </li>
 
+                <li class="submenu">
+                    <a href="#"><i class="fa fa-newspaper"></i> <span> التقارير</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('advertisements.index') }}">كل الإعلانات</a></li>
+                        <li><a href="{{ route('advertisements.create') }}">إضافة إعلان</a></li>
+                    </ul>
+                </li>
 
 
+                <li class="submenu">
+                    <a href="#"><i class="fa fa-newspaper"></i> <span> الاعلانات</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <ul>
+                        <li><a href="{{ route('advertisements.index') }}">كل الإعلانات</a></li>
+                        <li><a href="{{ route('advertisements.create') }}">إضافة إعلان</a></li>
+                    </ul>
+                </li>
                 <li class="submenu">
                     <a href="#"><i class="fa fa-newspaper"></i> <span> اعدادات الصفحة الرئيسية</span>
                         <span class="menu-arrow"></span>
@@ -112,17 +130,6 @@
                         {{-- <li><a href="{{ route('institute.edit') }}">تعديل معلومات المعهد</a></li> --}}
                     </ul>
                 </li>
-                <li class="submenu">
-                    <a href="#"><i class="fa fa-newspaper"></i> <span> الاعلانات</span>
-                        <span class="menu-arrow"></span>
-                    </a>
-                    <ul>
-                        <li><a href="{{ route('advertisements.index') }}">كل الإعلانات</a></li>
-                        <li><a href="{{ route('advertisements.create') }}">إضافة إعلان</a></li>
-                    </ul>
-                </li>
-
-
             </ul>
         </div>
     </div>

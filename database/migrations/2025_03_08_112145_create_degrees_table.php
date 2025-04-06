@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('final_degree', 5, 2);
             $table->decimal('attendance_degree', 5, 2);
             $table->decimal('total_degree', 5, 2);
-            $table->enum('status', ['pass', 'fail'])->nullable();
+            $table->boolean('state')->default('0');
             $table->timestamps();
 
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');

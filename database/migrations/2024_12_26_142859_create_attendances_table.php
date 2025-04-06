@@ -14,9 +14,11 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('session_id');
             $table->unsignedBigInteger('employee_id');
-            $table->dateTime('attendance_date')->default(now());
-            $table->boolean('status');
+            $table->dateTime('attendance_date')->useCurrent();
+            $table->boolean('status')->default(0);
             $table->timestamps();
+
+            $table->unique(['student_id', 'session_id','attendance_date'], 'student_unique_record');
 
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
             $table->foreign('session_id')->references('id')->on('course_sessions')->onDelete('cascade');
@@ -24,7 +26,7 @@ return new class extends Migration
         });
     }
 
- 
+
     public function down(): void
     {
         Schema::dropIfExists('attendances');

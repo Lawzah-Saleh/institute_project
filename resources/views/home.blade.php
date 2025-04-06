@@ -146,7 +146,7 @@
 
           <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
             <div class="service-item item-cyan position-relative">
-              <i class="bi bi-activity icon"></i>
+              <i class="bi bi-book icon" style="margin-left:20px"></i>
               <div>
                 <h3>{{ $department->department_name }}</h3>
                 <p>{{ $department->department_info }}</p>

@@ -11,16 +11,14 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('student_id'); // مفتاح أجنبي لجدول الطلاب
-            $table->unsignedBigInteger('session_id')->nullable();
-            $table->unsignedBigInteger('invoice_id');
-            $table->enum('status', ['pending', 'completed', 'failed']);
-            $table->date('payment_date');
-            $table->decimal('amount', 10, 2);
+            $table->unsignedBigInteger('student_id');
+            $table->unsignedBigInteger('course_id')->nullable();
+
+            $table->decimal('total_amount', 10, 2); // المبلغ الكلي المطلوب
+            $table->enum('status', ['unpaid', 'partial', 'paid'])->default('unpaid');
 
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->foreign('session_id')->references('id')->on('course_sessions')->onDelete('cascade');
-            $table->foreign('invoice_id')->references('id')->on('invoices')->onDelete('cascade');
+            $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->timestamps();
         });
     }
