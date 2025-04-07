@@ -21,17 +21,20 @@ class PaymentController extends Controller
         $sessionId    = $request->input('session_id');
         $search       = $request->input('search');
 
+        // Start the query for students
         $query = Student::query()
-            ->with(['invoices', 'payments']) // علاقات لجلب الفواتير والمدفوعات
-            ->withSum('invoices', 'amount')  // المبلغ الكلي المطلوب
-            ->withSum('payments', 'amount'); // المبلغ المدفوع
+            ->with(['invoices', 'payments']) // Relationships to fetch invoices and payments
+            ->withSum('invoices', 'amount')  // Total amount required from invoices
+            ->withSum('payments', 'total_amount'); // Paid amount from payments
 
+        // Filter by session
         if ($sessionId) {
             $query->whereHas('sessions', function ($q) use ($sessionId) {
                 $q->where('course_sessions.id', $sessionId);
             });
         }
 
+        // Filter by search term
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('student_name_ar', 'like', "%$search%")
@@ -42,25 +45,55 @@ class PaymentController extends Controller
             });
         }
 
+        // Filter by department
+        if ($departmentId) {
+            $query->whereHas('courses', function ($q) use ($departmentId) {
+                $q->where('department_id', $departmentId);
+            });
+        }
+
+        // Get the students
         $students = $query->get();
 
+        // Get all departments
         $departments = Department::all();
 
+        // Get courses if department_id is set
+        $courses = $departmentId ? Course::where('department_id', $departmentId)->get() : [];
+
+        // Return the view with students, departments, and courses
         return view('admin.pages.payments.index', [
             'students'    => $students,
             'departments' => $departments,
+            'courses'     => $courses, // Pass the filtered courses
         ]);
     }
     public function studentPaymentDetails($studentId)
     {
-        $student = Student::with(['invoices.payments'])->findOrFail($studentId);
-        return view('admin.pages.payments.details', compact('student'));
+        // تأكد من تحميل الفواتير مع المدفوعات
+        $student = Student::with(['payments.invoice'])->findOrFail($studentId);
+    // حساب المبلغ الكلي المدفوع
+    $totalPayments = $student->payments->sum('total_amount');
+
+    // حساب المبلغ الكلي للطالب (من الفواتير)
+    $totalAmount = $student->invoices->sum('amount');
+
+    // حساب المبلغ المتبقي
+    $remainingAmount = $totalPayments - $totalAmount ;
+
+    return view('admin.pages.payments.details', compact('student', 'totalPayments', 'remainingAmount'));
     }
-    public function showInvoiceDetails($invoiceId)
+
+    public function showInvoiceDetails($paymentId)
     {
-        $invoice = Invoice::with(['payments'])->findOrFail($invoiceId);
-        return view('admin.pages.payments.invoice_show', compact('invoice'));
+        // Retrieve the payment with its associated invoices (assuming payment model has an invoices() relationship)
+        $payment = Payment::with('invoices')->findOrFail($paymentId);
+
+        // Pass the payment and its invoices to the view
+        return view('admin.pages.payments.invoice_show', compact('payment'));
     }
+
+
 
 
     // 📄 عرض صفحة الدفع للطالب

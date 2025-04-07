@@ -32,7 +32,7 @@
 
                 <!-- اختيار الكورسات بناءً على القسم -->
                 <div class="col-md-4">
-                    <label>الكورس</label>
+                    <label>الدورة</label>
                     <select name="course_id" id="course_id" class="form-control" {{ request('department_id') ? '' : 'disabled' }}>
                         <option value="">-- اختر الدورة --</option>
                         @foreach($courses as $course)
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label>الجلسة</label>
+                    <label>الدورة المتاحة </label>
                     <select name="course_session_id" id="session_id" class="form-control" {{ request('course_id') ? '' : 'disabled' }}>
                         <option value="">-- اختر الدورة المتاحة --</option>
                         @foreach($sessions as $session)

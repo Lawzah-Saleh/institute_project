@@ -16,59 +16,71 @@
         <!-- معلومات الطالب -->
         <div class="card mb-4">
             <div class="card-body">
-                <h5 class="mb-3">🧑‍🎓 معلومات الطالب:</h5>
+                <h5 class="mb-3"> معلومات الطالب:</h5>
                 <p><strong>الاسم:</strong> {{ $student->student_name_ar }} ({{ $student->student_name_en }})</p>
                 <p><strong>البريد الإلكتروني:</strong> {{ $student->email }}</p>
-                <p><strong>رقم الهاتف:</strong> {{ json_decode($student->phones, true) ? implode(', ', json_decode($student->phones, true)) : 'غير متوفر' }}</p>
+                <p><strong>رقم الهاتف:</strong> {{ is_array($phones = json_decode($student->phones, true)) ? implode(',', $phones) : 'غير متوفر' }}</p>
+            </div>
+        </div>
+
+        <!-- المبلغ الإجمالي  -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="mb-3"> المبلغ الإجمالي على الطالب :</h5>
+                <p><strong>المبلغ :</strong> {{ number_format($totalPayments, 2) }} ريال</p>
+                <p><strong>حالة الدفع:</strong>
+                    @if($remainingAmount <= 0)
+                        <span class="badge bg-success">مدفوع بالكامل</span>
+                    @elseif($totalPayments > 0)
+                        <span class="badge bg-warning text-dark">مدفوع جزئياً</span>
+                    @else
+                        <span class="badge bg-danger">غير مدفوع</span>
+                    @endif
+                </p>
             </div>
         </div>
 
         <!-- الفواتير والمدفوعات -->
         <div class="card">
             <div class="card-body">
-                <h5 class="mb-3">💰 الفواتير والمدفوعات</h5>
+                <h5 class="mb-3"> الفواتير </h5>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
+                            <th>رقم الفاتورة</th>
                             <th>رقم الحافظة</th>
                             <th>تاريخ الاستحقاق</th>
-                            <th>المبلغ الكلي</th>
-                            <th>المبلغ المدفوع</th>
+                            <th>المبلغ المستحق</th>
                             <th>المتبقي</th>
-                            <th>الحالة</th>
+                            <th>حالة الفاتورة</th>
                             <th>الإجراء</th>
-
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($student->invoices as $invoice)
-                            @php
-                                $paid = $invoice->payments->sum('amount');
-                                $remaining = $invoice->amount - $paid;
-                            @endphp
+
                             <tr>
                                 <td>{{ $invoice->invoice_number }}</td>
-                                <td>{{ $invoice->due_date }}</td>
+                                <td>{{ $invoice->invoice_number }}</td> <!-- Assuming invoice number is the same as the invoice number -->
+                                <td>{{ $invoice->created_at }}</td>
                                 <td>{{ number_format($invoice->amount, 2) }} ريال</td>
-                                <td>{{ number_format($paid, 2) }} ريال</td>
-                                <td>{{ number_format($remaining, 2) }} ريال</td>
+                                <td>{{ number_format($remainingAmount, 2) }} ريال</td>
                                 <td>
-                                    @if($remaining <= 0)
-                                        <span class="badge bg-success">مدفوع</span>
-                                    @elseif($paid > 0)
-                                        <span class="badge bg-warning text-dark">مدفوع جزئياً</span>
+                                    @if($invoice->status == 0)
+                                        <span class="badge "style="background-color: #e94c21; color: #fff;">غير مدفوع</span>
+                                    @elseif($invoice->status == 1)
+                                        <span class="badge "style="background-color: #e94c21; color: #fff;">مدفوع</span>
                                     @else
-                                        <span class="badge bg-danger">غير مدفوع</span>
+                                        <span class="badge"style="background-color: #e94c21; color: #fff;">لا يوجد حالة</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <a href="{{ route('admin.payments.invoice.show', $invoice->id) }}" class="btn btn-sm btn-info">عرض الفاتورة</a>
-
+                                 <td>
+                                    <a href="{{ route('admin.payments.invoice.show', $invoice->id) }}" class="btn btn-sm "style="background-color: #196098; color: #fff;">عرض الفاتورة</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center">لا توجد فواتير مسجلة.</td>
+                                <td colspan="8" class="text-center">لا توجد فواتير مسجلة.</td>
                             </tr>
                         @endforelse
                     </tbody>
