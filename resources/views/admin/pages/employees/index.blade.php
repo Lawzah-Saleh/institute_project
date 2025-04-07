@@ -38,7 +38,7 @@
 
                         <!-- Submit Button -->
                         <div class="col-md-12 text-end mt-3">
-                            <button type="submit" class="btn btn-primary">بحث</button>
+                            <button type="submit" class="btn btn-primary"style="background-color: #196098;color: white">بحث</button>
                         </div>
                     </div>
                 </form>
@@ -55,7 +55,7 @@
                             <h3 class="page-title">قائمة الموظفين</h3>
                         </div>
                         <div class="col-auto text-start"> <!-- Changed from text-end to text-start -->
-                            <a href="{{ url('employees/create') }}" class="btn btn-primary">
+                            <a href="{{ url('employees/create') }}" class="btn btn-primary"style="background-color: #196098;color: white">
                                 <i class="fas fa-plus"></i> إضافة موظف
                             </a>
                         </div>
@@ -87,17 +87,17 @@
                                         @if ($employee->image)
                                             <img src="{{ asset('storage/' . $employee->image) }}" alt="صورة الموظف" width="50" class="rounded-circle">
                                         @else
-                                            <span class="text-muted">لا توجد صورة</span>
+                                        <img src="{{ asset('default_profile.png') }}" alt="صورة الموظف" width="50" class="rounded-circle ">
                                         @endif
                                     </td>
                                     <td>{{ $employee->name_en }}</td>
                                     <td>{{ $employee->name_ar }}</td>
-                                    <td>{{ $employee->phone }}</td>
+                                    <td>{{ $employee->phones }}</td>
                                     <td>{{ $employee->address }}</td>
                                     <td>{{ $employee->gender == 'male' ? 'ذكر' : 'أنثى' }}</td>
                                     <td>{{ $employee->email }}</td>
                                     <td>
-                                        <span class="badge bg-info text-white">
+                                        <span class="badge"style="background-color: #e94c21;color: white">
                                             {{ $employee->emptype == 'teacher' ? 'معلم' : 'موظف إداري' }}
                                         </span>
                                     </td>
@@ -106,15 +106,15 @@
                                     <td class="text-center">
                                         <form action="{{ route('employees.toggleStatus', $employee->id) }}" method="POST">
                                             @csrf
-                                            <button type="submit" class="btn btn-sm {{ $employee->state ? 'btn-success' : 'btn-danger' }}" 
+                                            <button type="submit" class="btn btn-sm {{ $employee->state ? 'btn-success' : 'btn-danger' }}"
                                                     style="border-radius: 50px; padding: 5px 15px;">
                                                 <i class="fas {{ $employee->state ? 'fa-check-circle' : 'fa-ban' }}"></i>
                                                 {{ $employee->state ? 'نشط' : 'غير نشط' }}
                                             </button>
                                         </form>
                                     </td>
-                                    
-                                    
+
+
                                     <td class="text-end">
                                         <div class="btn-group">
                                             <a href="{{ url('employees/'.$employee->id) }}" class="btn btn-sm">

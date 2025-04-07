@@ -43,7 +43,7 @@
                 <div class="col-md-4">
                     <label>الكورس</label>
                     <select name="course_id" id="course_id" class="form-control" {{ old('department_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الكورس --</option>
+                        <option value="">-- اختر الدورة --</option>
                         @if(old('department_id'))
                             @foreach($courses as $course)
                                 <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
@@ -58,7 +58,7 @@
                 <div class="col-md-4">
                     <label>الجلسة</label>
                     <select name="session_id" id="session_id" class="form-control" {{ old('course_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة المتاحة --</option>
                         @if(old('course_id'))
                             @foreach($sessions as $session)
                                 <option value="{{ $session->id }}" {{ old('session_id') == $session->id ? 'selected' : '' }}>
@@ -71,7 +71,7 @@
 
                 <!-- زر إظهار الطلاب -->
                 <div class="col-md-12 mt-3">
-                    <button type="button" id="show-students-btn" class="btn btn-primary">إظهار الطلاب</button>
+                    <button type="button" id="show-students-btn" class="btn"style="background-color: #196098;color: white;">إظهار الطلاب</button>
                 </div>
             </div>
 
@@ -100,7 +100,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="2">لا توجد طلاب في هذه الجلسة.</td>
+                                <td colspan="2">لا توجد طلاب في هذه الدورة الحالية .</td>
                             </tr>
                         @endif
                     </tbody>
@@ -110,7 +110,7 @@
 
             <!-- زر رفع الحضور -->
             <div class="col-md-12 mt-3">
-                <button type="submit" class="btn btn-primary">رفع الحضور</button>
+                <button type="submit" class="btn "style="background-color: #e94c21;color: white;">رفع الحضور</button>
             </div>
         </form>
     </div>

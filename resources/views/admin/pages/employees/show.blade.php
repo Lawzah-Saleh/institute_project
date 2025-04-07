@@ -14,8 +14,8 @@
                     <h3 class="page-title">تفاصيل الموظف</h3>
                 </div>
                 <div class="col-auto text-end">
-                    <a href="{{ route('employees.index') }}" class="btn btn-primary">
-                        <i class="fas fa-arrow-left"></i> رجوع
+                    <a href="{{ route('employees.index') }}" class="btn "style="background-color: #196098;color: white">
+                        <i class="fas fa-arrow-right"></i> رجوع
                     </a>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                                 <img src="{{ asset('storage/' . $employee->image) }}" alt="Employee Image"
                                      class="img-fluid rounded-circle border shadow" width="120">
                             @else
-                                <img src="{{ asset('images/default-avatar.png') }}" alt="No Image"
+                                <img src="{{ asset('default_profile.png') }}" alt="No Image"
                                      class="img-fluid rounded-circle border shadow" width="120">
                             @endif
                         </div>
@@ -134,22 +134,22 @@
         <div class="card mt-3">
             <div class="card-body text-end">
                 <!-- 🔹 Edit Button -->
-                <a href="{{ route('employees.edit', $employee->id) }}" class="btn btn-primary">
+                <a href="{{ route('employees.edit', $employee->id) }}" class="btn "style="background-color: #196098;color: white">
                     <i class="fas fa-edit"></i> تعديل
                 </a>
-        
+
                 <!-- 🔹 Activate/Deactivate Button -->
-                <form action="{{ route('employees.toggleStatus', $employee->id) }}" method="POST" style="display: inline-block;">
+                {{-- <form action="{{ route('employees.toggleStatus', $employee->id) }}" method="POST" style="display: inline-block;">
                     @csrf
-                    <button type="submit" class="btn btn-sm {{ $employee->state ? 'btn-success' : 'btn-danger' }}" 
+                    <button type="submit" class="btn btn-sm {{ $employee->state ? 'btn-success' : 'btn-danger' }}"
                             style="border-radius: 50px; padding: 5px 15px;">
                         <i class="fas {{ $employee->state ? 'fa-check-circle' : 'fa-ban' }}"></i>
                         {{ $employee->state ? 'نشط' : 'غير نشط' }}
                     </button>
-                </form>
+                </form> --}}
             </div>
         </div>
-        
+
 
 
     </div>

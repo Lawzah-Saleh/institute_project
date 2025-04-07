@@ -112,7 +112,7 @@ class DegreeController extends Controller
                 $totalDegree = $this->calculateTotalDegree($practicalDegree, $finalDegree, $attendanceDegree);
 
 
-        $status = $totalDegree >= 50 ? 'pass' : 'fail';
+        $state = '0';
 
         Degree::updateOrCreate(
             [
@@ -124,7 +124,7 @@ class DegreeController extends Controller
                 'final_degree' => $finalDegree,
                 'attendance_degree' => $attendanceDegree,  // تم استخدام المتغير هنا
                 'total_degree' => $totalDegree,  // تم إضافة المتغير هنا
-                'status' => $status,
+                'state' => $state,
             ]
         );
     }

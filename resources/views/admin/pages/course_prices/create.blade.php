@@ -3,7 +3,7 @@
 @section('title', 'إضافة سعر جديد')
 
 @section('content')
-<div class="page-wrapper">
+<div class="page-wrapper" syle="background-color: #F9F9FB;">
     <div class="content container-fluid">
         <div class="page-header">
             <div class="row align-items-center">

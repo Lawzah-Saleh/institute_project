@@ -45,5 +45,4 @@ class Invoice extends Model
         return $this->belongsTo(PaymentSource::class, 'payment_sources_id');
     }
 
-
 }

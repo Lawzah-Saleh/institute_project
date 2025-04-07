@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="page-wrapper">
+<div class="page-wrapper" style="background-color: #F9F9FB;">
     <div class="content container-fluid">
 
         <div class="page-header">
@@ -46,8 +46,8 @@
                             </div>
 
                             <div class="text-end">
-                                <button type="submit" class="btn btn-success">حفظ</button>
-                                <a href="{{ route('holidays.index') }}" class="btn btn-secondary">إلغاء</a>
+                                <button type="submit" class="btn "style="background-color: #196098;color: white;">حفظ</button>
+                                <a href="{{ route('holidays.index') }}" class="btn "style="background-color: #e94c21;color: white;">إلغاء</a>
                             </div>
 
                         </form>

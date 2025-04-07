@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\CoursePrice;
 use App\Models\Department;
 use App\Models\CourseSession;
 use Illuminate\Http\Request;
@@ -25,6 +26,11 @@ class CourseController extends Controller
         return view('admin.pages.courses.index', compact('courses', 'departments'));
     }
 
+    public function getCoursesByDepartment($departmentId)
+    {
+        $courses = Course::where('department_id', $departmentId)->get();
+        return response()->json($courses);
+    }
 
     public function toggleState(Course $course)
     {
@@ -41,15 +47,18 @@ class CourseController extends Controller
 
         public function store(Request $request)
         {
+            // التحقق من المدخلات
             $request->validate([
                 'course_name' => 'required|string|max:255',
                 'duration' => 'nullable|integer',
                 'description' => 'nullable|max:200',
                 'department_id' => 'required|exists:departments,id',
                 'state' => 'required|boolean',
+                'price' => 'required|numeric|min:0', // التحقق من السعر
             ]);
 
-            Course::create([
+            // إضافة الدورة إلى جدول الدورات
+            $course = Course::create([
                 'course_name' => $request->course_name,
                 'duration' => $request->duration,
                 'description' => $request->description,
@@ -57,8 +66,20 @@ class CourseController extends Controller
                 'state' => $request->state,
             ]);
 
+            // إضافة السعر إلى جدول course_prices باستخدام الـ id الخاص بالكورس
+            CoursePrice::create([
+                'course_id' => $course->id, // ربط السعر بالكورس
+                'price' => $request->price, // تخزين السعر
+                'date'=>now(),
+                'price_approval'=>now(),
+                'state'=>'1',
+
+            ]);
+
+            // إعادة التوجيه مع رسالة نجاح
             return redirect()->route('courses.index')->with('success', 'تم إضافة الدورة بنجاح!');
         }
+
         public function edit($id)
         {
             // جلب الكورس المحدد
@@ -89,10 +110,6 @@ class CourseController extends Controller
 
             // إعادة التوجيه مع رسالة نجاح
             return redirect()->route('courses.index')->with('success', 'تم تعديل الكورس بنجاح!');
-        }public function getCoursesByDepartment($departmentId)
-        {
-            $courses = Course::where('department_id', $departmentId)->get();
-            return response()->json($courses);
         }
         public function getSessions($courseId)
 {

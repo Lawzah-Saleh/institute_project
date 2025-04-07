@@ -13,11 +13,17 @@
             </div>
         </div>
 
+
         <div class="card">
-            <div class="card-body">
-                <div class="row mb-3">
-                    <div class="col ">
-                        <a href="{{ route('payment_sources.create') }}" class="btn btn-primary">إضافة جهة سداد جديدة</a>
+            <div class="card-body justify-content-center">
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="page-title">قائمة الجهات السداد</h3>
+                        </div>
+                        <div class="col-auto text-end float-end ms-auto">
+                            <a href="{{ route('payment_sources.create') }}" class="btn "style="background-color: #196098;color: white"><i class="fas fa-plus"></i> إضافة جهة سداد</a>
+                        </div>
                     </div>
                 </div>
 

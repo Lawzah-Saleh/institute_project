@@ -42,20 +42,20 @@
                         {{-- الاسم بالعربية --}}
                         <div class="col-md-6 mb-3">
                             <label>الاسم بالعربية *</label>
-                            <input type="text" name="student_name_ar" class="form-control" required>
+                            <input type="text" name="student_name_ar" value="{{ old('student_name_ar') }}" class="form-control" required>
                         </div>
 
                         {{-- الاسم بالإنجليزية --}}
                         <div class="col-md-6 mb-3">
                             <label>الاسم بالإنجليزية *</label>
-                            <input type="text" name="student_name_en" class="form-control" required>
+                            <input type="text" name="student_name_en" value="{{ old('student_name_en') }}" class="form-control" required>
                         </div>
 
                         {{-- أرقام الهواتف --}}
                         <div class="col-md-6 mb-3">
                             <label>رقم الهاتف *</label>
                             <div id="phone-container">
-                                <input type="text" name="phones[]" class="form-control mb-1" required>
+                                <input type="text" name="phones[]" value="{{ old('phones.0') }}" class="form-control mb-1" required>
                             </div>
                             <button type="button" id="add-phone" class="btn btn-sm btn-outline-secondary">+ رقم إضافي</button>
                         </div>
@@ -63,7 +63,7 @@
                         {{-- الجنس --}}
                         <div class="col-md-6 mb-3">
                             <label>الجنس *</label>
-                            <select name="gender" class="form-select" required>
+                            <select name="gender" value="{{ old('gender') }}" class="form-select" required>
                                 <option value="">اختر</option>
                                 <option value="male">ذكر</option>
                                 <option value="female">أنثى</option>
@@ -73,33 +73,33 @@
                         {{-- المؤهل --}}
                         <div class="col-md-6 mb-3">
                             <label>المؤهل العلمي *</label>
-                            <input type="text" name="qualification" class="form-control" required>
+                            <input type="text" name="qualification" value="{{ old('qualification') }}" class="form-control" required>
                         </div>
 
                         {{-- الميلاد --}}
                         <div class="col-md-6 mb-3">
                             <label>تاريخ الميلاد *</label>
-                            <input type="date" name="birth_date" class="form-control" required>
+                            <input type="date" name="birth_date" value="{{ old('birth_date') }}" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>مكان الميلاد *</label>
-                            <input type="text" name="birth_place" class="form-control" required>
+                            <input type="text" name="birth_place" value="{{ old('birth_place') }}" class="form-control" required>
                         </div>
 
                         {{-- العنوان والبريد --}}
                         <div class="col-md-6 mb-3">
                             <label>العنوان *</label>
-                            <input type="text" name="address" class="form-control" required>
+                            <input type="text" name="address" value="{{ old('address') }}" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>البريد الإلكتروني</label>
-                            <input type="email" name="email" class="form-control">
+                            <input type="email" name="email" value="{{ old('email') }}" class="form-control">
                         </div>
 
                         {{-- القسم والكورس --}}
                         <div class="col-md-6 mb-3">
                             <label>القسم *</label>
-                            <select name="department" id="department" class="form-select" required>
+                            <select name="department" id="department" class="form-select"  required>
                                 <option value="">اختر القسم</option>
                                 @foreach ($departments as $department)
                                     <option value="{{ $department->id }}">{{ $department->department_name }}</option>
@@ -143,16 +143,19 @@
                         {{-- الدفع --}}
                         <div class="col-md-6 mb-3">
                             <label>المبلغ المدفوع *</label>
-                            <input type="number" name="amount_paid" class="form-control" required>
+                            <input type="number" name="amount_paid" class="form-control" value="{{ old('amount_paid') }}" required>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label>طريقة الدفع *</label>
                             <select name="payment_method" class="form-select" required>
-                                <option value="cash">نقدًا</option>
-                                <option value="mail">بريد</option>
+                                <option value="">اختر طريقة الدفع</option>
+                                @foreach($paymentSources as $source)
+                                    <option value="{{ $source->name }}">{{ $source->name }}</option>
+                                @endforeach
                             </select>
                         </div>
+
 
                         {{-- الحالة --}}
                         <div class="col-md-6 mb-3">
@@ -166,12 +169,12 @@
                         {{-- الصورة --}}
                         <div class="col-md-6 mb-3">
                             <label>صورة الطالب</label>
-                            <input type="file" name="image" class="form-control" accept="image/*">
+                            <input type="file" name="image" class="form-control" value="{{ old('image') }}" accept="image/*">
                         </div>
 
                         {{-- زر الحفظ --}}
                         <div class="col-12">
-                            <button type="submit" class="btn btn-primary">💾 حفظ الطالب</button>
+                            <button type="submit" class="btn "style="background-color: #196098; color: white;">💾 حفظ الطالب</button>
                         </div>
 
                     </div>

@@ -98,10 +98,10 @@ class CourseSessionController extends Controller
     {
         // Fetch only sessions that belong to the selected course
         $sessions = CourseSession::where('course_id', $courseId)->get();
-    
+
         return response()->json($sessions);
     }
-    
+
 
 
     public function destroy(CourseSession $courseSession)

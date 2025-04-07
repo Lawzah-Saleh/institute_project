@@ -33,16 +33,16 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label>الكورس</label>
+                    <label>الدورة</label>
                     <select name="course_id" id="course_id" class="form-control" disabled>
-                        <option value="">-- اختر الكورس --</option>
+                        <option value="">-- اختر الدورة --</option>
                     </select>
                 </div>
 
                 <div class="col-md-4">
-                    <label>الجلسة</label>
+                    <label>الدورة الحالية</label>
                     <select name="session_id" id="session_id" class="form-control" disabled>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة الحالية --</option>
                     </select>
                 </div>
 
@@ -61,7 +61,7 @@
                 </div>
 
                 <div class="col-md-12 mt-3">
-                    <button type="submit" class="btn btn-primary">بحث</button>
+                    <button type="submit" class="btn "style="background-color: #196098;color: white;">بحث</button>
                 </div>
             </div>
         </form>
@@ -71,8 +71,8 @@
             <thead>
                 <tr>
                     <th>الطالب</th>
-                    <th>الكورس</th>
-                    <th>الجلسة</th>
+                    <th>الدورة</th>
+                    <th>الدورة الحالية</th>
                     <th>درجة العملي</th>
                     <th>درجة النهائي</th>
                     <th>درجة الحضور</th>
@@ -92,8 +92,8 @@
                     <td>{{ $degree->attendance_degree }}</td>
                     <td>{{ $degree->total_degree }}</td>
                     <td>
-                        <span class="badge {{ $degree->status == 'pass' ? 'bg-success' : 'bg-danger' }}">
-                            {{ $degree->status == 'pass' ? 'ناجح' : 'راسب' }}
+                        <span class="badge {{ $degree->state == '0' ? 'bg-success' : 'bg-danger' }}">
+                            {{ $degree->state == '0' ? 'ناجح' : 'راسب' }}
                         </span>
                     </td>
                     <td>
@@ -147,8 +147,8 @@
         let courseSelect = document.getElementById('course_id');
         let sessionSelect = document.getElementById('session_id');
 
-        courseSelect.innerHTML = '<option value="">-- اختر الكورس --</option>';
-        sessionSelect.innerHTML = '<option value="">-- اختر الجلسة --</option>';
+        courseSelect.innerHTML = '<option value="">-- اختر الدورة --</option>';
+        sessionSelect.innerHTML = '<option value="">-- اختر الدورة الحالية --</option>';
         courseSelect.disabled = true;
         sessionSelect.disabled = true;
 

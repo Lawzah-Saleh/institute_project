@@ -10,10 +10,9 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title">تعديل الجلسة</h3>
+                    <h3 class="page-title">تعديل الدورة المتاحة</h3>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('course-sessions.index') }}">جلسات الكورسات</a></li>
-                        <li class="breadcrumb-item active">تعديل الجلسة</li>
+                        <li class="breadcrumb-item"><a href="{{ route('course-sessions.index') }}">الدورات المتاحة  </a></li>
                     </ul>
                 </div>
             </div>
@@ -29,7 +28,7 @@
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
-                                        <label for="course_id">الكورس الحالي:</label>
+                                        <label for="course_id">الدورة الحالي:</label>
                                         <select name="course_id" id="course_id" class="form-control" required>
                                             @foreach($courses as $course)
                                                 <option value="{{ $course->id }}" {{ $session->course_id == $course->id ? 'selected' : '' }}>
@@ -102,8 +101,8 @@
                                 </div>
 
                                 <div class="col-sm-12">
-                                    <button type="submit" class="btn btn-primary">تعديل الجلسة</button>
-                                    <a href="{{ route('course-sessions.index') }}" class="btn btn-secondary">إلغاء</a>
+                                    <button type="submit" class="btn "style="background-color: #196098;color: white;">تعديل الدورة المتاحة </button>
+                                    <a href="{{ route('course-sessions.index') }}" class="btn "style="background-color: #196098;color: white;">إلغاء</a>
                                 </div>
                             </div>
                         </form>

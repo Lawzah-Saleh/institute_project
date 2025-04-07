@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="page-wrapper">
+<div class="page-wrapper" style="background-color: #F9F9FB;">
     <div class="content container-fluid">
 
         <div class="page-header">
@@ -29,7 +29,7 @@
                                     <h3 class="page-title">قائمة الإجازات</h3>
                                 </div>
                                 <div class="col-auto text-end float-end ms-auto">
-                                    <a href="{{ route('holidays.create') }}" class="btn btn-primary"><i class="fas fa-plus"></i> إضافة إجازة</a>
+                                    <a href="{{ route('holidays.create') }}" class="btn "style="background-color: #196098;color: white"><i class="fas fa-plus"></i> إضافة إجازة</a>
                                 </div>
                             </div>
                         </div>

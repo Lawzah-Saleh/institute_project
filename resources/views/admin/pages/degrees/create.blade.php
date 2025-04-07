@@ -34,21 +34,21 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label>الكورس</label>
+                    <label>الدورة</label>
                     <select name="course_id" id="course_id" class="form-control" disabled>
-                        <option value="">-- اختر الكورس --</option>
+                        <option value="">-- اختر الدورة --</option>
                     </select>
                 </div>
 
                 <div class="col-md-4">
-                    <label>الجلسة</label>
+                    <label>الدورة الحالية</label>
                     <select name="session_id" id="session_id" class="form-control" disabled>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة الحالية --</option>
                     </select>
                 </div>
 
                 <div class="col-md-12 mt-3">
-                    <button type="submit" class="btn btn-primary">عرض الطلاب</button>
+                    <button type="submit" class="btn"style="background-color: #196098;color: white;">عرض الطلاب</button>
                 </div>
             </div>
         </form>
@@ -70,7 +70,7 @@
                     <tbody>
                         @foreach ($students as $student)
                         <tr>
-                            <td>{{ $student->name }}</td>
+                            <td>{{ $student->student_name_ar }}</td>
                             <td>
                                 <input type="number" name="practical_degree[{{ $student->id }}]" class="form-control"
                                     value="{{ $student->degrees->first()->practical_degree ?? 0 }}" required>
@@ -89,7 +89,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                <button type="submit" class="btn btn-success">حفظ الدرجات</button>
+                <button type="submit" class="btn "style="background-color: #e94c21;color: white;">حفظ الدرجات</button>
             </form>
         @endif
     </div>

@@ -32,7 +32,6 @@
                     <h3 class="page-title">تعديل الكورس</h3>
                     <ul class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('courses.index') }}">الكورسات</a></li>
-                        <li class="breadcrumb-item active">تعديل الكورس</li>
                     </ul>
                 </div>
             </div>

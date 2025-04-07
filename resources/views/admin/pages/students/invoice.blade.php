@@ -16,11 +16,11 @@
             <ul class="list-group mb-4">
                 <li class="list-group-item"><strong>رقم الفاتورة:</strong> {{ $invoice->invoice_number }}</li>
                 <li class="list-group-item"><strong>اسم الطالب:</strong> {{ $invoice->student->student_name_ar }}</li>
-                <li class="list-group-item"><strong>المبلغ الإجمالي:</strong> {{ number_format($invoice->amount, 2) }} ريال</li>
+                <li class="list-group-item"><strong>المبلغ الإجمالي:</strong> {{ number_format($payment->total_amount, 2) }} ريال</li>
                 <li class="list-group-item"><strong>تاريخ الاستحقاق:</strong> {{ $invoice->due_date }}</li>
                 <li class="list-group-item"><strong>حالة الفاتورة:</strong>
-                    <span class="badge {{ $invoice->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
-                        {{ $invoice->status == 'paid' ? 'مدفوعة' : 'غير مدفوعة' }}
+                    <span class="badge {{ $payment->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
+                        {{ $payment->status == 'paid' ? 'مدفوعة' : 'غير مدفوعة' }}
                     </span>
                 </li>
             </ul>
@@ -28,12 +28,11 @@
             @if ($payment)
                 <h5 class="mb-3">💵 تفاصيل الدفع</h5>
                 <ul class="list-group mb-4">
-                    <li class="list-group-item"><strong>المبلغ المدفوع:</strong> {{ number_format($payment->amount, 2) }} ريال</li>
-                    <li class="list-group-item"><strong>تاريخ الدفع:</strong> {{ $payment->payment_date }}</li>
-                    <li class="list-group-item"><strong>طريقة الدفع:</strong> {{ $payment->source->name ?? 'غير محدد' }}</li>
+                    <li class="list-group-item"><strong>المبلغ المدفوع:</strong> {{ number_format($invoice->amount, 2) }} ريال</li>
+                    <li class="list-group-item"><strong>طريقة الدفع:</strong> {{ $invoice->paymentSource->name ?? 'غير محدد' }}</li>
                     <li class="list-group-item"><strong>حالة الدفع:</strong>
-                        <span class="badge {{ $payment->status == 'completed' ? 'bg-success' : 'bg-warning text-dark' }}">
-                            {{ $payment->status == 'completed' ? 'مكتمل' : 'قيد المعالجة' }}
+                        <span class="badge {{ $invoice->status == '1' ? 'bg-success' : 'bg-warning text-dark' }}">
+                            {{ $invoice->status == '1' ? 'مكتمل' : 'قيد المعالجة' }}
                         </span>
                     </li>
                 </ul>

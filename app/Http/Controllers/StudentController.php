@@ -61,12 +61,12 @@ class StudentController extends Controller
             });
         }
 
-        // 🔍 فلترة الطلاب بناءً على الجلسة
-        if ($request->filled('course_session_id')) {
-            $query->whereHas('sessions', function ($q) use ($request) {
-                $q->where('course_sessions.id', $request->course_session_id);
-            });
-        }
+    // 🔍 فلترة الطلاب بناءً على الجلسة
+    if ($request->filled('course_session_id')) {
+        $query->whereHas('sessions', function ($q) use ($request) {
+            $q->where('course_sessions.id', $request->course_session_id);
+        });
+    }
 
         // تحميل العلاقات لضمان ظهور البيانات
         $students = $query->with(['courses', 'sessions.course'])->get();
@@ -87,8 +87,9 @@ class StudentController extends Controller
         $departments = Department::with(['courses' => function ($query) {
             $query->orderBy('id')->limit(1);
         }])->get();
+        $paymentSources = PaymentSource::where('status', 'active')->get();
 
-        return view('admin.pages.students.create', compact('departments',));
+        return view('admin.pages.students.create', compact('departments', 'paymentSources'));
     }
     public function store(Request $request)
     {
@@ -176,28 +177,28 @@ class StudentController extends Controller
             if (!$coursePrice) {
                 return back()->withErrors(['course_id' => '⚠️ لا يوجد سعر محدد لهذا الكورس.'])->withInput();
             }
-
-            // ✅ إنشاء الفاتورة
+            $payment = Payment::create([
+                'student_id' => $student->id,
+                'course_id' => $courseId,
+                'total_amount' => $coursePrice->price,
+                'status' => ($request->amount_paid >= $coursePrice->price) ? 'paid' : 'unpaid',
+            ]);
+                  // ✅ إنشاء الفاتورة في جدول invoices
             $invoice = Invoice::create([
-                'student_id' => $student->id,
-                'amount' => $coursePrice->price,
-                'status' => ($request->amount_paid >= $coursePrice->price) ? '1' : '0',
-                'invoice_number' => '25' . time(),
-                'invoice_details' => "رسوم الكورس: " . Course::find($courseId)?->course_name,
-                'due_date' => now(),
-                'paid_at' => ($request->amount_paid >= $coursePrice->price) ? now() : null,
-                'payment_sources_id' => PaymentSource::where('name', $request->payment_method)->value('id'),
-            ]);
-
-            // ✅ إنشاء الدفع
-            Payment::create([
-                'student_id' => $student->id,
-                'invoice_id' => $invoice->id,
-                'amount' => $request->amount_paid,
-                'payment_date' => now(),
-                'status' => 'completed',
-                'payment_sources_id' => $invoice->payment_sources_id,
-            ]);
+            'student_id' => $student->id,
+            'payment_id' => $payment->id, // ربط الفاتورة بالدفع
+            'amount' => $request->amount_paid,
+            'status' => '1',
+            'invoice_number' => '25' . time(),
+            'invoice_details' => "رسوم الكورس: " . Course::find($courseId)->course_name,
+            'due_date' => now()->addDays(30),
+            'paid_at' =>  now(),
+            'payment_sources_id' => PaymentSource::where('name', $request->payment_method)->value('id'),
+        ]);
+        // ✅ إضافة الدفع للفاتورة
+        $payment->update([
+            'status' => ($request->amount_paid >= $coursePrice->price) ? 'paid' : 'partial',
+        ]);
 
             DB::commit();
             return redirect()->route('students.invoice', $student->id)->with('success', 'تم تسجيل الطالب بنجاح!');
@@ -208,16 +209,23 @@ class StudentController extends Controller
     }
     public function showInvoice($studentId)
     {
+        // جلب الطالب من قاعدة البيانات
         $student = Student::findOrFail($studentId);
-        $invoice = $student->invoices()->latest()->first();
-        $payment = $invoice ? $invoice->payments()->latest()->first() : null;
 
+        // جلب الفاتورة الأخيرة المرتبطة بالطالب
+        $invoice = $student->invoices()->latest()->first();
+
+        // التحقق إذا كانت الفاتورة موجودة، ثم جلب الدفع المرتبط بها عبر payment_id
+        $payment = $invoice ? Payment::find($invoice->payment_id) : null;
+
+        // تمرير البيانات إلى الـ View
         return view('admin.pages.students.invoice', compact('student', 'invoice', 'payment'));
     }
 
+
     public function printInvoice($studentId)
     {
-        // جلب الطالب
+        // جلب الطالب من قاعدة البيانات
         $student = Student::findOrFail($studentId);
 
         // جلب أحدث فاتورة للطالب
@@ -228,73 +236,140 @@ class StudentController extends Controller
             return redirect()->back()->with('error', '⚠️ لا توجد فاتورة لطباعتها.');
         }
 
-        // جلب آخر عملية دفع مرتبطة بهذه الفاتورة (إن وجدت)
-        $payment = $invoice->payments()->latest()->first();
+        // جلب الدفع المرتبط بالفاتورة باستخدام payment_id
+        $payment = $invoice->payment;  // نستخدم payment بدلاً من payments()
 
         // عرض صفحة الطباعة
         return view('admin.pages.students.print_invoice', compact('student', 'invoice', 'payment'));
     }
 
 
-    public function edit($id)
-    {
-        $student = Student::with('courses', 'sessions')->findOrFail($id);
-        $departments = Department::all();
-        $courses = Course::where('department_id', $student->department_id)->get();
-        $sessions = CourseSession::where('course_id', $student->course_id)->get();
 
-        return view('admin.pages.students.edit', compact('student', 'departments', 'courses', 'sessions'));
+
+    public function edit($id, Request $request)
+    {
+        // جلب بيانات الطالب من قاعدة البيانات
+        $student = Student::with(['courses', 'sessions', 'payments', 'invoices'])->findOrFail($id);
+
+        // تحديد القسم الذي سيتم تعديله (بيانات شخصية، أكاديمية، أو مالية)
+        $section = $request->get('section', 'all'); // القيمة الافتراضية لتعديل الكل
+
+        // جلب البيانات المرتبطة
+        $departments = Department::all();
+        $courses = Course::all();
+        $sessions = CourseSession::all();
+        $paymentSources = PaymentSource::all();
+
+        return view('admin.pages.students.edit', compact(
+            'student',
+            'departments',
+            'courses',
+            'sessions',
+            'paymentSources',
+            'section'
+        ));
     }
+
+
 
 
     public function update(Request $request, $id)
     {
-        // 🔹 التحقق من صحة البيانات
+        // تأكد من أن البيانات المرسلة صالحة
         $validated = $request->validate([
             'student_name_ar' => 'required|max:300',
             'student_name_en' => 'required|max:300',
-            'phones' => 'nullable|array',
-            'phones.*' => 'string|max:20',            'gender' => 'required|in:male,female',
-            'qualification' => 'nullable|max:150',
+            'phones' => 'required|array',
+            'phones.*' => 'string|max:20',
+            'gender' => 'required|in:male,female',
+            'qualification' => 'required|max:255',
             'birth_date' => 'required|date',
             'birth_place' => 'required|max:150',
             'address' => 'required|max:300',
-            'email' => 'nullable|email|unique:students,email,'.$id,
-            'department_id' => 'required|exists:departments,id',
-            'course_id' => 'nullable|exists:courses,id',
+            'email' => 'nullable|email|unique:students,email,' . $id,
+            'state' => 'required|boolean',
+            'image' => 'nullable|image|max:2048',
+            'course_id' => 'required|exists:courses,id',
+            'study_time' => 'nullable|in:8-10,10-12,12-2,2-4,4-6',
             'course_session_id' => 'nullable|exists:course_sessions,id',
-            'state' => 'required|in:active,inactive,suspended,expelled,graduated',
+            'amount_paid' => 'required|numeric|min:0',
+            'payment_method' => 'required|exists:payment_sources,name',
         ]);
 
-        // 🔹 جلب الطالب وتحديث البيانات
-        $student = Student::findOrFail($id);
-        $student->update($validated);
+        // بدء عملية المعاملة
+        DB::beginTransaction();
 
-        // 🔹 تحديث الكورسات والجلسات
-        if ($request->filled('course_session_id')) {
-            // حذف أي تسجيل قديم للطالب في الجلسات
-            CourseSessionStudent::where('student_id', $student->id)->delete();
+        try {
+            // جلب الطالب
+            $student = Student::findOrFail($id);
 
-            // تسجيل الطالب في الجلسة الجديدة
-            CourseSessionStudent::create([
-                'student_id' => $student->id,
-                'course_session_id' => $request->course_session_id,
-                'status' => 'active',
-            ]);
-        } elseif ($request->filled('course_id')) {
-            // حذف أي تسجيل قديم للطالب في الكورسات
-            CourseStudent::where('student_id', $student->id)->delete();
+            // تحديث بيانات المستخدم
+            $user = $student->user;
+            $user->name = $validated['student_name_ar'];
+            $user->email = $validated['email'] ?? $user->email;
+            $user->save();
 
-            // تسجيل الطالب في الكورس الجديد
-            CourseStudent::create([
-                'student_id' => $student->id,
-                'course_id' => $request->course_id,
-                'register_at' => now(),
-                'study_time' => '08-10', // الوقت الافتراضي
-            ]);
+            // تحديث بيانات الطالب
+            $student->update($validated);
+
+            // إذا كانت هناك صورة جديدة
+            if ($request->hasFile('image')) {
+                $student->image = $request->file('image')->store('students', 'public');
+                $student->save();
+            }
+
+            // التعامل مع القسم والكورس والجلسة
+            if ($request->section == 'academic' || $request->section == 'all') {
+                // تحديث الكورس والجلسة
+                $student->courses()->sync([$validated['course_id']]);
+                if ($request->filled('course_session_id')) {
+                    $student->sessions()->sync([$validated['course_session_id']]);
+                }
+            }
+
+            // التعامل مع البيانات المالية
+            if ($request->section == 'financial' || $request->section == 'all') {
+                // تحديث الدفع والفاتورة
+                $coursePrice = CoursePrice::where('course_id', $validated['course_id'])->latest()->first();
+
+                if (!$coursePrice) {
+                    return back()->withErrors(['course_id' => '⚠️ لا يوجد سعر محدد لهذا الكورس.'])->withInput();
+                }
+
+                // تحديث الدفع
+                $payment = Payment::updateOrCreate(
+                    ['student_id' => $student->id, 'course_id' => $validated['course_id']],
+                    ['total_amount' => $coursePrice->price, 'status' => ($validated['amount_paid'] >= $coursePrice->price) ? 'paid' : 'unpaid']
+                );
+
+                // إنشاء أو تحديث الفاتورة
+                $invoice = Invoice::updateOrCreate(
+                    ['student_id' => $student->id, 'payment_id' => $payment->id],
+                    [
+                        'amount' => $validated['amount_paid'],
+                        'status' => '1',
+                        'invoice_number' => '25' . time(),
+                        'invoice_details' => "رسوم الكورس: " . Course::find($validated['course_id'])->course_name,
+                        'due_date' => now()->addDays(30),
+                        'paid_at' => ($validated['amount_paid'] >= $coursePrice->price) ? now() : null,
+                        'payment_sources_id' => PaymentSource::where('name', $validated['payment_method'])->value('id'),
+                    ]
+                );
+
+                // تحديث حالة الدفع
+                $payment->update([
+                    'status' => ($validated['amount_paid'] >= $coursePrice->price) ? 'paid' : 'partial',
+                ]);
+            }
+
+            DB::commit();
+
+            // إعادة التوجيه مع رسالة النجاح
+            return redirect()->route('students.invoice', $student->id)->with('success', 'تم تحديث بيانات الطالب بنجاح!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => '❌ حدث خطأ أثناء التحديث: ' . $e->getMessage()])->withInput();
         }
-
-        return redirect()->route('students.index')->with('success', 'تم تعديل بيانات الطالب بنجاح.');
     }
 
 
@@ -308,14 +383,15 @@ class StudentController extends Controller
         public function register(Request $request)
         {
             try {
-                $request->merge(['payment_method' => 'mail']);
+                $request->merge(['payment_method' => 'البريد']);
 
                 // ✅ تحقق من صحة البيانات
                 $validated = $request->validate([
                     'student_name_ar' => 'required|string|max:255',
                     'student_name_en' => 'required|string|max:255',
                     'email' => 'required|email|unique:users,email|unique:students,email',
-                    'phone' => 'required|string',
+                    'phone' => 'required|array',
+                    'phone.*' => 'string|max:20',
                     'address' => 'required|string',
                     'gender' => 'required|in:Male,Female',
                     'qualification' => 'required|string',
@@ -327,11 +403,15 @@ class StudentController extends Controller
                     'course_session_id' => 'nullable|exists:course_sessions,id',
                     'time' => 'nullable|in:8-10,10-12,2-4,4-6',
                     'amount_paid' => 'required|numeric|min:0',
-                    'payment_method' => 'required|in:cash,mail'
+                    'payment_method' => 'required|in:المعهد,البريد'
                 ]);
 
                 DB::beginTransaction();
 
+
+
+                // Store phone numbers as JSON
+                $validated['phones'] = json_encode($validated['phone']);
                 // ✅ رفع الصورة
                 $imagePath = $request->hasFile('image') ? $request->file('image')->store('students/images', 'public') : null;
 
@@ -349,7 +429,7 @@ class StudentController extends Controller
                     'student_name_ar' => $validated['student_name_ar'],
                     'student_name_en' => $validated['student_name_en'],
                     'email' => $validated['email'],
-                    'phone' => $validated['phone'],
+                    'phones' => $validated['phones'],
                     'address' => $validated['address'],
                     'gender' => $validated['gender'],
                     'qualification' => $validated['qualification'],
@@ -401,26 +481,38 @@ class StudentController extends Controller
                 }
 
                 // ✅ إنشاء الفاتورة
+                $payment = Payment::create([
+                    'student_id' => $student->id,
+                    'course_id' => $courseId,
+                    'total_amount' => $coursePrice->price,
+                    'status' => 'unpaid',
+                    ]);
+                      // ✅ إنشاء الفاتورة في جدول invoices
                 $invoice = Invoice::create([
-                    'student_id' => $student->id,
-                    'amount' => $coursePrice->price,
-                    'status' => '0',
-                    'invoice_number' => '25' . time(),
-                    'invoice_details' => "رسوم الكورس: " . Course::find($courseId)->course_name,
-                    'due_date' => now()->addDays(60),
-                    'paid_at' => ($validated['amount_paid'] >= $coursePrice->price) ? now() : null,
-                    'payment_sources_id' => PaymentSource::where('name', $validated['payment_method'])->value('id'),
-                ]);
+                'student_id' => $student->id,
+                'payment_id' => $payment->id, // ربط الفاتورة بالدفع
+                'amount' => $request->amount_paid,
+                'status' => '0',
+                'invoice_number' => '25' . time(),
+                'invoice_details' => "رسوم الكورس: " . Course::find($courseId)->course_name,
+                'due_date' => now()->addDays(30),
+                'paid_at' => null,
+                'payment_sources_id' => PaymentSource::where('name', $request->payment_method)->value('id'),
+            ]);
+        // التحقق من حالة الفاتورة في جدول الحوافظ (Invoices)
+        $existingInvoice = Invoice::where('student_id', $student->id)
+            ->where('status', 1) // تحقق من أن الفاتورة قد تم تسديدها بالكامل
+            ->first();
 
-                // ✅ تسجيل الدفع
-                Payment::create([
-                    'student_id' => $student->id,
-                    'invoice_id' => $invoice->id,
-                    'amount' => $validated['amount_paid'],
-                    'payment_date' => now(),
-                    'status' => 'pending',
-                    'payment_sources_id' => $invoice->payment_sources_id,
+            if ($existingInvoice) {
+                // إذا كانت الفاتورة قد تم تسديدها بالكامل، نقوم بتحديث حالة الدفع
+                $invoice->update([
+                    'status' => '1',  // "مدفوع"
                 ]);
+                $payment->update([
+                    'status' => 'paid', // تحديث حالة الدفع إلى "مدفوع"
+                ]);
+            }
 
                 DB::commit();
 
@@ -434,8 +526,17 @@ class StudentController extends Controller
         }
         public function showInvoiceConfirmation($invoiceId)
         {
+            // جلب الفاتورة مع الطالب
             $invoice = Invoice::with('student')->findOrFail($invoiceId);
-            $payment = Payment::where('invoice_id', $invoice->id)->first(); // أو مجموع الدفع إن وجد أكثر من دفعة
+
+            // جلب الدفع المرتبط بالفاتورة باستخدام payment_id
+            $payment = Payment::where('id', $invoice->payment_id)->first(); // الآن نستخدم payment_id في invoices
+
+            // التحقق إذا كانت الفاتورة مدفوعة بالكامل
+            if ($invoice->status == 1) { // 1 يعني "مدفوع"
+                $payment->status = 'paid'; // تحديث حالة الدفع إلى "مدفوع"
+                $payment->save(); // حفظ التغيير
+            }
 
             return view('admin.pages.students.invoicestudent', compact('invoice', 'payment'));
         }

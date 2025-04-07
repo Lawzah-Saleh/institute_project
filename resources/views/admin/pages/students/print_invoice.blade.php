@@ -63,37 +63,15 @@
     <h2>سند دفع رسمي</h2>
 
     <div class="info">
-        <p><label>اسم الطالب:</label> {{ $student->student_name_ar }}</p>
         <p><label>رقم الفاتورة:</label> {{ $invoice->invoice_number }}</p>
+        <p><label>اسم الطالب:</label> {{ $student->student_name_ar }}</p>
         <p><label>تاريخ الفاتورة:</label> {{ $invoice->created_at->format('Y-m-d H:i') }}</p>
-        <p><label>المبلغ الإجمالي:</label> {{ number_format($invoice->amount, 2) }} ريال</p>
+        <p><label>المبلغ المدفوع:</label> {{ number_format($invoice->amount, 2) }} ريال</p>
         <p><label>تفاصيل:</label> {{ $invoice->invoice_details }}</p>
+        <p><label>طريقة الدفع:</label> {{ $invoice->paymentSource->name ?? 'غير محدد' }}</p>
     </div>
 
-    @if ($payment)
-        <table class="payment">
-            <tr>
-                <td><strong>تاريخ الدفع:</strong></td>
-                <td>{{ $payment->payment_date->format('Y-m-d H:i') }}</td>
-            </tr>
-            <tr>
-                <td><strong>المبلغ المدفوع:</strong></td>
-                <td>{{ number_format($payment->amount, 2) }} ريال</td>
-            </tr>
-            <tr>
-                <td><strong>طريقة الدفع:</strong></td>
-                <td>{{ $payment->source->name ?? 'غير محددة' }}</td>
-            </tr>
-            <tr>
-                <td><strong>حالة الدفع:</strong></td>
-                <td>
-                    {{ $payment->status == 'completed' ? 'مدفوع' : 'غير مكتمل' }}
-                </td>
-            </tr>
-        </table>
-    @else
-        <p>⚠️ لا توجد بيانات دفع مسجلة حتى الآن.</p>
-    @endif
+
 
     <div class="print-btn">
         <button onclick="window.print()">🖨️ طباعة السند</button>

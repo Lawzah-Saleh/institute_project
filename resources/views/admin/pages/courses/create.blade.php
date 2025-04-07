@@ -70,6 +70,13 @@
                                         <input type="number" name="duration" class="form-control" placeholder="ادخل مدة الدورة" value="{{ old('duration') }}">
                                     </div>
                                 </div>
+                                <!-- السعر -->
+                                <div class="col-12 col-sm-4">
+                                    <div class="form-group local-forms">
+                                        <label>السعر <span class="login-danger">*</span></label>
+                                        <input type="number" name="price" class="form-control" placeholder="ادخل سعر الدورة" value="{{ old('price') }}" required>
+                                    </div>
+                                </div>
 
 
                                 <!-- اختيار القسم -->

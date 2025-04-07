@@ -132,6 +132,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // routes/web.php
     Route::get('/students/{student}/invoice', [StudentController::class, 'showInvoice'])->name('students.invoice');
     Route::get('/students/{student}/invoice/print', [StudentController::class, 'printInvoice'])->name('students.invoice.print');
+    Route::get('students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
+    Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
 
 
 });

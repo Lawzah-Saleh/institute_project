@@ -64,14 +64,14 @@
 
                     <div class="mb-3">
                         <strong class="text-secondary">📞 رقم الهاتف:</strong>
-                        {{ $invoice->student->phones }}
+                        {{ implode(', ', json_decode($invoice->student->phones) ?? []) }}
                     </div>
 
                     <hr class="my-4">
 
                     <div class="mb-3">
                         <strong class="text-secondary">💰 المبلغ الكلي للدفع:</strong>
-                        {{ number_format($invoice->amount, 2) }} ريال
+                        {{ number_format($payment->total_amount, 2) }} ريال
                     </div>
 
                     <div class="mb-3">
@@ -83,20 +83,38 @@
                         <strong class="text-secondary">🔖 رقم الحافظة:</strong>
                         <span dir="ltr" class="fw-bold text-dark">{{ $invoice->invoice_number }}</span>
                     </div>
+
                     <div class="mb-3">
                         <strong class="text-secondary">💵 المبلغ الذي سوف يتم تسديده:</strong>
-                        {{ number_format($payment->amount, 2) }} ريال
+                        {{ number_format($invoice->amount, 2) }} ريال
                     </div>
 
                     <div class="mb-3">
                         <strong class="text-secondary">💸 المتبقي على الطالب:</strong>
                         <span class="text-danger fw-bold">
-                            {{ number_format($invoice->amount - $payment->amount, 2) }} ريال
+                            {{ number_format($payment->total_amount - $invoice->amount, 2) }} ريال
                         </span>
                     </div>
+
                     <div class="mb-3">
                         <strong class="text-secondary">📌 حالة الفاتورة:</strong>
-                        <span class="badge badge-warning">{{ $invoice->status == 'unpaid' ? 'غير مدفوع' : 'مدفوع' }}</span>
+                        <span class="badge badge-warning">
+                            {{ $invoice->status == 0 ? 'غير مدفوع' : 'مدفوع' }}
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong class="text-secondary">📅 تاريخ الدفع:</strong>
+                        @if($invoice->paid_at)
+                            {{ \Carbon\Carbon::parse($invoice->paid_at)->format('Y-m-d H:i:s') }}
+                        @else
+                            <span class="text-danger">لم يتم الدفع بعد</span>
+                        @endif
+                    </div>
+
+                    <div class="mb-3">
+                        <strong class="text-secondary">💳 طريقة الدفع:</strong>
+                        {{ $invoice->payment_sources->name ?? 'عبر البريد' }}
                     </div>
                 </div>
 

@@ -18,7 +18,7 @@ class Degree extends Model
         'final_degree',
         'attendance_degree',
         'total_degree',
-        'status',
+        'state',
     ];
 
     protected $casts = [

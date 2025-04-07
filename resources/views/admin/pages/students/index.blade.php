@@ -34,7 +34,7 @@
                 <div class="col-md-4">
                     <label>الكورس</label>
                     <select name="course_id" id="course_id" class="form-control" {{ request('department_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الكورس --</option>
+                        <option value="">-- اختر الدورة --</option>
                         @foreach($courses as $course)
                             <option value="" {{ request('course_id') == $course->id ? 'selected' : '' }}>
                                 {{ $course->course_name }}
@@ -44,13 +44,12 @@
 
                 </div>
 
-                <!-- اختيار الجلسات بناءً على الكورس -->
                 <div class="col-md-4">
                     <label>الجلسة</label>
                     <select name="course_session_id" id="session_id" class="form-control" {{ request('course_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة المتاحة --</option>
                         @foreach($sessions as $session)
-                            <option value="" {{ request('course_session_id') == $session->id ? 'selected' : '' }}>
+                            <option value="{{ $session->id }}" {{ request('course_session_id') == $session->id ? 'selected' : '' }}>
                                 {{ $session->start_date }} - {{ $session->end_date }}
                             </option>
                         @endforeach
@@ -61,7 +60,7 @@
                     <input type="text" name="search" class="form-control" placeholder="ابحث عن الطالب بالاسم أو الرقم" value="">
                 </div>
                 <div class="col-md-12 mt-3">
-                    <button type="submit" class="btn btn-primary">بحث</button>
+                    <button type="submit" class="btn " style="background-color: #196098;color: white">بحث</button>
                 </div>
             </div>
         </form>
@@ -77,7 +76,7 @@
                                     <h3 class="page-title">قائمة الطلاب</h3>
                                 </div>
                                 <div class="col-auto text-end float-end ms-auto download-grp">
-                                    <a href="{{ url('students/create') }}" class="btn btn-primary">
+                                    <a href="{{ url('students/create') }}" class="btn "style="background-color: #196098;color: white">
                                         <i class="fas fa-plus"></i> إضافة طالب
                                     </a>
                                 </div>
@@ -94,8 +93,8 @@
                                     <th>المؤهل</th>
                                     <th>العنوان</th>
                                     <th>الحالة</th>
-                                    <th>الكورس</th>
-                                    <th>الجلسة</th>
+                                    <th>الدورة</th>
+                                    <th>الدورة الحالية</th>
                                     <th class="text-end">الإجراءات</th>
                                 </tr>
                             </thead>
@@ -128,20 +127,20 @@
                                     </td>
                                     <td>
                                         @if ($student->sessions->isNotEmpty())
-                                            <span class="badge bg-primary">
+                                            <span class="badge "style="background-color: #e94c21;color: white">
                                                 {{ $student->sessions->first()->start_date }} - {{ $student->sessions->first()->end_date }}
                                             </span>
                                         @else
-                                            <span">لا توجد جلسات</span>
+                                            <span"> لم يتم تحديد دورة متاحة </span>
                                         @endif
                                     </td>
 
                                     <td>
-                                        <a href="{{ route('students.show', $student->id) }}" class="btn btn-sm btn-success">
+                                        <a href="{{ route('students.show', $student->id) }}" class="btn btn-sm "style="background-color: #196098;color: white">
                                             <i class="feather-eye"></i> عرض
                                         </a>
 
-                                        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-sm btn-success">
+                                        <a href="{{ route('students.edit', $student->id) }}" class="btn btn-sm "style="background-color: #196098;color: white;">
                                             <i class="feather-edit"></i> تعديل
                                         </a>
                                     </td>

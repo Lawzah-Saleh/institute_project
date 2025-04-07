@@ -32,8 +32,8 @@
                     </div>
 
                     <div class="form-group text-end">
-                        <button type="submit" class="btn btn-success">تحديث</button>
-                        <a href="{{ route('payment_sources.index') }}" class="btn btn-secondary">إلغاء</a>
+                        <button type="submit" class="btn "style="background-color: #196098;color: white;">تحديث</button>
+                        <a href="{{ route('payment_sources.index') }}" class="btn "style="background-color: #e94c21;color: white;">إلغاء</a>
                     </div>
                 </form>
             </div>
