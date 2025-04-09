@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Student;
 use App\Models\Payment;
+use App\Models\PaymentSource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -65,38 +66,34 @@ class InvoiceController extends Controller
         return view('admin.pages.invoices.show', compact('invoice'));
     }
 
-    /**
-     * نموذج التعديل.
-     */
     public function edit($id)
     {
-        $invoice = Invoice::findOrFail($id);
-        $students = Student::all();
-        return view('admin.pages.invoices.edit', compact('invoice', 'students'));
+        $invoice = Invoice::with(['student', 'payment', 'paymentSource'])->findOrFail($id);
+        $sources = PaymentSource::where('status', 'active')->get();
+
+        return view('admin.pages.invoices.edit', compact('invoice', 'sources'));
     }
 
-    /**
-     * حفظ التعديلات.
-     */
     public function update(Request $request, $id)
     {
         $invoice = Invoice::findOrFail($id);
 
         $request->validate([
-            'amount'          => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:0',
             'invoice_details' => 'required|string',
-            'due_date'        => 'nullable|date',
-            'status'          => 'in:0,1',
+            'due_date' => 'required|date',
+            'payment_sources_id' => 'nullable|exists:payment_sources,id',
         ]);
 
         $invoice->update([
-            'amount'          => $request->amount,
+            'amount' => $request->amount,
             'invoice_details' => $request->invoice_details,
-            'due_date'        => $request->due_date,
-            'status'          => $request->status,
+            'due_date' => $request->due_date,
+            'payment_sources_id' => $request->payment_sources_id,
         ]);
 
-        return redirect()->route('invoices.index')->with('success', 'تم تعديل الحافظة بنجاح');
+        return redirect()->route('admin.student.payment.details', $invoice->student_id)
+                         ->with('success', 'تم تعديل الفاتورة بنجاح ✅');
     }
 
     /**

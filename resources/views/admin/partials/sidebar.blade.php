@@ -74,8 +74,7 @@
                     <ul>
                         <li><a href="{{ route('degrees.index') }}"> قائمة الدرجات </a></li>
                         <li><a href="{{ route('degrees.create') }}"> أضافة الدرجات </a></li>
-                        {{-- <li><a href="{{ route('attendance.report') }}"> تقرير الحضور </a></li>
-                        <li><a href="{{ route('attendance.monthly_report') }}"> شهري تقرير الحضور </a></li> --}}
+
                     </ul>
                 </li>
 
@@ -98,25 +97,27 @@
                         <li><a href="{{ route('admin.payments.create') }}">إضافة رسوم</a></li>
                     </ul>
                 </li>
-                <li class="submenu">
-                    <a href="#"><i class="fas fa-comment-dollar"></i> <span>أدارة  الحوافظ</span><span
-                         class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="{{ route('admin.payments.index') }}"> قائمة الرسوم </a></li>
-                        <li><a href="{{ route('admin.payments.create') }}">إضافة رسوم</a></li>
-                        <li><a href="edit-invoice.html">Edit Invoices</a></li>
-                        <li><a href="view-invoice.html">Invoices Details</a></li>
-                        <li><a href="invoices-settings.html">Invoices Settings</a></li>
-                    </ul>
-                </li>
 
                 <li class="submenu">
                     <a href="#"><i class="fa fa-newspaper"></i> <span> التقارير</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <ul>
-                        <li><a href="{{ route('advertisements.index') }}">كل الإعلانات</a></li>
-                        <li><a href="{{ route('advertisements.create') }}">إضافة إعلان</a></li>
+                        <li><a href="{{ route('admin.reports.filtered_paid_students') }}">تقرير الطلاب المدفوعة</a></li>
+                        <li><a href="{{ route('admin.reports.financial_status_search') }}">بيان حالة مالية للطالب </a></li>
+                        <li><a href="{{ route('admin.reports.payment_summary') }}">كشف بالمبالغ المسددة  </a></li>
+                        <li><a href="{{ route('admin.reports.payment_budget_report') }}">ميزانية الدفع  </a></li>
+                        <li><a href="{{ route('admin.reports.payment_statement_report') }}">المبالغ المسددة بين تاريخيين    </a></li>
+                        <li><a href="{{ route('admin.reports.students_in_course_report') }}">  كشف بيانات الطلاب بالدورات      </a></li>
+                        <li><a href="{{ route('admin.reports.students_grades_report') }}">  كشف درجات الطلاب بالدورات      </a></li>
+                        <li><a href="{{ route('admin.reports.student_grade_search') }}">  بيان درجة طالب       </a></li>
+                        <li><a href="{{ route('admin.reports.courses_report') }}">  كشف بالدورات المتاحة   </a></li>
+                        <li><a href="{{ route('admin.reports.teachers_in_courses') }}">  كشف بالمدرسين  للدورات   </a></li>
+                        <li><a href="{{ route('admin.reports.courses_on_date') }}">     تقرير بالدورات المقامة في تاريخ   </a></li>
+
+
+
+
                     </ul>
                 </li>
 

@@ -62,7 +62,10 @@ class CourseSession extends Model
     }
 
 
-
+    public function degrees()
+    {
+        return $this->hasMany(Degree::class);
+    }
 
 
 }

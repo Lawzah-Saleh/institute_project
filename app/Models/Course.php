@@ -31,10 +31,11 @@ class Course extends Model
 {
     return $this->hasMany(CourseSession::class);
 }
-public function invoices()
-{
 
-    return $this->hasMany(Invoice::class, 'course_id');
+public function payments()
+{
+    return $this->hasMany(\App\Models\Payment::class);
 }
+
 
 }

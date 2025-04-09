@@ -268,16 +268,21 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // عرض نموذج إضافة الدفع
     Route::get('/payments/create', [PaymentController::class, 'create'])->name('admin.payments.create');
-    
+
     // حفظ عملية الدفع
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
-    
+
     Route::get('/payments/invoice/{id}', [PaymentController::class, 'showInvoice'])->name('payments.invoice.show');
 // راوت تحميل الفاتورة بصيغة PDF
 Route::get('/payments/invoice/{id}/download', [PaymentController::class, 'downloadInvoice'])->name('admin.payments.downloadInvoice');
+Route::get('admin/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
+Route::put('admin/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+
+Route::get('admin/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+Route::put('admin/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
 
 
- 
+
     // مسار البحث عن الطالب
     Route::get('/admin/payments/search', [PaymentController::class, 'search'])->name('admin.payments.search');
     Route::get('/admin/payments/details/{studentId}', [PaymentController::class, 'getStudentDetails']);
@@ -291,7 +296,86 @@ Route::get('/payments/invoice/{id}/download', [PaymentController::class, 'downlo
     Route::patch('/payments/{invoice}/mark-paid', [PaymentController::class, 'markInvoicePaid'])->name('admin.payments.markPaid');
 });
 
-// // routes/api.php
-// use App\Http\Controllers\Api\StudentSearchController;
+use App\Http\Controllers\ReportController;
 
-// Route::get('/students/search', [StudentSearchController::class, 'search']);
+Route::middleware(['auth', 'role:admin'])->group(function () {
+// تقرير الطلاب المدفوعة بناءً على الفلاتر
+    Route::get('admin/reports/filtered-paid-students', [ReportController::class, 'filteredPaidStudentsReport'])->name('admin.reports.filtered_paid_students');
+
+    // بيانات الأقسام
+    Route::get('admin/get-departments', [ReportController::class, 'getDepartments'])->name('admin.get_departments');
+
+    // بيانات الكورسات بناءً على القسم
+    Route::get('admin/get-courses/{departmentId}', [ReportController::class, 'getCourses'])->name('admin.get_courses');
+
+    // بيانات الجلسات بناءً على الكورس
+    Route::get('admin/get-sessions/{courseId}', [ReportController::class, 'getSessions'])->name('admin.get_sessions');
+    Route::get('admin/reports/export_excel', [ReportController::class, 'exportToExcel'])->name('admin.reports.export_excel');
+    Route::get('admin/reports/export_pdf', [ReportController::class, 'exportPdf'])->name('admin.reports.export_pdf');
+
+ // بحث عن حالة الطالب المالية
+Route::get('admin/reports/financial-status-search', [ReportController::class, 'financialStatusSearch'])->name('admin.reports.financial_status_search');
+// عرض بيانات الطالب المالية
+Route::get('admin/reports/view-student-financial-status/{studentId}', [ReportController::class, 'viewStudentFinancialStatus'])->name('admin.reports.view_student_financial_status');
+Route::get('admin/reports/export_excel_financial', [ReportController::class, 'exportExcelFinancial'])->name('admin.reports.export_excel_financial');
+Route::get('admin/reports/export_pdf_financial', [ReportController::class, 'exportPdfFinancial'])->name('admin.reports.export_pdf_financial');
+
+//
+Route::get('admin/reports/payment-summary', [ReportController::class, 'paymentSummaryReport'])->name('admin.reports.payment_summary');
+Route::get('admin/reports/export-excel-payment-summary', [ReportController::class, 'exportExcelPaymentSummary'])->name('admin.reports.export_excel_payment_summary');
+Route::get('admin/reports/export-pdf-payment-summary', [ReportController::class, 'exportPdfPaymentSummary'])->name('admin.reports.export_pdf_payment_summary');
+
+///
+Route::prefix('admin/reports')->group(function () {
+    // Route for Payment Budget Report
+    Route::get('/payment-budget-report', [ReportController::class, 'paymentBudgetReport'])->name('admin.reports.payment_budget_report');
+    
+    // Export to Excel
+    Route::get('/export-excel-payment-budget', [ReportController::class, 'exportExcelPaymentBudget'])->name('admin.reports.export_excel_payment_budget');
+    
+    // Export to PDF
+    Route::get('/export-pdf-payment-budget', [ReportController::class, 'exportPdfPaymentBudget'])->name('admin.reports.export_pdf_payment_budget');
+    //
+
+    Route::get('/payment-statement-report', [ReportController::class, 'paymentStatementReport'])->name('admin.reports.payment_statement_report');
+    
+    // Export to Excel
+    Route::get('/export-excel-payment-statement', [ReportController::class, 'exportExcelPaymentStatement'])->name('admin.reports.export_excel_payment_statement');
+    
+    // Export to PDF
+    Route::get('/export-pdf-payment-statement', [ReportController::class, 'exportPdfPaymentStatement'])->name('admin.reports.export_pdf_payment_statement');
+    Route::get('/students-in-course-report', [ReportController::class, 'studentsInCourseReport'])->name('admin.reports.students_in_course_report');
+    
+    // Export to Excel
+    Route::get('/export-excel-students-in-course', [ReportController::class, 'exportExcelStudentsInCourse'])->name('admin.reports.export_excel_students_in_course');
+    
+    // Export to PDF
+    Route::get('/export-pdf-students-in-course', [ReportController::class, 'exportPdfStudentsInCourse'])->name('admin.reports.export_pdf_students_in_course');
+
+    //
+    Route::get('/students-grades-report', [ReportController::class, 'studentsGradesReport'])->name('admin.reports.students_grades_report');
+
+    // ✅ Export to Excel
+    Route::get('/admin/reports/students-grades-report/export-excel', [ReportController::class, 'exportExcelStudentsGrades'])->name('admin.reports.export_excel_students_grades');
+
+    // ✅ Export to PDF
+    Route::get('/students-grades-report/export-pdf', [ReportController::class, 'exportPdfStudentsGrades'])->name('export_pdf_students_grades');
+    Route::get('/admin/reports/student-grades/{studentId}', [ReportController::class, 'viewStudentGrades'])
+    ->name('admin.reports.view_student_grades');
+
+});
+
+Route::get('/admin/reports/student-grade', [ReportController::class, 'studentGradeSearch'])->name('admin.reports.student_grade_search');
+Route::get('/admin/reports/student-grade/{studentId}', [ReportController::class, 'studentGradeDetails'])->name('admin.reports.student_grade_details');
+Route::get('/admin/reports/courses_report', [ReportController::class, 'coursesReport'])->name('admin.reports.courses_report');
+Route::get('/admin/reports/teachers-in-courses', [ReportController::class, 'teachersInCourses'])->name('admin.reports.teachers_in_courses');
+
+
+// routes/web.php
+
+Route::get('/admin/reports/teachers-in-courses', [ReportController::class, 'teachersInCourses'])->name('admin.reports.teachers_in_courses');
+Route::get('/admin/reports/export_excel_teachers_in_courses', [ReportController::class, 'exportExcelTeachersInCourses'])->name('admin.reports.export_excel_teachers_in_courses');
+Route::get('/admin/reports/export_pdf_teachers_in_courses', [ReportController::class, 'exportPdfTeachersInCourses'])->name('admin.reports.export_pdf_teachers_in_courses');
+Route::get('admin/reports/courses-on-date', [ReportController::class, 'coursesOnDate'])->name('admin.reports.courses_on_date');
+
+});

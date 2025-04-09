@@ -71,21 +71,47 @@ class PaymentController extends Controller
             'courses'     => $courses, // Pass the filtered courses
         ]);
     }
-    public function studentPaymentDetails($studentId)
+    public function studentPaymentDetails(Request $request, $studentId)
     {
-        // تأكد من تحميل الفواتير مع المدفوعات
-        $student = Student::with(['payments.invoices'])->findOrFail($studentId);
-    // حساب المبلغ الكلي المدفوع
-    $totalPayments = $student->payments->sum('total_amount');
+        $courseId = $request->input('course_id');
 
-    // حساب المبلغ الكلي للطالب (من الفواتير)
-    $totalAmount = $student->invoices->sum('amount');
+        // جلب بيانات الطالب مع العلاقات
+        $student = Student::with(['payments.course', 'payments.invoices'])
+                    ->findOrFail($studentId);
 
-    // حساب المبلغ المتبقي
-    $remainingAmount = $totalPayments - $totalAmount ;
+        $payment = null;
+        $totalAmount = 0;
+        $totalPayments = 0;
+        $remainingAmount = 0;
 
-    return view('admin.pages.payments.details', compact('student', 'totalPayments', 'remainingAmount'));
+        // إذا تم اختيار دورة
+        if ($courseId) {
+            $payment = $student->payments->where('course_id', $courseId)->first();
+
+            if ($payment) {
+                // المبلغ المطلوب من جدول الدفع
+                $totalAmount = $payment->total_amount;
+
+                // مجموع المدفوع من الفواتير المرتبطة
+                $totalPayments = $payment->invoices->sum(function ($invoice) {
+                    return $invoice->status == 1 ? $invoice->amount : 0;
+                });
+
+                // المتبقي = المبلغ المطلوب - المدفوع
+                $remainingAmount = $totalAmount - $totalPayments;
+            }
+        }
+
+        return view('admin.pages.payments.details', [
+            'student'         => $student,
+            'payment'         => $payment,
+            'totalAmount'     => $totalAmount,
+            'totalPayments'   => $totalPayments, // ✅ هذا السطر مهم
+            'remainingAmount' => $remainingAmount,
+        ]);
     }
+    
+
 
     public function showInvoiceDetails($invoiceId)
     {
@@ -214,18 +240,36 @@ public function downloadInvoice($id)
       return view('admin.pages.payments.detailstopay', compact('student'));
   }
 
-    public function edit(payment $payment)
-    {
-        //
-    }
+  public function edit($id)
+  {
+      $payment = Payment::with('student', 'course')->findOrFail($id);
+      return view('admin.pages.payments.edit', compact('payment'));
+  }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, payment $payment)
-    {
-        //
-    }
+  public function update(Request $request, $id)
+  {
+      $request->validate([
+          'total_amount' => 'required|numeric|min:0',
+      ]);
+
+      $payment = Payment::findOrFail($id);
+      $payment->total_amount = $request->total_amount;
+
+      // تحديث الحالة تلقائيًا إذا تم السداد بالكامل
+      $paid = $payment->invoices()->sum('amount');
+      if ($paid >= $request->total_amount) {
+          $payment->status = 'paid';
+      } elseif ($paid > 0) {
+          $payment->status = 'partial';
+      } else {
+          $payment->status = 'unpaid';
+      }
+
+      $payment->save();
+
+      return redirect()->route('admin.student.payment.details', $payment->student_id)
+                       ->with('success', 'تم تحديث رسوم الطالب بنجاح ✅');
+  }
 
     /**
      * Remove the specified resource from storage.

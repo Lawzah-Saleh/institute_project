@@ -56,9 +56,7 @@
                         <button type="submit" class="btn btn-primary w-100 mt-3 rounded-pill" style="background-color: #196098;">تسجيل الدخول</button>
                     </form>
                 </div>
-                <div class="card-footer text-center bg-light rounded-bottom">
-                    <p class="mb-0">لا تمتلك حسابًا؟ <a href="{{ route('register') }}" class="text-primary">سجل الآن</a></p>
-                </div>
+
             </div>
         </div>
     </div>
