@@ -60,7 +60,7 @@
                         @forelse($student->invoices as $invoice)
 
                             <tr>
-                                <td>{{ $invoice->invoice_number }}</td>
+                                <td>{{ $invoice->id }}</td>
                                 <td>{{ $invoice->invoice_number }}</td> <!-- Assuming invoice number is the same as the invoice number -->
                                 <td>{{ $invoice->created_at }}</td>
                                 <td>{{ number_format($invoice->amount, 2) }} ريال</td>
@@ -75,7 +75,8 @@
                                     @endif
                                 </td>
                                  <td>
-                                    <a href="{{ route('admin.payments.invoice.show', $invoice->id) }}" class="btn btn-sm "style="background-color: #196098; color: #fff;">عرض الفاتورة</a>
+                                    <a href="{{ route('admin.invoices.show', $invoice->id) }}" class="btn btn-sm "style="background-color: #196098; color: #fff;">عرض الفاتورة</a>
+
                                 </td>
                             </tr>
                         @empty

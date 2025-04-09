@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\DashboardController;
@@ -14,8 +13,6 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HolidayController;
 
 
-
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 
@@ -25,20 +22,6 @@ Route::post('/students/register', [StudentController::class, 'register'])->name(
 Route::get('/students/invoice/{invoiceId}', [StudentController::class, 'showInvoiceConfirmation'])->name('students.invoice.view');
 
 
-
-
-// Route::get('/get-courses/{department}', function ($department) {
-//     try {
-//         $courses = DB::table('courses')
-//             ->where('department_id', $department)
-//             ->select('id', 'course_name') // تعديل الاسم الصحيح
-//             ->get();
-
-//         return response()->json($courses);
-//     } catch (\Exception $e) {
-//         return response()->json(['error' => $e->getMessage()], 500);
-//     }
-// });
 Route::get('/get-course-price/{course_id}', function ($course_id) {
     try {
         $price = DB::table('course_prices')
@@ -135,6 +118,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
 
+// مسار صفحة تحديث الطالب إلى الدورة التالية
+Route::get('/students/transfer', [StudentController::class, 'transferStudent'])->name('students.transfer');
+Route::post('/students/transfer/{studentId}', [StudentController::class, 'processTransfer'])->name('students.processTransfer');
 
 });
 Route::get('/department/{department}/first-course', [CourseController::class, 'getFirstCourseInDepartment'])->name('department.first_course');
@@ -240,6 +226,15 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/student/notifications', [StudentNotificationsController::class, 'index'])->name('student.notifications');
 });
 
+// payment sources
+use App\Http\Controllers\PaymentSourceController;
+
+Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::resource('payment_sources', PaymentSourceController::class);
+ });
+
+
+
 use App\Http\Controllers\StudentPaymentController;
 
 Route::middleware(['auth', 'role:student'])->group(function () {
@@ -264,30 +259,39 @@ Route::middleware(['auth', 'role:student'])->group(function () {
 
 
 });
-
+use App\Http\Controllers\InvoiceController;
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/payments', [PaymentController::class, 'index'])->name('admin.payments.index');
     Route::get('/admin/student/payments/{student}', [PaymentController::class, 'studentPaymentDetails'])
     ->name('admin.student.payment.details');
-    Route::get('/admin/payments/invoice/{id}', [PaymentController::class, 'showInvoiceDetails'])->name('admin.payments.invoice.show');
-    Route::get('/admin/payments/create', [PaymentController::class, 'create'])->name('admin.payments.create');
-    Route::post('/admin/payments', [PaymentController::class, 'store'])->name('admin.payments.store');
-// مسار البحث عن الطالب
-Route::get('/admin/payments/search', [PaymentController::class, 'search'])->name('admin.payments.search');
+    Route::get('admin/invoices/{id}', [PaymentController::class, 'showInvoiceDetails'])->name('admin.invoices.show');
+
+    // عرض نموذج إضافة الدفع
+    Route::get('/payments/create', [PaymentController::class, 'create'])->name('admin.payments.create');
+    
+    // حفظ عملية الدفع
+    Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+    
+    Route::get('/payments/invoice/{id}', [PaymentController::class, 'showInvoice'])->name('payments.invoice.show');
+// راوت تحميل الفاتورة بصيغة PDF
+Route::get('/payments/invoice/{id}/download', [PaymentController::class, 'downloadInvoice'])->name('admin.payments.downloadInvoice');
+
+
+ 
+    // مسار البحث عن الطالب
+    Route::get('/admin/payments/search', [PaymentController::class, 'search'])->name('admin.payments.search');
+    Route::get('/admin/payments/details/{studentId}', [PaymentController::class, 'getStudentDetails']);
 
 // مسار عرض تفاصيل الدفع
-Route::get('/admin/payments/details/{studentId}', [PaymentController::class, 'showDetails'])->name('admin.payments.details');
+    Route::get('/admin/payments/details/{studentId}', [PaymentController::class, 'showDetails'])->name('admin.payments.details');
 
 // إضافة الدفع للطالب
-Route::post('/admin/payments/store', [PaymentController::class, 'store'])->name('admin.payments.store');
+    Route::post('/admin/payments/store', [PaymentController::class, 'store'])->name('admin.payments.store');
 
     Route::patch('/payments/{invoice}/mark-paid', [PaymentController::class, 'markInvoicePaid'])->name('admin.payments.markPaid');
 });
 
+// // routes/api.php
+// use App\Http\Controllers\Api\StudentSearchController;
 
-use App\Http\Controllers\PaymentSourceController;
-
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::resource('payment_sources', PaymentSourceController::class);
-    });
-
+// Route::get('/students/search', [StudentSearchController::class, 'search']);

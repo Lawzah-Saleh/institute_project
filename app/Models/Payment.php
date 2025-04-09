@@ -25,10 +25,11 @@ class Payment extends Model
     }
 
     // الدفع مرتبط بالفاتورة
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class);
-    }
+public function invoices()
+{
+    return $this->hasMany(Invoice::class);
+}
+
 
     // الدفع مرتبط بمصدر الدفع
 

@@ -29,9 +29,9 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title">تعديل الكورس</h3>
+                    <h3 class="page-title">تعديل الدورة</h3>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('courses.index') }}">الكورسات</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('courses.index') }}">الدورات</a></li>
                     </ul>
                 </div>
             </div>
@@ -46,13 +46,13 @@
                             @method('PUT')
                             <div class="row">
                                 <div class="col-12">
-                                    <h5 class="form-title"><span>تفاصيل الكورس</span></h5>
+                                    <h5 class="form-title"><span>تفاصيل الدورات</span></h5>
                                 </div>
 
                                 <!-- رقم الكورس -->
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
-                                        <label>رقم الكورس<span class="login-danger">*</span></label>
+                                        <label>رقم الدورة<span class="login-danger">*</span></label>
                                         <input type="text" class="form-control" value="{{ $course->id }}" disabled>
                                     </div>
                                 </div>
@@ -60,7 +60,7 @@
                                 <!-- اسم الكورس -->
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
-                                        <label>اسم الكورس <span class="login-danger">*</span></label>
+                                        <label>اسم الدورة <span class="login-danger">*</span></label>
                                         <input type="text" name="course_name" class="form-control" value="{{ $course->course_name }}" required>
                                     </div>
                                 </div>
@@ -68,7 +68,7 @@
                                 <!-- مدة الكورس (اختياري) -->
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
-                                        <label>مدة الكورس (اختياري)</label>
+                                        <label>مدة الدورة (اختياري)</label>
                                         <input type="number" name="duration" class="form-control" value="{{ $course->duration }}">
                                     </div>
                                 </div>
@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="col-12 col-sm-4">
                                     <div class="form-group local-forms">
-                                        <label>وصف الكورس <span class="login-danger">*</span></label>
+                                        <label>وصف الدورة <span class="login-danger">*</span></label>
                                         <input type="text" name="description" class="form-control" value="{{ $course->description }}" required>
                                     </div>
                                 </div>
@@ -108,7 +108,7 @@
                                 <!-- زر التعديل -->
                                 <div class="col-12">
                                     <div class="student-submit">
-                                        <button type="submit" class="btn btn-primary">تعديل الكورس</button>
+                                        <button type="submit" class="btn btn-primary">تعديل الدورة</button>
                                     </div>
                                 </div>
                             </div>

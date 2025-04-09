@@ -553,4 +553,84 @@ class StudentController extends Controller
         $students = Student::all();
         return view('Teacher-dashboard.students', compact('students'));
     }
+    public function transferStudent()
+{
+    // عرض صفحة تحديث الطالب إلى الدورة التالية
+    return view('admin.pages.students.transfer');
+}
+
+public function processTransfer(Request $request, $studentId)
+{
+    $validated = $request->validate([
+        'amount_paid' => 'required|numeric|min:0',
+    ]);
+
+    // الحصول على الطالب
+    $student = Student::findOrFail($studentId);
+
+    // الحصول على الدورة الحالية
+    $currentCourse = $student->courses()->latest()->first();
+
+    // العثور على الدورة التالية بناءً على ترتيب ID
+    $nextCourse = Course::where('id', '>', $currentCourse->id)->orderBy('id')->first();
+
+    if (!$nextCourse) {
+        return back()->withErrors(['error' => 'لا توجد دورة تالية للتسجيل.']);
+    }
+
+    // تسجيل الطالب في الدورة التالية
+    CourseStudent::updateOrCreate([
+        'student_id' => $student->id,
+        'course_id' => $nextCourse->id,
+    ], [
+        'register_at' => now(),
+        'status' => 'registered',  // حالة الطالب المسجل في الدورة التالية
+    ]);
+
+    // الحصول على السعر من جدول CoursePrice
+    $coursePrice = CoursePrice::where('course_id', $nextCourse->id)->latest()->first();
+
+    if (!$coursePrice) {
+        return back()->withErrors(['error' => 'لا يوجد سعر محدد لهذه الدورة.']);
+    }
+
+    // إنشاء الدفع
+    $payment = Payment::create([
+        'student_id' => $student->id,
+        'course_id' => $nextCourse->id,
+        'total_amount' => $coursePrice->price,
+        'status' => 'unpaid',
+    ]);
+
+    // إنشاء الفاتورة
+    $invoice = Invoice::create([
+        'student_id' => $student->id,
+        'payment_id' => $payment->id,
+        'amount' => $validated['amount_paid'],
+        'status' => '0',
+        'invoice_number' => 'INV' . time(),
+        'invoice_details' => "رسوم الدورة: " . $nextCourse->course_name,
+        'due_date' => now()->addDays(30),
+    ]);
+
+    // تحديث حالة الدفع بناءً على المبلغ المدفوع
+    $payment->update([
+        'status' => ($validated['amount_paid'] >= $coursePrice->price) ? 'paid' : 'partial',
+    ]);
+
+    return redirect()->route('students.transfer')->with('success', 'تم انتقال الطالب إلى الدورة التالية وتسجيل الفاتورة بنجاح!');
+}
+public function search(Request $request)
+{
+    $query = $request->query('query');
+    
+    if ($query) {
+        $students = Student::where('student_name_ar', 'like', '%' . $query . '%')
+                            ->get();
+        return response()->json($students);
+    }
+
+    return response()->json([]);
+}
+
 }

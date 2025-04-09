@@ -14,7 +14,7 @@
         </div>
 
         <!-- بحث الطالب -->
-        <form method="GET" action="{{ route('admin.payments.search') }}" class="mb-4">
+        <form method="GET" action="#" class="mb-4" id="searchForm">
             <div class="row">
                 <div class="col-md-6">
                     <label for="search_student">بحث عن الطالب</label>
@@ -28,51 +28,8 @@
         </form>
 
         <!-- عرض تفاصيل الطالب بعد البحث -->
-        @if(isset($student))
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5>معلومات الطالب</h5>
-                <p><strong>الاسم:</strong> {{ $student->student_name_ar }} ({{ $student->student_name_en }})</p>
-                <p><strong>البريد الإلكتروني:</strong> {{ $student->email }}</p>
-                <p><strong>رقم الهاتف:</strong>
-                    @php
-                        $phones = json_decode($student->phones, true);
-                    @endphp
-                    {{ $phones ? implode(', ', $phones) : 'غير متوفر' }}
-                </p>
-            </div>
-        </div>
+        <div id="student-details"></div> <!-- سيتم هنا عرض تفاصيل الطالب والفواتير -->
 
-        <!-- عرض الفواتير الخاصة بالطالب -->
-        <form action="{{ route('admin.payments.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="student_id" value="{{ $student->id }}">
-
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="mb-3">الفواتير الخاصة بالطالب</h5>
-                    <div class="form-group">
-                        <label for="invoice_id">اختر الفاتورة</label>
-                        <select name="invoice_id" id="invoice_id" class="form-control" required>
-                            <option value="">اختر الفاتورة</option>
-                            @foreach($student->invoices as $invoice)
-                                <option value="{{ $invoice->id }}">{{ $invoice->invoice_number }} - {{ $invoice->due_date }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="form-group mt-3">
-                        <label for="amount_paid">المبلغ المدفوع</label>
-                        <input type="number" name="amount_paid" class="form-control" placeholder="أدخل المبلغ المدفوع" required>
-                    </div>
-
-                    <div class="form-group mt-3">
-                        <button type="submit" class="btn btn-primary">إضافة الدفع</button>
-                    </div>
-                </div>
-            </div>
-        </form>
-        @endif
     </div>
 </div>
 
@@ -112,7 +69,17 @@
         // عند النقر على نتيجة البحث
         $(document).on('click', '#search-results li', function() {
             let studentId = $(this).data('id');
-            window.location.href = `/admin/payments/details/${studentId}`;  // الانتقال إلى صفحة تفاصيل الدفع
+
+            // إرسال طلب لتحميل بيانات الطالب
+            $.ajax({
+                url: `/admin/payments/details/${studentId}`,
+                method: 'GET',
+                success: function(data) {
+                    $('#student-details').html(data);  // عرض بيانات الطالب داخل العنصر المحدد
+                }
+            });
+
+            $('#search-results').hide();  // إخفاء نتائج البحث بعد اختيار الطالب
         });
     });
 </script>

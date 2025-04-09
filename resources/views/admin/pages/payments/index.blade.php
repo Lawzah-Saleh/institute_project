@@ -39,16 +39,16 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label>الجلسة</label>
+                    <label>الدورة الحالية</label>
                     <select name="session_id" id="session_id" class="form-control" {{ request('course_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة --</option>
                     </select>
                 </div>
                 <div class="col-md-8 mt-3">
                     <input type="text" name="search" class="form-control" placeholder="ابحث بالاسم أو البريد أو الهاتف" value="{{ request('search') }}">
                 </div>
                 <div class="col-md-12 mt-3">
-                    <button type="submit" class="btn btn-primary">بحث</button>
+                    <button type="submit" class="btn "style="background-color: #196098;color: white;">بحث</button>
                 </div>
             </div>
         </form>
@@ -75,35 +75,42 @@
                             </thead>
                             <tbody>
                                 @foreach($students as $student)
+                                @php
+                                    // 1. مجموع المبالغ الكلية من جميع دفعات الطالب
+                                    $totalAmount = $student->payments->sum('total_amount');
+                            
+                                    // 2. مجموع المبالغ المدفوعة من جميع الفواتير المرتبطة بالدفعات
+                                    $paidAmount = $student->invoices->sum('amount');
+                            
+                                    // 3. حساب المتبقي
+                                    $remaining = $totalAmount - $paidAmount;
+                                @endphp
+                            
                                 <tr>
                                     <td>{{ $student->id }}</td>
                                     <td>{{ $student->student_name_ar }} ({{ $student->student_name_en }})</td>
                                     <td>{{ $student->email }}</td>
                                     <td>{{ is_array($phones = json_decode($student->phones, true)) ? implode(',', $phones) : 'غير متوفر' }}</td>
-                                    <td>{{ number_format($student->payments_sum_total_amount, 2) }} ريال</td>
-                                    <td>{{ number_format($student->invoices_sum_amount, 2) }} ريال</td>
-                                    <td>{{ number_format($student->payments_sum_total_amount - $student->invoices_sum_amount, 2) }} ريال</td>
+                                    <td>{{ number_format($totalAmount, 2) }} ريال</td>
+                                    <td>{{ number_format($paidAmount, 2) }} ريال</td>
+                                    <td>{{ number_format($remaining, 2) }} ريال</td>
                                     <td>
-                                        @php
-                                            $total = $student->payments_sum_total_amount ?? 0;
-                                            $paid = $student->invoices_sum_amount ?? 0;
-                                            $remaining = $total - $paid;
-                                        @endphp
-                                        @if($remaining <= 0 && $total > 0)
-                                            <span class="badge bg-success">مدفوع بالكامل</span>
-                                        @elseif($paid > 0 && $paid < $total)
-                                            <span class="badge bg-warning text-dark">مدفوع جزئياً</span>
-                                        @elseif($paid == 0 && $total > 0)
-                                            <span class="badge bg-danger">غير مدفوع</span>
+                                        @if($remaining <= 0 && $totalAmount > 0)
+                                            <span class="badge "style="background-color: #e94c21; color: #fff;">مدفوع بالكامل</span>
+                                        @elseif($paidAmount > 0 && $remaining > 0)
+                                            <span class="badge  " style="background-color: #e94c21; color: #fff;">مدفوع جزئياً</span>
+                                        @elseif($paidAmount == 0 && $totalAmount > 0)
+                                            <span class="badge "style="background-color: #e94c21; color: #fff;">غير مدفوع</span>
                                         @else
                                             <span class="badge bg-secondary">لا توجد بيانات</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.student.payment.details', $student->id) }}" class="btn btn-sm btn-info">عرض التفاصيل</a>
+                                        <a href="{{ route('admin.student.payment.details', $student->id) }}" class="btn btn-sm"style="background-color: #196098; color: #fff;">عرض التفاصيل</a>
                                     </td>
                                 </tr>
-                                @endforeach
+                            @endforeach
+                            
                             </tbody>
                         </table>
                     </div>

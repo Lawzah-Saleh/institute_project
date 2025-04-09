@@ -9,9 +9,12 @@ use App\Models\CourseSessionStudent;
 use App\Models\Student;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PaymentSource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade as PDF;
+
 class PaymentController extends Controller
 {
     public function index(Request $request)
@@ -71,7 +74,7 @@ class PaymentController extends Controller
     public function studentPaymentDetails($studentId)
     {
         // تأكد من تحميل الفواتير مع المدفوعات
-        $student = Student::with(['payments.invoice'])->findOrFail($studentId);
+        $student = Student::with(['payments.invoices'])->findOrFail($studentId);
     // حساب المبلغ الكلي المدفوع
     $totalPayments = $student->payments->sum('total_amount');
 
@@ -84,13 +87,21 @@ class PaymentController extends Controller
     return view('admin.pages.payments.details', compact('student', 'totalPayments', 'remainingAmount'));
     }
 
-    public function showInvoiceDetails($paymentId)
+    public function showInvoiceDetails($invoiceId)
     {
-        // Retrieve the payment with its associated invoices (assuming payment model has an invoices() relationship)
-        $payment = Payment::with('invoices')->findOrFail($paymentId);
+        $invoice = Invoice::findOrFail($invoiceId);
+        return view('admin.pages.payments.invoice_show', compact('invoice'));
+    }
 
-        // Pass the payment and its invoices to the view
-        return view('admin.pages.payments.invoice_show', compact('payment'));
+
+
+    public function getStudentDetails($studentId)
+    {
+        // Check if the student exists and load related data
+        $student = Student::with(['payments.invoices'])->findOrFail($studentId);
+
+        // Return the view with student data
+        return view('admin.pages.payments.student_details', compact('student'));
     }
 
 
@@ -99,12 +110,84 @@ class PaymentController extends Controller
     // 📄 عرض صفحة الدفع للطالب
     public function create()
     {
-        // Get all students
-        $students = Student::all();
+        $students = Student::select('id', 'student_name_ar', 'email')->get();
+        $paymentSources = PaymentSource::where('status', 'active')->get();
 
-        // Return the create payment view
-        return view('admin.pages.payments.create', compact('students'));
+        return view('admin.pages.payments.add_payment', [
+            'students' => $students,
+            'paymentSources' => $paymentSources,
+        ]);
     }
+
+    /**
+     * تخزين الدفع
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'student_id'         => 'required|exists:students,id',
+            'payment_amount'     => 'required|numeric|min:0.01',
+            'payment_sources_id' => 'required|exists:payment_sources,id',
+            'payment_date'       => 'required|date',
+        ]);
+
+        $student = Student::with('invoices')->findOrFail($validated['student_id']);
+        $totalDue = $student->invoices->sum('amount');
+
+        // إنشاء سجل الدفع أو جلب الموجود
+        $payment = Payment::firstOrCreate(
+            ['student_id' => $student->id],
+            ['total_amount' => 0, 'status' => 'unpaid']
+        );
+
+
+        // إنشاء فاتورة لهذه الدفعة
+        $invoice = Invoice::create([
+            'student_id'         => $student->id,
+            'payment_id'         => $payment->id,
+            'payment_sources_id' => $validated['payment_sources_id'],
+            'amount'             => $validated['payment_amount'],
+            'invoice_number'     => '25' . time(),
+            'invoice_details'    => 'دفعة جديدة',
+            'due_date'           => now()->addDays(30),
+            'paid_at'            => $validated['payment_date'],
+            'status'             => true,
+        ]);
+            // حساب المبلغ المدفوع
+    $paidAmount = $payment->invoices->sum('amount');
+
+    // تحديث حالة الدفع بناءً على المبلغ المدفوع
+    if ($paidAmount >= $payment->total_amount) {
+        $payment->status = 'paid'; // المدفوع بالكامل
+    } elseif ($paidAmount > 0) {
+        $payment->status = 'partial'; // المدفوع جزئياً
+    } else {
+        $payment->status = 'unpaid'; // غير مدفوع
+    }
+
+    // حفظ الحالة الجديدة في الدفع
+    $payment->save();
+
+        return redirect()->route('payments.invoice.show', $invoice->id)->with('success', 'تم إضافة الدفع بنجاح ✅');
+    }
+    public function showInvoice($id)
+{
+    $invoice = Invoice::with(['student', 'paymentSource'])->findOrFail($id);
+
+    return view('admin.pages.payments.invoice_show', compact('invoice'));
+}
+public function downloadInvoice($id)
+{
+    // العثور على الفاتورة بناءً على الرقم التعريفي
+    $invoice = Invoice::findOrFail($id);
+
+    // تحميل الفاتورة كـ PDF باستخدام DomPDF
+    $pdf = PDF::loadView('admin.pages.payments.invoice_pdf', compact('invoice'));
+
+    // تحميل الفاتورة كـ PDF
+    return $pdf->download('invoice_' . $invoice->invoice_number . '.pdf');
+}
+
   // في الـ PaymentController
  // في PaymentController.php
  public function search(Request $request)
@@ -131,62 +214,6 @@ class PaymentController extends Controller
       return view('admin.pages.payments.detailstopay', compact('student'));
   }
 
-
-
-    // Store the payment
-    public function storePayment(Request $request)
-    {
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'invoice_id' => 'required|exists:invoices,id',
-            'amount_paid' => 'required|numeric|min:0',
-        ]);
-
-        // Store the payment
-        $payment = new Payment();
-        $payment->student_id = $request->student_id;
-        $payment->invoice_id = $request->invoice_id;
-        $payment->amount = $request->amount_paid;
-        $payment->payment_date = Carbon::now(); // Add the current date and time
-        $payment->save();
-
-        // Update the invoice's total paid amount
-        $invoice = Invoice::find($request->invoice_id);
-        $invoice->amount = $invoice->payments()->sum('amount');
-        $invoice->save();
-
-        // Redirect with success message
-        return redirect()->route('admin.payments.index')->with('success', 'تم إضافة الدفع بنجاح');
-    }
-    public function store(Request $request)
-    {
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'invoice_id' => 'required|exists:invoices,id',
-            'amount_paid' => 'required|numeric|min:0',
-        ]);
-
-        // Store the payment
-        $payment = new Payment();
-        $payment->student_id = $request->student_id;
-        $payment->invoice_id = $request->invoice_id;
-        $payment->amount = $request->amount_paid;
-        $payment->payment_date = Carbon::now(); // Add the current date and time
-        $payment->save();
-
-        // Update the invoice's total paid amount
-        $invoice = Invoice::find($request->invoice_id);
-        $invoice->amount = $invoice->payments()->sum('amount');
-        $invoice->save();
-
-        // Redirect with success message
-        return redirect()->route('admin.payments.index')->with('success', 'تم إضافة الدفع بنجاح');
-    }
-
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(payment $payment)
     {
         //

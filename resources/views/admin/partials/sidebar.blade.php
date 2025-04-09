@@ -17,6 +17,8 @@
                         <li><a href="{{ route('students.index') }}">عرض الطلاب</a></li>
 
                         <li><a href="{{ route('students.create') }}">إضافة طالب</a></li>
+                        <li><a href="{{ route('students.transfer')  }}">تحديث الطالب للدورة التالية </a></li>
+
                     </ul>
                 </li>
                 <li class="submenu">
@@ -94,6 +96,14 @@
                     <ul>
                         <li><a href="{{ route('admin.payments.index') }}"> قائمة الرسوم </a></li>
                         <li><a href="{{ route('admin.payments.create') }}">إضافة رسوم</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="#"><i class="fas fa-comment-dollar"></i> <span>أدارة  الحوافظ</span><span
+                         class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ route('admin.payments.index') }}"> قائمة الرسوم </a></li>
+                        <li><a href="{{ route('admin.payments.create') }}">إضافة رسوم</a></li>
                         <li><a href="edit-invoice.html">Edit Invoices</a></li>
                         <li><a href="view-invoice.html">Invoices Details</a></li>
                         <li><a href="invoices-settings.html">Invoices Settings</a></li>
@@ -127,7 +137,6 @@
                     <ul>
                         <li><a href="{{ route('institute.create') }}">أضافة معلومات المعهد</a></li>
                         <li><a href="{{ route('institute.index') }}">عرض معلومات المعهد</a></li>
-                        {{-- <li><a href="{{ route('institute.edit') }}">تعديل معلومات المعهد</a></li> --}}
                     </ul>
                 </li>
             </ul>

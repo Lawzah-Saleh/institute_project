@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="page-sub-header">
-                <h3 class="page-title">مرحبا</h3>
+                <h3 class="page-title" style="font-size: 30px; ">الصفحة الرئيسية</h3>
 
             </div>
         </div>
@@ -71,7 +71,7 @@
                 <div class="card-body">
                     <div class="db-widgets d-flex justify-content-between align-items-center">
                         <div class="db-info">
-                            <h6>الكورسات</h6>
+                            <h6>الدورات التدريبية</h6>
                             <h3>{{ $coursesCount ?? 0}}</h3>
                         </div>
                         <div class="icon_box">
@@ -96,7 +96,7 @@
         <script>
             // بيانات الطلاب لكل شهر
             const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-            const totalStudents = [150, 180, 200, 170, 210, 190, 230, 250, 240, 220, 260, 270]; // قم بتعديل الأرقام بناءً على بياناتك.
+            const totalStudents = [50, 70, 100, 40, 50, 50, 60, 40, 30, 40, 40, 100]; // قم بتعديل الأرقام بناءً على بياناتك.
 
             // إعداد المخطط
             const ctx = document.getElementById('studentsChart').getContext('2d');
@@ -107,8 +107,8 @@
                     datasets: [{
                         label: 'Total Students',
                         data: totalStudents,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(233, 76, 33, 0.7)',
+                        borderColor: 'rgba(233, 76, 33, 0.9)',
                         borderWidth: 1
                     }]
                 },
@@ -134,15 +134,6 @@
 
     </div>
     <div class="col-xl-6 d-flex">
-
-
-
-
-
-
-
-
-
     </div>
 </div>
 </div>
