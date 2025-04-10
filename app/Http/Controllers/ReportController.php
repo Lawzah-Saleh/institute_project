@@ -8,7 +8,7 @@ use App\Models\Department;
 use App\Models\Payment;
 use App\Models\CourseSession;
 use App\Models\Degree;
-
+use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\PaidStudentsExport;
@@ -732,4 +732,121 @@ public function coursesOnDate(Request $request)
 
     return view('admin.pages.reports.courses_on_date', compact('courses', 'selectedDate'));
 }
+// app/Http/Controllers/ReportController.php
+
+public function coursesStatus(Request $request)
+{
+    $statusFilter = $request->input('status'); // الحصول على حالة الدورة (منتهية أو غير منتهية)
+    $today = now(); // الحصول على تاريخ اليوم
+
+    // جلب الدورات بناءً على الحالة المطلوبة
+    $coursesQuery = Course::query();
+
+    if ($statusFilter) {
+        if ($statusFilter == 'completed') {
+            // تصفية الدورات المنتهية
+            $coursesQuery->whereHas('sessions', function ($query) use ($today) {
+                $query->whereDate('end_date', '<', $today);
+            });
+        } else {
+            // تصفية الدورات غير المنتهية
+            $coursesQuery->whereHas('sessions', function ($query) use ($today) {
+                $query->whereDate('end_date', '>=', $today);
+            });
+        }
+    }
+
+    // جلب الدورات مع الجلسات
+    $courses = $coursesQuery->with('sessions')->get();
+
+    return view('admin.pages.reports.courses_status', compact('courses', 'statusFilter'));
+}
+public function attendanceReport(Request $request)
+{
+    // استرجاع الفلاتر من الطلب
+    $departmentId = $request->input('department_id');
+    $courseId = $request->input('course_id');
+    $sessionId = $request->input('session_id');
+    $reportType = $request->input('report_type');
+    $departments = Department::all();
+
+    // تصفية الدورات بناءً على القسم
+    $coursesQuery = Course::query();
+    if ($departmentId) {
+        $coursesQuery->where('department_id', $departmentId);
+    }
+    $courses = $coursesQuery->get();
+
+    // جلب الجلسات بناءً على الدورة المحددة
+    $sessionsQuery = CourseSession::query();
+    if ($courseId) {
+        $sessionsQuery->where('course_id', $courseId);
+    }
+    $sessions = $sessionsQuery->get();
+
+    // جلب الطلاب بناءً على الجلسة المحددة
+    $studentsQuery = Student::whereHas('sessions', function($query) use ($sessionId) {
+        $query->where('course_sessions.id', $sessionId);
+    });
+
+    // في حال كان التقرير يوميًا
+    if ($reportType == 'daily') {
+        $startDate = now()->startOfDay();
+        $endDate = now()->endOfDay();
+        $studentsQuery->whereHas('course_sessions', function($query) use ($sessionId, $startDate, $endDate) {
+            $query->where('course_sessions.id', $sessionId)
+                  ->whereBetween('course_sessions.start_date', [$startDate, $endDate]);
+        });
+    }
+    // في حال كان التقرير شهريًا
+    elseif ($reportType == 'monthly') {
+        $startDate = now()->startOfMonth();
+        $endDate = now()->endOfMonth();
+        $studentsQuery->whereHas('sessions', function($query) use ($sessionId, $startDate, $endDate) {
+            $query->where('course_sessions.id', $sessionId)
+                  ->whereBetween('course_sessions.start_date', [$startDate, $endDate]);
+        });
+    }
+
+    // جلب بيانات الطلاب مع الحضور والغياب
+    $students = $studentsQuery->get();
+
+    return view('admin.pages.reports.attendance_report', compact('courses', 'sessions', 'students','departments'));
+}
+
+// Method to export the attendance report to Excel
+public function exportExcelAttendance(Request $request)
+{
+    $attendances = $this->attendanceQuery($request)->get();
+    return Excel::download(new AttendanceExport($attendances), 'attendance_report.xlsx');
+}
+
+// Method to export the attendance report to PDF
+public function exportPdfAttendance(Request $request)
+{
+    $attendances = $this->attendanceQuery($request)->get();
+    $pdf = PDF::loadView('admin.pages.reports.attendance_report_pdf', compact('attendances'));
+    return $pdf->download('attendance_report.pdf');
+}
+
+// Helper method to query attendance based on filters
+private function attendanceQuery(Request $request)
+{
+    $period = $request->input('period', 'today');
+    $startDate = null;
+    $endDate = null;
+
+    if ($period === 'today') {
+        $startDate = now()->startOfDay();
+        $endDate = now()->endOfDay();
+    } elseif ($period === 'month') {
+        $startDate = now()->startOfMonth();
+        $endDate = now()->endOfMonth();
+    }
+
+    return Attendance::with(['student', 'course_session'])
+        ->whereBetween('created_at', [$startDate, $endDate]);
+}
+
+
 }

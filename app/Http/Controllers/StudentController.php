@@ -31,42 +31,36 @@ class StudentController extends Controller
         $courses = Course::all();
         $sessions = CourseSession::all();
 
-        // 🔍 البحث عن الطلاب بالاسم أو الرقم
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('id', $searchTerm)
-                  ->orWhere('student_name_ar', 'LIKE', "%{$searchTerm}%")
-                  ->orWhere('student_name_en', 'LIKE', "%{$searchTerm}%");
-            });
-        }
+  // 🔍 البحث عن الطلاب بالاسم أو الرقم
+  if ($request->filled('search')) {
+    $searchTerm = $request->search;
+    $query->where(function ($q) use ($searchTerm) {
+        $q->where('students.id', $searchTerm)
+          ->orWhere('students.student_name_ar', 'LIKE', "%{$searchTerm}%")
+          ->orWhere('students.student_name_en', 'LIKE', "%{$searchTerm}%");
+    });
+}
 
-        // 🔍 فلترة الطلاب بناءً على القسم
-        if ($request->filled('department_id')) {
-            $query->whereHas('courses', function ($q) use ($request) {
-                $q->where('department_id', $request->department_id);
-            })->orWhereHas('sessions.course', function ($q) use ($request) {
-                $q->where('department_id', $request->department_id);
-            });
-        }
+// 🔍 فلترة الطلاب بناءً على القسم
+if ($request->filled('department_id')) {
+    $query->whereHas('courses', function ($q) use ($request) {
+        $q->where('courses.department_id', $request->department_id);
+    });
+}
 
-        // 🔍 فلترة الطلاب بناءً على الكورس
-        if ($request->filled('course_id')) {
-            $query->whereHas('courses', function ($q) use ($request) {
-                $q->where('courses.id', $request->course_id);
-            })->orWhereHas('sessions', function ($q) use ($request) {
-                $q->whereHas('course', function ($q) use ($request) {
-                    $q->where('id', $request->course_id);
-                });
-            });
-        }
+// 🔍 فلترة الطلاب بناءً على الدورة
+if ($request->filled('course_id')) {
+    $query->whereHas('courses', function ($q) use ($request) {
+        $q->where('courses.id', $request->course_id);
+    });
+}
 
-    // 🔍 فلترة الطلاب بناءً على الجلسة
-    if ($request->filled('course_session_id')) {
-        $query->whereHas('sessions', function ($q) use ($request) {
-            $q->where('course_sessions.id', $request->course_session_id);
-        });
-    }
+// 🔍 فلترة الطلاب بناءً على الجلسة
+if ($request->filled('course_session_id')) {
+    $query->whereHas('sessions', function ($q) use ($request) {
+        $q->where('course_sessions.id', $request->course_session_id);
+    });
+}
 
         // تحميل العلاقات لضمان ظهور البيانات
         $students = $query->with(['courses', 'sessions.course'])->get();
@@ -207,6 +201,98 @@ class StudentController extends Controller
             return back()->withErrors(['error' => '❌ حدث خطأ أثناء الحفظ: ' . $e->getMessage()])->withInput();
         }
     }
+
+    public function showRegisterNextCourseForm()
+{
+    $courses = Course::all();
+    $paymentMethods = PaymentSource::all();
+
+    return view('admin.pages.students.register_next', compact('courses', 'paymentMethods'));
+}
+
+    public function registerNextCourse(Request $request)
+{
+    $request->validate([
+        'student_id' => 'required|exists:students,id',
+        'course_id' => 'required|exists:courses,id',
+        'course_session_id' => 'nullable|exists:course_sessions,id',
+        'study_time' => 'nullable|in:8-10,10-12,12-2,2-4,4-6',
+        'amount_paid' => 'required|numeric|min:0',
+        'payment_method' => 'required|exists:payment_sources,name',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $student = Student::findOrFail($request->student_id);
+        $courseId = $request->course_id;
+
+        $registeredToSession = false;
+
+        // ✅ تسجيله في الجلسة إن وجدت
+        if ($request->filled('course_session_id')) {
+            $session = CourseSession::find($request->course_session_id);
+            if ($session) {
+                $start = \Carbon\Carbon::parse($session->start_date);
+                if (now()->lte($start->copy()->addDays(5))) {
+                    CourseSessionStudent::updateOrCreate([
+                        'student_id' => $student->id,
+                        'course_session_id' => $session->id,
+                    ], ['status' => 'active']);
+                    $courseId = $session->course_id;
+                    $registeredToSession = true;
+                }
+            }
+        }
+
+        // ✅ إذا لم تكن هناك جلسة، سجله في الكورس فقط
+        if (!$registeredToSession) {
+            CourseStudent::updateOrCreate([
+                'student_id' => $student->id,
+                'course_id' => $courseId,
+            ], [
+                'register_at' => now(),
+                'study_time' => $request->study_time ?? '8-10',
+            ]);
+        }
+
+        // ✅ السعر من جدول course_prices
+        $coursePrice = CoursePrice::where('course_id', $courseId)->latest()->first();
+
+        if (!$coursePrice) {
+            return back()->withErrors(['course_id' => '⚠️ لا يوجد سعر محدد لهذا الكورس.']);
+        }
+
+        // ✅ إنشاء الدفع
+        $payment = Payment::create([
+            'student_id' => $student->id,
+            'course_id' => $courseId,
+            'total_amount' => $coursePrice->price,
+            'status' => ($request->amount_paid >= $coursePrice->price) ? 'paid' : 'partial',
+        ]);
+
+        // ✅ إنشاء الفاتورة
+        $invoice = Invoice::create([
+            'student_id' => $student->id,
+            'payment_id' => $payment->id,
+            'amount' => $request->amount_paid,
+            'status' => '1',
+            'invoice_number' => '25' . time(),
+            'invoice_details' => 'رسوم الكورس: ' . Course::find($courseId)->course_name,
+            'due_date' => now()->addDays(30),
+            'paid_at' => now(),
+            'payment_sources_id' => PaymentSource::where('name', $request->payment_method)->value('id'),
+        ]);
+
+        DB::commit();
+
+        return redirect()->route('students.invoice', $student->id)->with('success', '✅ تم تسجيل الطالب في الدورة الجديدة بنجاح!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->withErrors(['error' => '❌ حدث خطأ: ' . $e->getMessage()]);
+    }
+}
+
     public function showInvoice($studentId)
     {
         // جلب الطالب من قاعدة البيانات

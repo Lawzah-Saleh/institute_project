@@ -195,6 +195,20 @@ class AttendanceController extends Controller
         return redirect()->back()->with('success', 'تم تسجيل الحضور بنجاح.');
     }
 
+// Controller method to get students for a session
+public function getStudentsForSession($sessionId)
+{
+    $session = CourseSession::find($sessionId);
+    
+    if (!$session) {
+        return response()->json(['error' => 'Session not found'], 404);
+    }
+
+    // Get students enrolled in the session
+    $students = $session->students;
+
+    return response()->json($students);
+}
 
 public function update(Request $request, $id)
 {

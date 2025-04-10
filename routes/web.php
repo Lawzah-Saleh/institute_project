@@ -11,6 +11,8 @@ use App\Http\Controllers\CourseSessionController;
 use App\Http\Controllers\CourseSessionStudentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HolidayController;
+use Illuminate\Http\Request;
+
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -117,6 +119,24 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/students/{student}/invoice/print', [StudentController::class, 'printInvoice'])->name('students.invoice.print');
     Route::get('students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
     Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
+
+
+
+    Route::get('/students/register-next', [StudentController::class, 'registerNextForm'])
+    ->name('students.register_next_course_form');
+
+
+// تنفيذ التسجيل
+Route::post('/students/register-next-course', [StudentController::class, 'registerNextCourse'])->name('students.register_next_course');
+
+// البحث التلقائي
+Route::get('/search-students', function(Request $request) {
+    return \App\Models\Student::where('student_name_ar', 'LIKE', "%{$request->q}%")
+            ->orWhere('student_name_en', 'LIKE', "%{$request->q}%")
+            ->select('id', 'student_name_ar', 'student_name_en')
+            ->limit(10)
+            ->get();
+});
 
 // مسار صفحة تحديث الطالب إلى الدورة التالية
 Route::get('/students/transfer', [StudentController::class, 'transferStudent'])->name('students.transfer');
@@ -247,15 +267,13 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     // Show unpaid invoices
     Route::get('student/payments/unpaid', [StudentPaymentController::class, 'showUnpaid'])->name('student.payment.unpaid');
 
-    // Show the payment page for a specific invoice
-    Route::get('student/payments/pay/{invoice_id}', [StudentPaymentController::class, 'showPaymentPage'])->name('student.payment.pay');
+    Route::get('student/payment/pay/{paymentId}', [StudentPaymentController::class, 'payInvoice'])->name('student.payment.pay');
+    Route::post('student/payment/process/{paymentId}', [StudentPaymentController::class, 'processPayment'])->name('student.payment.process');
+    
 
-    // Store payment data
-    Route::get('/student/payment/receipt', [StudentPaymentController::class, 'storePayment'])->name('student.payment.receipt');
+// لجلب السعر بناءً على الدورة المختارة
+    Route::get('/get-course-price/{courseId}', [StudentPaymentController::class, 'getCoursePrice']);
 
-    Route::post('/payment/receipt/{invoice_id}', [StudentPaymentController::class, 'payInvoice'])->name('student.payment.pay.invoice');
-    // Mark invoice as paid
-    Route::post('student/payments/pay/{invoice_id}/mark-as-paid', [StudentPaymentController::class, 'markAsPaid'])->name('student.payment.markAsPaid');
 
 
 });
@@ -378,4 +396,34 @@ Route::get('/admin/reports/export_excel_teachers_in_courses', [ReportController:
 Route::get('/admin/reports/export_pdf_teachers_in_courses', [ReportController::class, 'exportPdfTeachersInCourses'])->name('admin.reports.export_pdf_teachers_in_courses');
 Route::get('admin/reports/courses-on-date', [ReportController::class, 'coursesOnDate'])->name('admin.reports.courses_on_date');
 
+Route::get('admin/reports/courses-status', [ReportController::class, 'coursesStatus'])->name('admin.reports.courses_status');
+
+// Route to display the attendance report with filters
+Route::get('/admin/reports/attendance-report', [ReportController::class, 'attendanceReport'])
+    ->name('admin.reports.attendance_report');
+
+// Route to export the attendance report to Excel
+Route::get('/admin/reports/export-excel-attendance', [ReportController::class, 'exportExcelAttendance'])
+    ->name('admin.reports.export_excel_attendance');
+
+// Route to export the attendance report to PDF
+Route::get('/admin/reports/export-pdf-attendance', [ReportController::class, 'exportPdfAttendance'])
+    ->name('admin.reports.export_pdf_attendance');
+
+
+
+
 });
+use App\Http\Controllers\CertificateController;
+use App\Models\Attendance;
+
+// صفحة البحث عن الطالب
+Route::get('search-student', [CertificateController::class, 'searchStudentForm'])->name('student.search');
+Route::post('search-student', [CertificateController::class, 'searchStudent'])->name('student.search.submit');
+
+// لإصدار الشهادة
+Route::get('certificate/{studentId}/{courseSessionId}', [CertificateController::class, 'generateCertificate'])
+    ->name('certificate.generate');
+
+// In web.php (routes)
+Route::get('/get-students/{sessionId}', [AttendanceController::class, 'getStudentsForSession']);

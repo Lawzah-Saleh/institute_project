@@ -169,25 +169,31 @@ document.getElementById('show-students-btn').addEventListener('click', function 
         fetch(`/get-students/${sessionId}`)
             .then(response => response.json())
             .then(data => {
-                let tbody = document.querySelector("#students-table tbody");
-                tbody.innerHTML = '';
-                data.forEach(student => {
-                    let row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${student.student_name_ar}</td>
-                        <td>
-                            <select name="status[${student.id}]" class="form-control">
-                                <option value="1">حاضر</option>
-                                <option value="0">غائب</option>
-                            </select>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                studentsTable.style.display = 'block';
-            });
+                if (data.error) {
+                    alert(data.error);  // Show error if no students found
+                } else {
+                    let tbody = document.querySelector("#students-table tbody");
+                    tbody.innerHTML = '';  // Clear the table body
+                    data.forEach(student => {
+                        let row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${student.student_name_ar}</td>
+                            <td>
+                                <select name="status[${student.id}]" class="form-control">
+                                    <option value="1">حاضر</option>
+                                    <option value="0">غائب</option>
+                                </select>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    studentsTable.style.display = 'block';
+                }
+            })
+            .catch(error => console.error('Error fetching students:', error));
     }
 });
+
 document.getElementById('session_id').addEventListener('change', function () {
     // عند اختيار الجلسة، نقوم بتحديث الحقل المخفي
     document.getElementById('session_id_input').value = this.value;

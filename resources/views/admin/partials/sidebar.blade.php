@@ -17,7 +17,7 @@
                         <li><a href="{{ route('students.index') }}">عرض الطلاب</a></li>
 
                         <li><a href="{{ route('students.create') }}">إضافة طالب</a></li>
-                        <li><a href="{{ route('students.transfer')  }}">تحديث الطالب للدورة التالية </a></li>
+                        <li><a href="{{ route('students.register_next_course_form')  }}">تحديث الطالب للدورة التالية </a></li>
 
                     </ul>
                 </li>
@@ -114,10 +114,8 @@
                         <li><a href="{{ route('admin.reports.courses_report') }}">  كشف بالدورات المتاحة   </a></li>
                         <li><a href="{{ route('admin.reports.teachers_in_courses') }}">  كشف بالمدرسين  للدورات   </a></li>
                         <li><a href="{{ route('admin.reports.courses_on_date') }}">     تقرير بالدورات المقامة في تاريخ   </a></li>
-
-
-
-
+                        <li><a href="{{ route('admin.reports.courses_status') }}">     تقرير بالدورات المنتهية وغير المنتهيئة   </a></li>
+                        <li><a href="{{ route('admin.reports.attendance_report') }}">     تقارير الحضور والغياب    </a></li>
                     </ul>
                 </li>
 
@@ -139,6 +137,12 @@
                         <li><a href="{{ route('institute.create') }}">أضافة معلومات المعهد</a></li>
                         <li><a href="{{ route('institute.index') }}">عرض معلومات المعهد</a></li>
                     </ul>
+                </li>
+                <li class="">
+                    <a href="{{ route('student.search') }}"><i class="fa fa-newspaper"></i> <span> أصدار شهادة </span>
+                        <span ></span>
+                    </a>
+ 
                 </li>
             </ul>
         </div>

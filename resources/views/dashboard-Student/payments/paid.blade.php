@@ -13,8 +13,22 @@
                     <i class="fas fa-check-circle" style="margin-left: 15px; color: #196098; font-size: 1.2rem;"></i>
                     المدفوعات المسددة
                 </h3>
+
             </div>
+            
         </div>
+                                      <!-- عرض رسائل الخطأ أو النجاح -->
+                                      @if(session('error'))
+                                      <div class="alert alert-danger" role="alert">
+                                          {{ session('error') }}
+                                      </div>
+                                  @endif
+                  
+                                  @if(session('success'))
+                                      <div class="alert alert-success" role="alert">
+                                          {{ session('success') }}
+                                      </div>
+                                  @endif
     </div>
 </div>
 

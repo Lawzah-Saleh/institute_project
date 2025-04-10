@@ -1,5 +1,3 @@
-
-
 @extends('dashboard-Student.layouts.app')
 
 @section('title', 'المدفوعات غير المسددة')
@@ -13,6 +11,18 @@
                     <i class="fas fa-exclamation-triangle" style="margin-left: 15px; color: #ffc107; font-size: 1.2rem;"></i>
                     المدفوعات غير المسددة
                 </h3>
+                              <!-- عرض رسائل الخطأ أو النجاح -->
+                              @if(session('error'))
+                              <div class="alert alert-danger" role="alert">
+                                  {{ session('error') }}
+                              </div>
+                          @endif
+          
+                          @if(session('success'))
+                              <div class="alert alert-success" role="alert">
+                                  {{ session('success') }}
+                              </div>
+                          @endif
             </div>
         </div>
     </div>
@@ -27,17 +37,26 @@
                         <strong>تم تسديد جميع المدفوعات!</strong>
                     </div>
                 @else
+                   
+
                     @foreach($unpaidInvoices as $invoice)
                         <div class="mb-3">
-                            <p><strong>رقم الفاتورة:</strong> #{{ $invoice->id }}</p>
-                            <p><strong>المبلغ:</strong> ${{ $invoice->amount }}</p>
-                            <p><strong>تاريخ الاستحقاق:</strong> {{ $invoice->due_date }}</p>
-                            <a href="{{ route('student.payment.pay', $invoice->id) }}" class="btn custom-btn w-100 mt-2">ادفع الآن</a>
-                        </div>
+                            <strong>المبلغ الكلي: </strong>{{ $totalAmount }} ريال يمني
+                            <br>
+
+                            <strong>المبلغ المدفوع: </strong>{{ $totalPaid }} ريال يمني
+                            <br>
+                            <strong>المبلغ المتبقي: </strong>{{ $remainingAmount }} ريال يمني
+
+                            <a href="{{ route('student.payment.pay', ['paymentId' => $payment->id]) }}" class="btn custom-btn w-100 mt-2">
+                                دفع الآن
+                            </a>
+                            
+                            
+                                                   </div>
                         <hr>
                     @endforeach
                 @endif
-
             </div>
         </div>
     </div>
@@ -96,4 +115,3 @@
     }
 </style>
 @endsection
-{

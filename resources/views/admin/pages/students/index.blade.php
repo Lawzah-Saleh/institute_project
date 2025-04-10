@@ -21,31 +21,27 @@
                     <select name="department_id" id="department_id" class="form-control">
                         <option value="" selected>-- اختر القسم --</option>
                         @foreach($departments as $department)
-                            <option value="{{ $department->id }}">
+                            <option value="{{ $department->id }}" {{ request('department_id') == $department->id ? 'selected' : '' }}>
                                 {{ $department->department_name }}
                             </option>
                         @endforeach
                     </select>
-
-
                 </div>
-
-                <!-- اختيار الكورسات بناءً على القسم -->
+        
                 <div class="col-md-4">
                     <label>الدورة</label>
                     <select name="course_id" id="course_id" class="form-control" {{ request('department_id') ? '' : 'disabled' }}>
                         <option value="">-- اختر الدورة --</option>
                         @foreach($courses as $course)
-                            <option value="" {{ request('course_id') == $course->id ? 'selected' : '' }}>
+                            <option value="{{ $course->id }}" {{ request('course_id') == $course->id ? 'selected' : '' }}>
                                 {{ $course->course_name }}
                             </option>
                         @endforeach
                     </select>
-
                 </div>
-
+        
                 <div class="col-md-4">
-                    <label>الدورة المتاحة </label>
+                    <label>الدورة المتاحة</label>
                     <select name="course_session_id" id="session_id" class="form-control" {{ request('course_id') ? '' : 'disabled' }}>
                         <option value="">-- اختر الدورة المتاحة --</option>
                         @foreach($sessions as $session)
@@ -55,16 +51,16 @@
                         @endforeach
                     </select>
                 </div>
-
+        
                 <div class="col-md-8 mt-3">
-                    <input type="text" name="search" class="form-control" placeholder="ابحث عن الطالب بالاسم أو الرقم" value="">
+                    <input type="text" name="search" class="form-control" placeholder="ابحث عن الطالب بالاسم أو الرقم" value="{{ request('search') }}">
                 </div>
                 <div class="col-md-12 mt-3">
-                    <button type="submit" class="btn " style="background-color: #196098;color: white">بحث</button>
+                    <button type="submit" class="btn" style="background-color: #196098;color: white">بحث</button>
                 </div>
             </div>
         </form>
-
+        
         <!-- 📋 Students List -->
         <div class="row">
             <div class="col-sm-12">

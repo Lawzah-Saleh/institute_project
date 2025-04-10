@@ -28,9 +28,9 @@
             <div class="card-body">
                 <div class="db-widgets d-flex justify-content-between align-items-center">
                     <div class="db-info">
-                        <h6> Total Courses</h6>
+                        <h6>الدورات التي اكملتها  </h6>
 
-                        <h3>{{ $totalCourses > 0 ? $totalCourses : 'No courses enrolled' }}</h3>
+                        <h3>10</h3>
                     </div>
                     <div class="icon_box">
                         <img src="{{ asset('admin/assets/img/icons/dash-icon-01.png') }}" alt="Dashboard Icon" style="height: 70px;width:70px">
@@ -53,7 +53,7 @@
                     <div class="db-info">
                         <h6>إجمالي الدورات المسجلة</h6>
                         <h3>
-                            {{ $totalCourses > 0 ? $totalCourses : 'لم يتم التسجيل في أي دورة' }}
+                            {{ $totalCourses > 10 ? $totalCourses : '3' }}
                         </h3>
                     </div>
                     <div class="icon_box">
