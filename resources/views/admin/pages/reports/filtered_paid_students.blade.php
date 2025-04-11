@@ -10,7 +10,7 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title">تقرير الطلاب المدفوعين</h3>
+                    <h3 class="page-title">تقرير مدفوعات الطلاب </h3>
                 </div>
             </div>
         </div>
@@ -36,13 +36,13 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label>اختر الجلسة:</label>
+                    <label>اختر الدورة الحالية:</label>
                     <select name="session_id" id="session_id" class="form-control" {{ request('course_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة الحالية --</option>
                     </select>
                 </div>
                 <div class="col-md-12 mt-3">
-                    <button type="submit" class="btn btn-primary">بحث</button>
+                    <button type="submit" class="btn "style="background-color: #196098;color: white;">بحث</button>
                 </div>
             </div>
         </form>
@@ -71,7 +71,7 @@
                                 <td>{{ number_format($student->payments_sum_total_amount, 2) }} ريال</td>
                                 <td>{{ number_format($student->invoices_sum_amount, 2) }} ريال</td>
                                 <td>
-                                    <a href="{{ route('admin.student.payment.details', $student->id) }}" class="btn btn-info btn-sm">عرض التفاصيل</a>
+                                    <a href="{{ route('admin.student.payment.details', $student->id) }}" class="btn btn-sm" style="background-color: #196098;color: white;">عرض التفاصيل</a>
                                 </td>
                             </tr>
                         @empty
@@ -87,10 +87,10 @@
         <!-- زر التصدير -->
         <div class="row">
             <div class="col-md-12 text-right">
-                <a href="{{ route('admin.reports.export_excel', ['department_id' => request('department_id'), 'course_id' => request('course_id'), 'session_id' => request('session_id')]) }}" class="btn btn-success">
+                <a href="{{ route('admin.reports.export_excel', ['department_id' => request('department_id'), 'course_id' => request('course_id'), 'session_id' => request('session_id')]) }}" class="btn "style="background-color: #e94c21;color: white">
                     تصدير إلى Excel
                 </a>
-                <a href="{{ route('admin.reports.export_pdf', ['department_id' => request('department_id'), 'course_id' => request('course_id'), 'session_id' => request('session_id')]) }}" class="btn btn-danger">
+                <a href="{{ route('admin.reports.export_pdf', ['department_id' => request('department_id'), 'course_id' => request('course_id'), 'session_id' => request('session_id')]) }}" class="btn "style="background-color: #e94c21;color: white">
                     تصدير إلى PDF
                 </a>
             </div>

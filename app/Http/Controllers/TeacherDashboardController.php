@@ -6,11 +6,16 @@ use Illuminate\Support\Facades\DB;
 use App\Models\CourseSession;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class TeacherDashboardController extends Controller
 {
     public function index()
     {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
         $userId = auth()->id(); // ✅ Get logged-in user ID
 
         // ✅ Retrieve employee ID based on the logged-in user
@@ -44,6 +49,7 @@ class TeacherDashboardController extends Controller
         return view('Teacher-dashboard.dashboard', [
             'students_count' => $students_count,
             'courses_count' => $courses_count, // ✅ Now correctly passed to the view
+            'employee' => $employee
         ]);
     }
     public function getTeacherSessions(Request $request)

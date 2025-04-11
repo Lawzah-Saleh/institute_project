@@ -45,10 +45,10 @@
         </div>
         <div class="row">
             <div class="col-md-12 text-right">
-                <a href="{{ route('admin.reports.export_excel_financial', ['search' => request('search')]) }}" class="btn btn-success">
+                <a href="{{ route('admin.reports.export_excel_financial', ['search' => request('search')]) }}" class="btn "style="background-color: #e94c21;color: white">
                     تصدير إلى Excel
                 </a>
-                <a href="{{ route('admin.reports.export_pdf_financial', ['search' => request('search')]) }}" class="btn btn-danger">
+                <a href="{{ route('admin.reports.export_pdf_financial', ['search' => request('search')]) }}" class="btn  "style="background-color: #e94c21;color: white">
                     تصدير إلى PDF
                 </a>
             </div>

@@ -126,6 +126,28 @@ public function getFirstCourseInDepartment($departmentId)
 
     return response()->json([]);
 }
+public function getPrice($id)
+{
+    $price = CoursePrice::where('course_id', $id)->latest()->first();
+
+    return response()->json([
+        'price' => $price ? $price->price : null
+    ]);
+}
+
+public function getCourses($department_id)
+{
+    $employee = auth()->user()->employee;
+
+    $courses = Course::where('department_id', $department_id)
+        ->whereHas('sessions', function ($query) use ($employee) {
+            $query->where('employee_id', $employee->id);
+        })
+        ->get(['id', 'course_name']);
+
+    return response()->json($courses);
+}
+
 
 
 }

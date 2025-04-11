@@ -6,7 +6,7 @@
     <!-- Welcome Card -->
     <div class="flex justify-center mb-6">
         <div class="bg-white shadow-md rounded-lg p-6 text-center w-full md:w-2/3">
-            <h3 class="text-2xl font-bold text-gray-700">مرحبًا أستاذ {{ Auth::user()->name }}</h3>
+            <h3 class="text-2xl font-bold text-gray-700">مرحبًا أستاذ {{ $employee->name_ar  }}</h3>
         </div>
     </div>
 
@@ -36,7 +36,7 @@
                     <div class="db-widgets d-flex justify-content-between align-items-center">
                         <div class="db-info">
                             <h6 style="font-size: 1.3rem; color: #555;">الكورسات</h6>
-                            <h3 style="font-size: 2rem; font-weight: bold; color: #3498db;">{{ $courses_count ?? 0 }}+</h3>
+                            <h3 style="font-size: 2rem; font-weight: bold; color: #3498db;">+{{ $course_count ?? 0 }}</h3>
                         </div>
                         <div>
                             <img src="{{ asset('admin/assets/img/icons/dash-icon-04.svg') }}" alt="Dashboard Icon" style="height: 50px; width: 70px;">

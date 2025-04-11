@@ -71,7 +71,7 @@ class DegreeController extends Controller
         // جلب الطلاب المسجلين في هذه الجلسة من جدول `course_session_students`
         $students = Student::whereHas('courseSessionStudents', function ($query) use ($sessionId) {
             $query->where('course_session_students.course_session_id', $sessionId);
-        })->with(['degree' => function ($query) use ($sessionId) {
+        })->with(['degrees' => function ($query) use ($sessionId) {
             $query->where('course_session_id', $sessionId);
         }])->get();
 
@@ -195,4 +195,148 @@ public function calculateAttendance($studentId, $sessionId)
         Degree::findOrFail($id)->delete();
         return redirect()->route('degrees.index')->with('success', 'تم حذف الدرجة بنجاح!');
     }
+
+
+
+// ****************teacher
+
+public function showFormteacher()
+{
+    $departments = Department::where('state', 1)->get();
+
+    // تعريف المتغيرات حتى لا تظهر أخطاء
+    $courses = [];
+    $sessions = [];
+    $students = [];
+    $noStudentsMessage = null;
+    $session = null;
+
+    return view('Teacher-dashboard.add-result', compact(
+        'departments', 'courses', 'sessions', 'students', 'noStudentsMessage', 'session'
+    ));
+}
+
+
+
+public function showStudentsteacher($sessionId)
+{
+    $session = CourseSession::findOrFail($sessionId);
+    $departments = Department::where('state', 1)->get();
+    $courses = Course::where('department_id', request('department_id'))->get();
+    $sessions = CourseSession::where('course_id', request('course_id'))
+        ->where('employee_id', auth()->user()->employee->id)
+        ->get();
+
+    $students = Student::join('course_session_students', 'students.id', '=', 'course_session_students.student_id')
+        ->where('course_session_students.course_session_id', $sessionId)
+        ->select('students.*')
+        ->with(['degrees' => function ($query) use ($sessionId) {
+            $query->where('course_session_id', $sessionId);
+        }, 'courseSessions.course']) // لتحميل الكورسات أيضًا
+        ->get();
+
+    $noStudentsMessage = $students->isEmpty() ? 'لا يوجد طلاب في هذه الجلسة.' : null;
+
+    return view('Teacher-dashboard.add-result', compact(
+        'departments', 'courses', 'sessions', 'session', 'students', 'noStudentsMessage'
+    ));
+}
+
+
+
+
+
+
+
+
+
+public function storeteacher(Request $request)
+{
+    $sessionId = $request->session_id;
+
+    // تحقق إذا كانت الدرجات موجودة مسبقًا
+    if (!$request->has('practical_degree') || empty($request->practical_degree)) {
+        return redirect()->back()->with('error', 'لقد تم إضافة الدرجات مسبقًا.');
+    }
+
+    foreach ($request->practical_degree as $studentId => $practical) {
+        $final = $request->final_degree[$studentId];
+
+        // التحقق من أن الدرجات ضمن الحدود المسموحة
+        if ($practical > 50 || $final > 40) {
+            return redirect()->back()->with('error', 'الدرجة العملية لا يمكن أن تتجاوز 50، والدرجة النهائية لا يمكن أن تتجاوز 40.');
+        }
+
+        // تحقق إذا كان الطالب قد أضاف الدرجات بالفعل أم لا
+        $existingDegree = Degree::where('student_id', $studentId)
+            ->where('course_session_id', $sessionId)
+            ->first();
+
+        if ($existingDegree) {
+            continue;
+        }
+
+        // حساب درجة الحضور
+        $attendanceDegree = $this->calculateAttendanceteacher($studentId, $sessionId);
+
+        // إذا لم يتم إضافة درجة عملية أو نهائية، نضعها إلى 0
+        $practicalDegree = $practical ?? 0;
+        $finalDegree = $final ?? 0;
+
+        Degree::create([
+            'student_id' => $studentId,
+            'course_session_id' => $sessionId,
+            'practical_degree' => $practicalDegree,
+            'final_degree' => $finalDegree,
+            'attendance_degree' => $attendanceDegree,
+            'total_degree' => $practicalDegree + $finalDegree + $attendanceDegree,
+        ]);
+    }
+
+    // إعادة تحميل الصفحة مع عرض الدرجات المدخلة
+    return redirect()->route('Teacher-dashboard.add-result', ['sessionId' => $sessionId])
+        ->with('success', 'تم حفظ الدرجات بنجاح.');
+}
+
+
+
+
+private function calculateAttendanceteacher($studentId, $sessionId)
+{
+    $total = Attendance::where('session_id', $sessionId)->count();
+    $attended = Attendance::where('student_id', $studentId)->where('session_id', $sessionId)->where('status', 'present')->count();
+    return ($total > 0) ? ($attended / $total) * 10 : 0;
+}
+
+
+public function getCoursesteacher($departmentId)
+{
+    $employeeId = auth()->user()->employee->id;
+
+    // جلب الكورسات الخاصة بالقسم والنشطة التي يدرسها الاستاذ
+    $courses = Course::where('department_id', $departmentId)
+        ->where('state', 1) // التأكد من أن الكورسات نشطة
+        ->whereHas('courseSessions', function($q) use ($employeeId) {
+            $q->where('employee_id', $employeeId)->where('state', 1); // فقط الجلسات التي يشرف عليها الاستاذ والنشطة
+        })
+        ->get();
+
+    return response()->json($courses);
+}
+
+
+public function getSessionsteacher($courseId)
+{
+    $employeeId = auth()->user()->employee->id;
+
+    // جلب الجلسات الخاصة بالكورس والتي يدرسها الاستاذ
+    $sessions = CourseSession::where('course_id', $courseId)
+        ->where('employee_id', $employeeId) // التأكد من أن الجلسات تخص الاستاذ
+        ->where('state', 1) // التأكد من أن الجلسات نشطة
+        ->get();
+
+    return response()->json($sessions);
+}
+
+
 }

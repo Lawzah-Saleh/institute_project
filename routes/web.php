@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/student/profile/password-update', [ProfileController::class, 'updateStudentPassword'])->name('profile.student.password.update');
 
 });
+Route::get('/courses/{id}/price', [CourseController::class, 'getPrice']);
 
 
 
@@ -117,8 +118,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // routes/web.php
     Route::get('/students/{student}/invoice', [StudentController::class, 'showInvoice'])->name('students.invoice');
     Route::get('/students/{student}/invoice/print', [StudentController::class, 'printInvoice'])->name('students.invoice.print');
-    Route::get('students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
-    Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
+    //fix the error
+    // Route::get('students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
+    // Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
 
 
 
@@ -203,8 +205,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::patch('/attendance/{id}/toggle', [AttendanceController::class, 'toggleAttendance'])->name('attendance.toggle');
     Route::get('/admin/attendance/monthly-report', [AttendanceController::class, 'monthlyAttendanceReport'])->name('attendance.monthly_report');
     Route::get('/admin/attendance/report', [AttendanceController::class, 'report'])->name('attendance.report');
-    Route::get('/get-courses/{departmentId}', [AttendanceController::class, 'getCoursesByDepartment']);
-    Route::get('/get-sessions/{courseId}', [AttendanceController::class, 'getSessionsByCourse']);
+    // Route::get('/get-courses/{departmentId}', [AttendanceController::class, 'getCoursesByDepartment']);
+    // Route::get('/get-sessions/{courseId}', [AttendanceController::class, 'getSessionsByCourse']);
     Route::get('/get-students/{sessionId}', [AttendanceController::class, 'getStudentsBySession']);
     Route::get('/get-session-days/{sessionId}', [AttendanceController::class, 'getSessionDays']);
 
@@ -214,10 +216,11 @@ use App\Http\Controllers\DegreeController;
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('degrees', DegreeController::class);
-    Route::get('/get-courses/{departmentId}', [DegreeController::class, 'getCourses']);
-    Route::get('/get-sessions/{courseId}', [DegreeController::class, 'getSessions']);
+    // Route::get('/get-courses/{departmentId}', [DegreeController::class, 'getCourses']);
+    // Route::get('/get-sessions/{courseId}', [DegreeController::class, 'getSessions']);
     Route::get('/get-students/{sessionId}', [DegreeController::class, 'getStudents']);
-    Route::get('/admin/degrees/{sessionId}', [DegreeController::class, 'show'])->name('degrees.show');
+    // to fix the route 
+    // Route::get('/admin/degrees/{sessionId}', [DegreeController::class, 'show'])->name('degrees.show');
 
 
 
@@ -269,7 +272,7 @@ Route::middleware(['auth', 'role:student'])->group(function () {
 
     Route::get('student/payment/pay/{paymentId}', [StudentPaymentController::class, 'payInvoice'])->name('student.payment.pay');
     Route::post('student/payment/process/{paymentId}', [StudentPaymentController::class, 'processPayment'])->name('student.payment.process');
-    
+
 
 // لجلب السعر بناءً على الدورة المختارة
     Route::get('/get-course-price/{courseId}', [StudentPaymentController::class, 'getCoursePrice']);
@@ -347,26 +350,26 @@ Route::get('admin/reports/export-pdf-payment-summary', [ReportController::class,
 Route::prefix('admin/reports')->group(function () {
     // Route for Payment Budget Report
     Route::get('/payment-budget-report', [ReportController::class, 'paymentBudgetReport'])->name('admin.reports.payment_budget_report');
-    
+
     // Export to Excel
     Route::get('/export-excel-payment-budget', [ReportController::class, 'exportExcelPaymentBudget'])->name('admin.reports.export_excel_payment_budget');
-    
+
     // Export to PDF
     Route::get('/export-pdf-payment-budget', [ReportController::class, 'exportPdfPaymentBudget'])->name('admin.reports.export_pdf_payment_budget');
     //
 
     Route::get('/payment-statement-report', [ReportController::class, 'paymentStatementReport'])->name('admin.reports.payment_statement_report');
-    
+
     // Export to Excel
     Route::get('/export-excel-payment-statement', [ReportController::class, 'exportExcelPaymentStatement'])->name('admin.reports.export_excel_payment_statement');
-    
+
     // Export to PDF
     Route::get('/export-pdf-payment-statement', [ReportController::class, 'exportPdfPaymentStatement'])->name('admin.reports.export_pdf_payment_statement');
     Route::get('/students-in-course-report', [ReportController::class, 'studentsInCourseReport'])->name('admin.reports.students_in_course_report');
-    
+
     // Export to Excel
     Route::get('/export-excel-students-in-course', [ReportController::class, 'exportExcelStudentsInCourse'])->name('admin.reports.export_excel_students_in_course');
-    
+
     // Export to PDF
     Route::get('/export-pdf-students-in-course', [ReportController::class, 'exportPdfStudentsInCourse'])->name('admin.reports.export_pdf_students_in_course');
 
@@ -427,3 +430,116 @@ Route::get('certificate/{studentId}/{courseSessionId}', [CertificateController::
 
 // In web.php (routes)
 Route::get('/get-students/{sessionId}', [AttendanceController::class, 'getStudentsForSession']);
+
+
+
+
+
+
+///////////////////////////////
+// teachers
+
+Route::get('/teacher/get-courses/{departmentId}', [StudentController::class, 'getCoursesteacher'])->middleware(['auth', 'is_teacher'])->name('teacher.get.courses');
+
+Route::get('/T-students/{sessionId}', [StudentController::class, 'showStudentsteacher'])
+->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+->name('degrees.show');
+
+
+// Route::get('/get-courses/{departmentId}', [StudentController::class, 'getCoursesteacher'])
+// ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+// ->name('get.courses');
+
+Route::get('teacher/get-sessions/{courseId}', [StudentController::class, 'getSessionsteacher'])
+->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+->name('get.sessions');
+
+
+
+
+Route::get('/search-students', [StudentController::class, 'searchStudentst']);
+
+
+Route::get('/T-courses', [CourseSessionController::class, 'coursrteacher'])
+    ->middleware(['auth', 'is_teacher']);
+
+    Route::middleware(['auth', 'role:teacher'])->group(function () {
+        Route::get('/T-students', [StudentController::class, 'showFormteacher'])->name('student.degrees.form');
+    });
+
+
+// profile
+Route::middleware(['auth'])->group(function () {
+    Route::get('/T-profile', [ProfileController::class, 'indexteacher'])->name('teacher.profile');
+});
+
+
+
+// الباسورد
+Route::middleware(['auth'])->group(function () {
+    Route::put('/teacher/update-password', [ProfileController::class, 'updatePassword'])->name('teacher.update-password');
+});
+
+
+Route::post('/teacher/change-password', [ProfileController::class, 'changePassword'])
+    ->middleware(['auth'])
+    ->name('teacher.change-password');
+
+
+Route::get('/edit-profile-T', [ProfileController::class, 'showEditProfile'])
+    ->middleware(['auth', 'is_teacher']) // إضافة ميدل وير is_teacher
+    ->name('Teacher-dashboard.edit-profile-T');
+
+    Route::get('/edit-profile-T', [ProfileController::class, 'editProfile'])
+    ->middleware(['auth', 'is_teacher'])
+    ->name('teacher.edit-profile');
+
+
+Route::post('/update-profile', [ProfileController::class, 'updateProfileteacher'])
+    ->middleware(['auth', 'is_teacher']) // إضافة ميدل وير is_teacher
+    ->name('teacher.update-profile');
+
+//end profile
+
+            // إضافة route لصفحة عرض النتيجة بعد حفظ الدرجات
+Route::get('/add-result', [DegreeController::class, 'showFormteacher'])
+->middleware(['auth', 'is_teacher'])
+->name('Teacher-dashboard.add-result');
+
+
+Route::get('/add-result/{sessionId}', [DegreeController::class, 'showStudentsteacher'])
+    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+    ->name('degrees.show');
+
+
+// Route::get('/get-courses/{departmentId}', [DegreeController::class, 'getCoursesteacher'])
+//     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+//     ->name('get.courses');
+
+// Route::get('/get-sessions/{courseId}', [DegreeController::class, 'getSessionsteacher'])
+//     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+//     ->name('get.sessions');
+
+Route::get('/presence and absence', [AttendanceController::class, 'showFormteacher'])
+    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+    ->name('degrees.form');
+
+Route::get('/presence and absence/{sessionId}', [AttendanceController::class, 'showStudentsteacher'])
+    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+    ->name('degrees.show');
+
+Route::post('/attendance/store', [AttendanceController::class, 'storeteacherattendance'])
+    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+    ->name('degrees.store');
+
+Route::post('/degrees/store', [DegreeController::class, 'storeteacher'])
+    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+    ->name('degrees.store');
+
+// Route::get('/get-courses/{departmentId}', [AttendanceController::class, 'getCoursesteacher'])
+//     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+//     ->name('get.courses');
+
+// Route::get('/get-sessions/{courseId}', [AttendanceController::class, 'getSessionsteacher'])
+//     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+//     ->name('get.sessions');

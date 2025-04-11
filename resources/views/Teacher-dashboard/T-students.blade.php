@@ -1,9 +1,9 @@
 
 
-
 @extends('Teacher-dashboard.layouts.app')
 
-@section('title', 'إضافة الدرجات')
+@section('title', 'عرض الطلاب')
+
 @section('content')
 <div class="page-wrapper">
     <div class="content container-fluid" style="background-color: #f9f9fb">
@@ -11,42 +11,22 @@
         <!-- ترحيب بالمعلم -->
         <div class="flex justify-center mb-6">
             <div class="bg-white shadow-md rounded-lg p-6 text-center w-full md:w-2/3">
-                <h3 class="text-2xl font-bold text-gray-700" > إضافة الدرجات  </h3>
+                <h3 class="text-2xl font-bold text-gray-700">عرض الطلاب</h3>
             </div>
         </div>
 
 
 
-        <!-- عرض الأخطاء إذا كانت موجودة -->
+
         @if(session('error'))
-            <div class="alert alert-danger">
-                {{ session('error') }}
-            </div>
+            <div class="alert alert-danger">{{ session('error') }}</div>
         @endif
 
         @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
+            <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-{{--
 
-        @if(session('error'))
-            <div class="alert alert-danger " style="background-color: #e2e8f0; color: #000; margin-top: 20px;">{{ session('error') }}</div>
-        @endif
-
-        @if(session('success'))
-            <div class="alert alert-success"  style="background-color: #e2e8f0; color: #000; margin-top: 20px;">
-                {{ session('success') }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="إغلاق" onclick="closeAlert()"
-                style="float: left; background: none; border: none; font-size: 1.5rem;">
-            &times;
-        </button>
-            </div>
-        @endif
-
- --}}
 
 
 
@@ -129,7 +109,19 @@
             </div>
 
 
+              <!-- البحث بالاسم -->
+              <div class="col-lg-6 col-md-12 mb-3">
+                <div class="form-group">
+                    <input type="text" id="search-name" class="form-control" style="width: 100%; height: 45px;" placeholder="البحث بالاسم...">
+                </div>
+            </div>
 
+            <!-- زر عرض الطلاب -->
+            <div class="col-lg-6 col-md-12 mb-3">
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; height: 40px; background: #e94c21; font-size: 1.1rem;">عرض الطلاب</button>
+                </div>
+            </div>
 
 
 
@@ -137,8 +129,6 @@
             </div>
         </div>
         </form>
-
-
 
 
 
@@ -162,9 +152,10 @@
                         <th>الدرجة النهائية</th>
                         <th>درجة الحضور</th>
                         <th>المجموع</th>
+                        <th>الحالة</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="students-table-body">
                     @foreach ($students as $index => $student)
                     <tr>
                         <td>{{ $index + 1 }}</td>
@@ -178,11 +169,12 @@
                         </td>
                         <td>
                             @if($student->courseSessions->isNotEmpty())
-                                {{ $student->courseSessions->first()->start_date }} - {{ $student->courseSessions->first()->end_date }}
+                                {{ $student->courseSessions->first()->start_date}} - {{ $student->courseSessions->first()->end_date }}
                             @else
                                 غير محدد
                             @endif
                         </td>
+
                         <td>
                             @if($student->courseSessions->isNotEmpty())
                                 {{ $student->courseSessions->first()->start_time}} - {{ $student->courseSessions->first()->end_time }}
@@ -190,28 +182,20 @@
                                 غير محدد
                             @endif
                         </td>
-                        @if($student->degree)
-                            <td>{{ $student->degree->practical_degree }}</td>
-                            <td>{{ $student->degree->final_degree }}</td>
-                            <td>{{ round($student->attendance_degree, 2) }}</td>
-                            <td>{{ round($student->total_degree, 2) }}</td>
+                        @php $degree = $student->degrees->first(); @endphp
+
+                        @if($degree)
+                            <td>{{ $degree->practical_degree }}</td>
+                            <td>{{ $degree->final_degree }}</td>
+                            <td>{{ $degree->attendance_degree }}</td>
+                            <td>{{ $degree->total_degree }}</td>
+                            <td>{{ $degree->total_degree >= 50 ? 'ناجح' : 'راسب' }}</td>
                         @else
-                            <td>
-                                <input type="number" step="0.01" name="practical_degree[{{ $student->id }}]" class="form-control" value="0"   max="50" required>
-                            </td>
-                            <td>
-                                <input type="number" step="0.01" name="final_degree[{{ $student->id }}]" class="form-control" value="0"  max="40"  required>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control" value="0" readonly>
-                            </td>
-                            <td>
-                                <input type="text" class="form-control" value="0" readonly>
-                            </td>
+                            <td colspan="5">لا توجد درجات لهذا الطالب</td>
                         @endif
+                        
 
                     </tr>
-
                     @endforeach
                 </tbody>
             </table>
@@ -219,7 +203,7 @@
 
 
 
-            <button type="submit" class="btn btn-success"  style="width: 20%; height: 40px; background: #196098; font-size: 1.1rem;">حفظ الدرجات</button>
+
         </form>
     @endif
     </div>
@@ -285,11 +269,17 @@ document.addEventListener('DOMContentLoaded', function () {
     sessionSelect.addEventListener('change', function () {
         const sessionId = this.value;
         if (sessionId) {
-            form.action = `/add-result/${sessionId}`;
+            form.action = `/T-students/${sessionId}`;
         }
     });
 });
+
+
+
 </script>
+
+
+
 
 
 <script>
@@ -319,6 +309,70 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 1000);
     }
 </script>
+
+
+
+<script>
+
+// البحث عند الضغط على زر البحث
+document.addEventListener('DOMContentLoaded', function () {
+    const searchButton = document.getElementById('search-button');
+    const searchNameInput = document.getElementById('search-name');
+    const departmentSelect = document.getElementById('department_id');
+    const courseSelect = document.getElementById('course_id');
+    const sessionSelect = document.getElementById('session_id');
+
+    // البحث عند الضغط على زر البحث
+    searchButton.addEventListener('click', function () {
+        const searchQuery = searchNameInput.value.trim();
+        const departmentId = departmentSelect.value;
+        const courseId = courseSelect.value;
+        const sessionId = sessionSelect.value;
+
+        if (searchQuery && departmentId && courseId && sessionId) {
+            fetch(`/search-students?name=${searchQuery}&department_id=${departmentId}&course_id=${courseId}&session_id=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        displayStudents(data); // عرض الطلاب في الجدول
+                    } else {
+                        alert('لا يوجد طلاب بهذا الاسم.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching students:', error);
+                });
+        } else {
+            alert("يرجى اختيار القسم والكورس والجلسة قبل البحث.");
+        }
+    });
+
+    // دالة لعرض الطلاب في الجدول
+    function displayStudents(students) {
+        const tableBody = document.querySelector('#students-table');
+        tableBody.innerHTML = ''; // تفريغ الجدول الحالي
+
+        students.forEach((student, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${student.student_name_ar}</td>
+                <td>${student.course ? student.course.course_name : 'غير محدد'}</td>
+                <td>${student.session_time ? student.session_time : 'غير محدد'}</td>
+                <td>${student.practical_degree}</td>
+                <td>${student.final_degree}</td>
+                <td>${student.attendance_degree}</td>
+                <td>${student.total_degree}</td>
+                <td>${student.total_degree >= 50 ? 'ناجح' : 'راسب'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+});
+
+
+</script>
+
 
 
 

@@ -27,7 +27,7 @@
                     </select>
                 </div>
                 <div class="col-md-12 mt-3">
-                    <button type="submit" class="btn btn-primary">بحث</button>
+                    <button type="submit" class="btn "style="background-color: #196098;color: white;">بحث</button>
                 </div>
             </div>
         </form>
@@ -68,10 +68,10 @@
         <!-- زر التصدير -->
         <div class="row">
             <div class="col-md-12 text-right">
-                <a href="{{ route('admin.reports.export_excel_payment_summary', ['period' => request('period')]) }}" class="btn btn-success">
+                <a href="{{ route('admin.reports.export_excel_payment_summary', ['period' => request('period')]) }}" class="btn "style="background-color: #e94c21;color: white">
                     تصدير إلى Excel
                 </a>
-                <a href="{{ route('admin.reports.export_pdf_payment_summary', ['period' => request('period')]) }}" class="btn btn-danger">
+                <a href="{{ route('admin.reports.export_pdf_payment_summary', ['period' => request('period')]) }}" class="btn "style="background-color: #e94c21;color: white">
                     تصدير إلى PDF
                 </a>
             </div>

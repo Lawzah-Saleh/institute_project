@@ -37,9 +37,9 @@
                 </div>
                 
                 <div class="col-md-4">
-                    <label>اختر الجلسة:</label>
+                    <label>اختر الدورة المتاحة:</label>
                     <select name="session_id" id="session_id" class="form-control" {{ request('course_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة المتاحة --</option>
                     </select>
                 </div>
                 <div class="col-md-4">

@@ -709,7 +709,7 @@ public function processTransfer(Request $request, $studentId)
 public function search(Request $request)
 {
     $query = $request->query('query');
-    
+
     if ($query) {
         $students = Student::where('student_name_ar', 'like', '%' . $query . '%')
                             ->get();
@@ -718,5 +718,192 @@ public function search(Request $request)
 
     return response()->json([]);
 }
+
+
+
+public function showFormteacher()
+
+
+{    // الحصول على بيانات الموظف (الاستاذ)
+    $employee = auth()->user()->employee; // إذا كان لديك علاقة مع المستخدم يمكن استخدام auth()
+
+    $departments = Department::where('state', 1)->get();
+
+     // تعريف المتغيرات حتى لا تظهر أخطاء
+     $courses = [];
+     $sessions = [];
+     $students = [];
+     $noStudentsMessage = null;
+     $session = null;
+
+
+
+
+
+    return view('Teacher-dashboard.T-students', compact(
+        'departments', 'courses', 'sessions', 'students', 'noStudentsMessage', 'session','employee'
+    ));
+}
+
+
+public function showStudentsForTeacher(Request $request)
+{
+    $employee = auth()->user()->employee;
+
+    $departments = Department::where('state', 1)->get();
+    $courses = [];
+    $sessions = [];
+    $students = collect();
+    $noStudentsMessage = null;
+    $session = null;
+
+    if ($request->filled('department_id')) {
+        $courses = Course::where('department_id', $request->department_id)
+            ->whereHas('sessions', function ($query) use ($employee) {
+                $query->where('employee_id', $employee->id);
+            })
+            ->get();
+        
+        if ($courses->isEmpty()) {
+            session()->flash('error', 'لا يوجد كورسات يدرسها المدرس في هذا القسم.');
+        }
+    }
+    
+
+    // جلب الجلسات إذا تم اختيار كورس
+    if ($request->filled('course_id')) {
+        $sessions = CourseSession::where('course_id', $request->course_id)
+            ->where('employee_id', $employee->id)
+            ->get();
+    }
+
+    // جلب الطلاب إذا تم اختيار جلسة
+    if ($request->filled('session_id')) {
+        $session = CourseSession::with('course')->find($request->session_id);
+
+        $students = Student::join('course_session_students', 'students.id', '=', 'course_session_students.student_id')
+            ->where('course_session_students.course_session_id', $request->session_id)
+            ->select('students.*')
+            ->with([
+                'degrees' => function ($query) use ($request) {
+                    $query->where('course_session_id', $request->session_id);
+                },
+                'courseSessions.course'
+            ])
+            ->get();
+
+        $noStudentsMessage = $students->isEmpty() ? 'لا يوجد طلاب في هذه الجلسة.' : null;
+    }
+
+    return view('Teacher-dashboard.T-students', compact(
+        'departments', 'courses', 'sessions', 'students', 'session', 'noStudentsMessage', 'employee'
+    ));
+}
+
+
+
+
+
+public function getCoursesteacher($departmentId)
+{
+    $employeeId = auth()->user()->employee->id;
+
+    // جلب الكورسات الخاصة بالقسم والنشطة التي يدرسها الاستاذ
+    $courses = Course::where('department_id', $departmentId)
+        ->where('state', 1) // التأكد من أن الكورسات نشطة
+        ->whereHas('Sessions', function($q) use ($employeeId) {
+            $q->where('employee_id', $employeeId)->where('state', 1); // فقط الجلسات التي يشرف عليها الاستاذ والنشطة
+        })
+        ->get();
+
+    return response()->json($courses);
+}
+
+
+public function getSessionsteacher($courseId)
+{
+    $employeeId = auth()->user()->employee->id;
+
+    // جلب الجلسات الخاصة بالكورس والتي يدرسها الاستاذ
+    $sessions = CourseSession::where('course_id', $courseId)
+        ->where('employee_id', $employeeId) // التأكد من أن الجلسات تخص الاستاذ
+        ->where('state', 1) // التأكد من أن الجلسات نشطة
+        ->get();
+
+    return response()->json($sessions);
+}
+
+
+public function searchStudentst(Request $request)
+{
+    $query = Student::with(['course.department', 'sessions']); // جلب البيانات المرتبطة
+
+    // إضافة التصفية بناءً على اسم الطالب
+    if ($request->has('name') && $request->name) {
+        $query->where('student_name_ar', 'like', '%' . $request->name . '%');
+    }
+
+    // إضافة التصفية بناءً على القسم
+    if ($request->has('department_id') && $request->department_id) {
+        $query->whereHas('course.department', function ($q) use ($request) {
+            $q->where('id', $request->department_id);
+        });
+    }
+
+    // إضافة التصفية بناءً على الكورس
+    if ($request->has('course_id') && $request->course_id) {
+        $query->where('course_id', $request->course_id);
+    }
+
+    // إضافة التصفية بناءً على الجلسة
+    if ($request->has('session_id') && $request->session_id) {
+        $query->where('session_id', $request->session_id);
+    }
+
+    // جلب الطلاب وفقًا للمعايير
+    $students = $query->get();
+
+    // إرجاع النتيجة كـ JSON
+    return response()->json($students);
+}
+
+
+
+
+
+
+public function showStudentsteacher($sessionId)
+{
+
+        // الحصول على بيانات الموظف (الاستاذ)
+        $employee = auth()->user()->employee; // إذا كان لديك علاقة مع المستخدم يمكن استخدام auth()
+
+    $session = CourseSession::findOrFail($sessionId);
+    $departments = Department::where('state', 1)->get();
+    $courses = Course::where('department_id', request('department_id'))->get();
+    $sessions = CourseSession::where('course_id', request('course_id'))
+        ->where('employee_id', auth()->user()->employee->id)
+        ->get();
+
+    $students = Student::join('course_session_students', 'students.id', '=', 'course_session_students.student_id')
+        ->where('course_session_students.course_session_id', $sessionId)
+        ->select('students.*')
+        ->with(['degrees' => function ($query) use ($sessionId) {
+            $query->where('course_session_id', $sessionId);
+        }, 'courseSessions.course']) // لتحميل الكورسات أيضًا
+        ->get();
+
+    $noStudentsMessage = $students->isEmpty() ? 'لا يوجد طلاب في هذه الجلسة.' : null;
+
+    return view('Teacher-dashboard.T-students', compact(
+        'departments', 'courses', 'sessions', 'session', 'students', 'noStudentsMessage','employee'
+    ));
+}
+
+
+
+
+
+
 
 }

@@ -6,6 +6,8 @@ use App\Models\Course;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+
 
 class CourseSessionController extends Controller
 {
@@ -109,4 +111,39 @@ class CourseSessionController extends Controller
         $courseSession->delete();
         return redirect()->route('course-sessions.index')->with('success', 'تم حذف الجلسة الدراسية.');
     }
+
+
+        // ******************teacher
+
+
+
+
+
+        public function coursrteacher()
+        {
+    
+    
+    
+    
+            // ✅ جلب بيانات الموظف المرتبط بالمستخدم الحالي
+            $employee = Auth::user()->employee;
+    
+            // ✅ التحقق من أن المستخدم فعلاً معلم
+            if (!$employee || $employee->emptype !== 'teacher') {
+                return redirect()->route('login')->with('error', 'ليس لديك الصلاحية للوصول إلى هذه الصفحة.');
+            }
+    
+            // ✅ جلب الكورسات المرتبطة بالمعلم فقط عندما تكون نشطة (status = 1)
+            $courseSessions = CourseSession::where('employee_id', $employee->id)
+                ->where('state', 1)              // ✅ فقط الكورسات النشطة
+                ->with('course')                 // ✅ تحميل علاقة الكورس المرتبط
+                ->get();
+    
+            // ✅ إرسال البيانات إلى صفحة العرض
+            return view('Teacher-dashboard.T-courses', compact('courseSessions'));
+        }
+    
+    
+    
+    
 }

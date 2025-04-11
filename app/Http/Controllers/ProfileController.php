@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Student;
-use App\Models\Teacher;
+use App\Models\Employee;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+
 
 
 class ProfileController extends Controller
@@ -127,4 +128,137 @@ class ProfileController extends Controller
     {
         // نفس الطريقة كما في الطالب
     }
+
+
+
+    ############# Teacher ##############
+
+
+
+
+
+public function showEditProfile()
+{
+    // التحقق من أن المستخدم معلم
+    if (Auth::user()->employee->emptype !== 'teacher') {
+        return redirect('/')->with('error', 'ليس لديك صلاحية للوصول إلى هذه الصفحة.');
+    }
+
+    return view('Teacher-dashboard.edit-profile-T');
+}
+
+public function indexteacher()
+{
+    // التحقق من أن المستخدم معلم
+    $user = Auth::user();
+    $employee = Employee::where('user_id', $user->id)->first();
+
+    if (!$employee || $employee->emptype !== 'teacher') {
+        return redirect('/')->with('error', 'ليس لديك صلاحية للوصول إلى هذه الصفحة.');
+    }
+
+    return view('Teacher-dashboard.T-profile', compact('employee'));
+}
+
+public function updatePassword(Request $request)
+{
+    $request->validate([
+        'current_password' => ['required'],
+        'new_password' => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
+
+    // التحقق من أن المستخدم معلم
+    $user = Auth::user();
+    if ($user->employee->emptype !== 'teacher') {
+        return redirect('/')->with('error', 'ليس لديك صلاحية للوصول إلى هذه الصفحة.');
+    }
+
+    if (!Hash::check($request->current_password, $user->password)) {
+        return back()->with('error', 'كلمة المرور القديمة غير صحيحة.');
+    }
+
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return back()->with('success', 'تم تغيير كلمة المرور بنجاح.');
+}
+
+public function changePassword(Request $request)
+{
+    $request->validate([
+        'old_password' => 'required',
+        'new_password' => 'required|min:6',
+        'confirm_password' => 'required|same:new_password',
+    ]);
+
+    // التحقق من أن المستخدم معلم
+    $user = Auth::user();
+    if ($user->employee->emptype !== 'teacher') {
+        return redirect('/')->with('error', 'ليس لديك صلاحية للوصول إلى هذه الصفحة.');
+    }
+
+    if (!Hash::check($request->old_password, $user->password)) {
+        return back()->with('error', 'كلمة المرور القديمة غير صحيحة.');
+    }
+
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return back()->with('success', 'تم تغيير كلمة المرور بنجاح.');
+}
+
+public function editProfile()
+{
+    // التحقق من أن المستخدم معلم
+    $employee = Employee::where('user_id', auth()->id())->first();
+    if ($employee->emptype !== 'teacher') {
+        return redirect('/')->with('error', 'ليس لديك صلاحية للوصول إلى هذه الصفحة.');
+    }
+
+    return view('Teacher-dashboard.edit-profile-T', compact('employee'));
+}
+
+public function updateProfileteacher(Request $request)
+{
+    $employee = Employee::where('user_id', Auth::id())->firstOrFail(); // استخدم firstOrFail لتفادي null
+
+    // التحقق من أن المستخدم معلم
+    if ($employee->emptype !== 'teacher') {
+        return redirect('/')->with('error', 'ليس لديك صلاحية للوصول إلى هذه الصفحة.');
+    }
+
+    $validated = $request->validate([
+        'name_en' => 'required|string|max:255',
+        'name_ar' => 'required|string|max:255',
+        'email' => 'required|email|unique:employees,email,' . $employee->id,
+        'phones' => 'nullable|string|max:20',
+        'address' => 'nullable|string|max:255',
+        'gender' => 'required|in:male,female',
+        'birth_date' => 'nullable|date',
+        'birth_place' => 'nullable|string|max:255',
+        'emptype' => 'nullable|string|max:255',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
+
+    // التعامل مع الصورة إن تم رفعها
+    if ($request->hasFile('image')) {
+        if ($employee->image && Storage::disk('public')->exists($employee->image)) {
+            Storage::disk('public')->delete($employee->image);
+        }
+
+        $validated['image'] = $request->file('image')->store('employees', 'public');
+    }
+
+    // التحديث
+    $employee->update($validated);
+
+    // الرسالة عند النجاح
+    return redirect()->route('teacher.profile')->with('success', 'تم تحديث البيانات بنجاح.');
+}
+
+
+
+
+
+
 }

@@ -235,7 +235,7 @@
                         </div>
                         <div class="mb-3">
                             <label>💰 سعر الدورة *</label>
-                            <input type="number" name="course_price" class="form-control" value="{{ old('course_price') }}" readonly>
+                            <input type="number" name="course_price" class="form-control" value="{{ old('course_price') }}"readonly >
                         </div>
                         <div class="mb-3">
                             <label for="study_time">وقت الدراسة *</label>
@@ -301,6 +301,25 @@
                 coursesSelect.innerHTML = '<option value="">خطأ في تحميل الدورات</option>';
             });
     });
+    document.getElementById('courses').addEventListener('change', function () {
+    let courseId = this.value;
+    let priceInput = document.querySelector('input[name="course_price"]');
+
+    if (courseId) {
+        fetch(`/courses/${courseId}/price`)
+            .then(response => response.json())
+            .then(data => {
+                priceInput.value = data.price ?? 'غير متوفر';
+            })
+            .catch(error => {
+                console.error('خطأ في تحميل السعر:', error);
+                priceInput.value = '';
+            });
+    } else {
+        priceInput.value = '';
+    }
+});
+
 </script>
 
 </body>

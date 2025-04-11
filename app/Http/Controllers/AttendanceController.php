@@ -307,4 +307,124 @@ public function monthlyAttendanceReport(Request $request)
 // }
 
 
+// **********************teacher
+
+
+
+public function showFormteacher()
+{
+    $departments = Department::all();
+    $holidays = Holiday::where('state', 1)->pluck('date')->toArray();
+
+    // تعريف المتغيرات حتى لا تظهر أخطاء
+    $courses = [];
+    $sessions = [];
+    $students = [];
+    $noStudentsMessage = null;
+    $session = null;
+
+
+    return view('Teacher-dashboard.presence and absence', compact(
+        'departments', 'courses', 'sessions', 'students', 'noStudentsMessage', 'session',
+        'holidays'
+    ));
+}
+
+
+
+public function showStudentsteacher($sessionId)
+{
+    $session = CourseSession::findOrFail($sessionId);
+    $departments = Department::where('state', 1)->get();
+    $courses = Course::where('department_id', request('department_id'))->get();
+    $sessions = CourseSession::where('course_id', request('course_id'))
+
+
+        ->where('employee_id', auth()->user()->employee->id)
+        ->get();
+
+    $students = Student::join('course_session_students', 'students.id', '=', 'course_session_students.student_id')
+        ->where('course_session_students.course_session_id', $sessionId)
+        ->select('students.*')
+        ->with(['degrees' => function ($query) use ($sessionId) {
+            $query->where('course_session_id', $sessionId);
+        }, 'courseSessions.course']) // لتحميل الكورسات أيضًا
+        ->get();
+
+    $noStudentsMessage = $students->isEmpty() ? 'لا يوجد طلاب في هذه الجلسة.' : null;
+
+    $holidays = Holiday::pluck('date')->toArray(); // استرجاع تواريخ الإجازات من قاعدة البيانات
+return view('Teacher-dashboard.presence and absence', compact(
+    'departments', 'courses', 'sessions', 'session', 'students', 'noStudentsMessage', 'holidays'
+));
+
+
+
+}
+
+
+public function getCoursesteacher($departmentId)
+{
+    $employeeId = auth()->user()->employee->id;
+
+    // جلب الكورسات الخاصة بالقسم والنشطة التي يدرسها الاستاذ
+    $courses = Course::where('department_id', $departmentId)
+        ->where('state', 1) // التأكد من أن الكورسات نشطة
+        ->whereHas('courseSessions', function($q) use ($employeeId) {
+            $q->where('employee_id', $employeeId)->where('state', 1); // فقط الجلسات التي يشرف عليها الاستاذ والنشطة
+        })
+        ->get();
+
+    return response()->json($courses);
+}
+
+
+public function getSessionsteacher($courseId)
+{
+    $employeeId = auth()->user()->employee->id;
+
+    // جلب الجلسات الخاصة بالكورس والتي يدرسها الاستاذ
+    $sessions = CourseSession::where('course_id', $courseId)
+        ->where('employee_id', $employeeId) // التأكد من أن الجلسات تخص الاستاذ
+        ->where('state', 1) // التأكد من أن الجلسات نشطة
+        ->get();
+
+    return response()->json($sessions);
+}
+
+public function storeteacherattendance(Request $request)
+{
+    // تحقق من تحديد الجلسة
+    if (!$request->has('session_id') || !$request->session_id) {
+        return redirect()->back()->with('error', 'يجب اختيار جلسة.');
+    }
+
+    $sessionId = $request->session_id;
+    $session = CourseSession::find($sessionId);
+
+    if (!$session) {
+        return redirect()->back()->with('error', 'الجلسة غير موجودة.');
+    }
+
+    // تسجيل الحضور لجميع الطلاب
+    foreach ($request->status as $studentId => $status) {
+        // تأكد من عدم تكرار الحضور
+        $attendanceExists = Attendance::where('student_id', $studentId)
+                                      ->where('session_id', $sessionId)
+                                      ->exists();
+
+        if (!$attendanceExists) {
+            Attendance::create([
+                'student_id' => $studentId,
+                'session_id' => $sessionId,
+                'attendance_date' => now()->toDateString(),
+                'status' => $status,
+                'employee_id' => auth()->id(),
+            ]);
+        }
+    }
+
+    return redirect()->back()->with('success', 'تم تسجيل الحضور بنجاح.');
+}
+
 }

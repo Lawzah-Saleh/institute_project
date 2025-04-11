@@ -27,7 +27,7 @@
                     <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
                 </div>
                 <div class="col-md-4 mt-3">
-                    <button type="submit" class="btn btn-primary">بحث</button>
+                    <button type="submit" class="btn "style="background-color: #196098;color: white;">بحث</button>
                 </div>
             </div>
         </form>
@@ -66,10 +66,10 @@
         <!-- زر التصدير -->
         <div class="row">
             <div class="col-md-12 text-right">
-                <a href="{{ route('admin.reports.export_excel_payment_statement', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn btn-success">
+                <a href="{{ route('admin.reports.export_excel_payment_statement', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn "style="background-color: #e94c21;color: white">
                     تصدير إلى Excel
                 </a>
-                <a href="{{ route('admin.reports.export_pdf_payment_statement', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn btn-danger">
+                <a href="{{ route('admin.reports.export_pdf_payment_statement', ['start_date' => request('start_date'), 'end_date' => request('end_date')]) }}" class="btn "style="background-color: #e94c21;color: white">
                     تصدير إلى PDF
                 </a>
             </div>

@@ -44,9 +44,9 @@
                 </div>
                 <!-- جلسة -->
                 <div class="col-md-4">
-                    <label>اختر الجلسة:</label>
+                    <label>اختر الدورة الحالية:</label>
                     <select name="session_id" id="session_id" class="form-control" {{ request('course_id') ? '' : 'disabled' }}>
-                        <option value="">-- اختر الجلسة --</option>
+                        <option value="">-- اختر الدورة الحالية --</option>
                         @foreach($sessions as $session)
                             <option value="{{ $session->id }}" {{ request('session_id') == $session->id ? 'selected' : '' }}>
                                 {{ $session->start_date }} - {{ $session->end_date }}

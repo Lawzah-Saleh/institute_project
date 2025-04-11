@@ -57,11 +57,11 @@ public function sessions()
     {
         return $this->hasMany(Attendance::class);
     }
-
     public function courseSessions()
     {
-        return $this->belongsToMany(CourseSessionStudent::class);
+        return $this->belongsToMany(CourseSession::class, 'course_session_students', 'student_id', 'course_session_id');
     }
+    
     public function courseSessionStudents()
     {
         return $this->belongsToMany(CourseSession::class, 'course_session_students');

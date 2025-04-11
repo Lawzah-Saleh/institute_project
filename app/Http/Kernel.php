@@ -70,7 +70,7 @@ class Kernel extends HttpKernel
         'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
-
+        'is_teacher' => \App\Http\Middleware\IsTeacher::class,    
 
 
     ];
