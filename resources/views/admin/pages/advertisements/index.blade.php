@@ -60,7 +60,7 @@
                                 <tr>
                                     <td>{{ $advertisement->id }}</td>
                                     <td>{{ $advertisement->title }}</td>
-                                    <td>{{ $advertisement->content }}</td>
+                                    <td>{{ \Str::limit($advertisement->content, 100, '...') }}</td>
                                     <td>{{ $advertisement->publish_date }}</td>
                                     <td>{{ $advertisement->end_date }}</td>
                                     <td>

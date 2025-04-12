@@ -12,7 +12,7 @@
                 <li><a href="{{ route('home') }}#hero" class="{{ request()->routeIs('home') ? 'active' : '' }}">الصفحة الرئيسية</a></li>
                 <li><a href="{{ route('home') }}#about">من نحن</a></li>
                 <li><a href="{{ route('home') }}#features-details">الإعلانات</a></li>
-                <li><a href="{{ route('home') }}#services">الكورسات</a></li>
+                <li><a href="{{ route('home') }}#services">الأقسام</a></li>
                 <li><a href="{{ route('home') }}#contact">اتصل بنا</a></li>
                 @auth
                     <!-- Authenticated User Links -->
@@ -34,9 +34,9 @@
                 @else
                     <!-- Guest Links -->
                     <li><a class="btn-getstarted text-align-center" href="{{ route('login') }}">تسجيل الدخول</a></li>
-                    @if (Route::has('register'))
+                    {{-- @if (Route::has('register'))
                         <li><a href="{{ route('register') }}">التسجيل</a></li>
-                    @endif
+                    @endif --}}
                 @endauth
             </ul>
             <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>

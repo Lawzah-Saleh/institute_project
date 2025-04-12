@@ -41,7 +41,11 @@
 
                         <div class="col-md-12 mb-3">
                             <label>محتوى الإعلان <span class="text-danger">*</span></label>
-                            <textarea name="content" class="form-control" rows="4" required>{{ old('content', $advertisement->content) }}</textarea>
+                            <textarea name="content" class="form-control" rows="6" maxlength="255" required>{{ old('content', $advertisement->content) }}</textarea>
+                            <small class="text-muted d-block text-end">
+                                <span id="charCount">0</span>/255 حرف
+                            </small>
+                            
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -95,6 +99,18 @@
         image.src = URL.createObjectURL(event.target.files[0]);
         image.style.display = 'block';
     }
+    document.addEventListener("DOMContentLoaded", function () {
+        const textarea = document.querySelector('textarea[name="content"]');
+        const charCount = document.getElementById('charCount');
+
+        function updateCount() {
+            charCount.textContent = textarea.value.length;
+        }
+
+        textarea.addEventListener('input', updateCount);
+        updateCount(); // لعرض العداد عند تحميل الصفحة
+    });
+
 </script>
 
 @endsection

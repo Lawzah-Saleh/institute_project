@@ -80,10 +80,13 @@ class InstituteController extends Controller
         if ($request->hasFile('about_image')) {
             // حذف الصورة القديمة إذا كانت موجودة
             if ($institute->about_image) {
-                Storage::delete($institute->about_image);
+                Storage::disk('public')->delete($institute->about_image);
             }
-            $validated['about_image'] = $request->file('about_image')->store('institutes');
+        
+            // رفع الصورة الجديدة إلى التخزين العام
+            $validated['about_image'] = $request->file('about_image')->store('institutes', 'public');
         }
+        
 
         $institute->update($validated);
 

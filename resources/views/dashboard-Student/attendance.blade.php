@@ -20,9 +20,9 @@
     <div class="col-12">
         <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); direction: rtl; text-align: right;">
             <div class="card-body">
-                <h4 style="color: #333;">اختر الكورس</h4>
+                <h4 style="color: #333;">اختر الدورة</h4>
                 <select id="courseSelect" class="form-control">
-                    <option selected disabled>اختر الكورس</option>
+                    <option selected disabled>اختر الدورة</option>
                     @foreach($courses as $course)
                         <option value="{{ $course->id }}">{{ $course->course_name }}</option>
                     @endforeach

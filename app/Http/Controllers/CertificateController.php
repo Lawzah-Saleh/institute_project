@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\Course;
+use App\Models\Degree;
 use App\Models\CourseSession;
 use Illuminate\Http\Request;
 
@@ -30,6 +31,12 @@ class CertificateController extends Controller
     {
         $student = Student::findOrFail($studentId);
         $courseSession = CourseSession::findOrFail($courseSessionId);
-        return view('admin.pages.certificates.certificate', compact('student', 'courseSession'));
+
+            // جلب الدرجة الخاصة بالطالب
+    $degree = Degree::where('student_id', $studentId)
+    ->where('course_session_id', $courseSessionId)
+    ->first();
+        return view('admin.pages.certificates.certificate', compact('student', 'courseSession', 'degree'));
+        
     }
 }

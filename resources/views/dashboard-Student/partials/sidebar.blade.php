@@ -9,7 +9,7 @@
                 <li class="nav-item dropdown has-arrow new-user-menus">
                     <span class="user-img">
                         <div class="" style="margin-top: 10px;">
-                            <img class="rounded-circle img" src="{{ asset('storage/' . ($student->image ?? 'default_profile.png')) }}"
+                            <img class="rounded-circle img" src="{{ asset('photo_2025-04-12_02-23-08.jpg') }}"
                                     style="width: 80% ;height: 80%;" alt="Soeng Souy">
                         </div>
                     </span>

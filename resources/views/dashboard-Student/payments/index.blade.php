@@ -7,7 +7,7 @@
             <div class="page-sub-header" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); direction: rtl; text-align: right;">
                 <h3 class="page-title" style="color: #196098; display: flex; align-items: center; font-family: 'Roboto', sans-serif; font-size: 1.2rem;">
                     <i class="fas fa-credit-card" style="margin-left: 15px; color: #196098; font-size: 1.2rem;"></i>
-                    واجهة المدفوعات
+                     المدفوعات
                 </h3>
             </div>
         </div>
@@ -18,7 +18,7 @@
     <div class="col-12">
         <div class="card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); direction: rtl; text-align: right;">
             <div class="card-body text-center">
-                <h4 style="color: #333;">اختر نوع الدفعة</h4>
+                <h4 style="color: #333;">اختر حالة الدفع</h4>
                 <div class="row mt-4">
                     <div class="col-md-6 mb-2">
                         <a href="{{ route('student.payment.paid') }}"
