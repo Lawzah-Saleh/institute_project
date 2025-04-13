@@ -201,98 +201,128 @@ if ($request->filled('course_session_id')) {
             return back()->withErrors(['error' => '❌ حدث خطأ أثناء الحفظ: ' . $e->getMessage()])->withInput();
         }
     }
+    public function showSearchStudentPage(Request $request)
+    {
+        $students = Student::query();
 
-    public function showRegisterNextCourseForm()
+        if ($request->filled('student_name')) {
+            $students = $students->where('student_name_ar', 'like', '%' . $request->student_name . '%');
+        }
+    
+        $students = $students->get();
+    
+        // إعادة النتائج بتنسيق JSON
+        return response()->json(['students' => $students]);    }
+        public function showStudentDetails($studentId)
 {
-    $courses = Course::all();
-    $paymentMethods = PaymentSource::all();
+    $student = Student::findOrFail($studentId);
+    $currentSession = CourseSessionStudent::where('student_id', $studentId)
+        ->where('status', 'active') // تأكد من أنه في جلسة نشطة
+        ->first();
 
-    return view('admin.pages.students.register_next', compact('courses', 'paymentMethods'));
+    // إعادة التفاصيل بتنسيق JSON
+    return response()->json([
+        'student' => $student,
+        'currentSession' => $currentSession
+    ]);
 }
 
-    public function registerNextCourse(Request $request)
-{
-    $request->validate([
-        'student_id' => 'required|exists:students,id',
-        'course_id' => 'required|exists:courses,id',
-        'course_session_id' => 'nullable|exists:course_sessions,id',
-        'study_time' => 'nullable|in:8-10,10-12,12-2,2-4,4-6',
-        'amount_paid' => 'required|numeric|min:0',
-        'payment_method' => 'required|exists:payment_sources,name',
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-        $student = Student::findOrFail($request->student_id);
-        $courseId = $request->course_id;
-
-        $registeredToSession = false;
-
-        // ✅ تسجيله في الجلسة إن وجدت
-        if ($request->filled('course_session_id')) {
-            $session = CourseSession::find($request->course_session_id);
-            if ($session) {
-                $start = \Carbon\Carbon::parse($session->start_date);
-                if (now()->lte($start->copy()->addDays(5))) {
-                    CourseSessionStudent::updateOrCreate([
-                        'student_id' => $student->id,
-                        'course_session_id' => $session->id,
-                    ], ['status' => 'active']);
-                    $courseId = $session->course_id;
-                    $registeredToSession = true;
+    public function registerForNewCourse(Request $request, $studentId)
+    {
+        $validated = $request->validate([
+            'course_id' => 'required|exists:courses,id',  // New course to register
+            'course_session_id' => 'nullable|exists:course_sessions,id',  // Optional session
+            'study_time' => 'nullable|in:8-10,10-12,12-2,2-4,4-6',  // Study time preference
+            'amount_paid' => 'required|numeric|min:0',
+            'payment_method' => 'required|exists:payment_sources,name',
+        ]);
+    
+        DB::beginTransaction();
+    
+        try {
+            $student = Student::findOrFail($studentId);
+    
+            // Check if the student is already registered for the new course
+            $existingCourseRegistration = CourseStudent::where('student_id', $student->id)
+                ->where('course_id', $validated['course_id'])
+                ->exists();
+    
+            if ($existingCourseRegistration) {
+                return back()->withErrors(['course_id' => '⚠️ الطالب مسجل بالفعل في هذا الكورس.'])->withInput();
+            }
+    
+            // If the student is registering for a course session
+            $registeredToSession = false;
+            if ($request->filled('course_session_id')) {
+                $session = CourseSession::find($validated['course_session_id']);
+                if ($session) {
+                    $sessionStart = \Carbon\Carbon::parse($session->start_date);
+                    $now = now();
+                    if ($now->lessThanOrEqualTo($sessionStart->copy()->addDays(5))) {
+                        // Register for the session
+                        CourseSessionStudent::updateOrCreate([
+                            'student_id' => $student->id,
+                            'course_session_id' => $session->id,
+                        ], ['status' => 'active']);
+                        $registeredToSession = true;
+                    }
                 }
             }
-        }
-
-        // ✅ إذا لم تكن هناك جلسة، سجله في الكورس فقط
-        if (!$registeredToSession) {
-            CourseStudent::updateOrCreate([
+    
+            // If not registered to a session, register the student for the course directly
+            if (!$registeredToSession) {
+                CourseStudent::updateOrCreate([
+                    'student_id' => $student->id,
+                    'course_id' => $validated['course_id'],
+                ], [
+                    'register_at' => now(),
+                    'study_time' => $validated['study_time'] ?? '8-10',
+                ]);
+            }
+    
+            // Calculate course price from the course prices table
+            $coursePrice = CoursePrice::where('course_id', $validated['course_id'])
+                ->orderByDesc('id')
+                ->first();
+    
+            if (!$coursePrice) {
+                return back()->withErrors(['course_id' => '⚠️ لا يوجد سعر محدد لهذا الكورس.'])->withInput();
+            }
+    
+            // Record payment for the new course registration
+            $payment = Payment::create([
                 'student_id' => $student->id,
-                'course_id' => $courseId,
-            ], [
-                'register_at' => now(),
-                'study_time' => $request->study_time ?? '8-10',
+                'course_id' => $validated['course_id'],
+                'total_amount' => $coursePrice->price,
+                'status' => ($validated['amount_paid'] >= $coursePrice->price) ? 'paid' : 'unpaid',
             ]);
+    
+            // Create invoice for the new payment
+            $invoice = Invoice::create([
+                'student_id' => $student->id,
+                'payment_id' => $payment->id,
+                'amount' => $validated['amount_paid'],
+                'status' => '1',
+                'invoice_number' => '25' . time(),
+                'invoice_details' => "رسوم الكورس: " . Course::find($validated['course_id'])->course_name,
+                'due_date' => now()->addDays(30),
+                'paid_at' => now(),
+                'payment_sources_id' => PaymentSource::where('name', $validated['payment_method'])->value('id'),
+            ]);
+    
+            // Update the payment status in the payment table
+            $payment->update([
+                'status' => ($validated['amount_paid'] >= $coursePrice->price) ? 'paid' : 'partial',
+            ]);
+    
+            DB::commit();
+            return redirect()->route('students.invoice', $student->id)->with('success', 'تم تسجيل الطالب في الكورس الجديد بنجاح!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withErrors(['error' => '❌ حدث خطأ أثناء التسجيل: ' . $e->getMessage()])->withInput();
         }
-
-        // ✅ السعر من جدول course_prices
-        $coursePrice = CoursePrice::where('course_id', $courseId)->latest()->first();
-
-        if (!$coursePrice) {
-            return back()->withErrors(['course_id' => '⚠️ لا يوجد سعر محدد لهذا الكورس.']);
-        }
-
-        // ✅ إنشاء الدفع
-        $payment = Payment::create([
-            'student_id' => $student->id,
-            'course_id' => $courseId,
-            'total_amount' => $coursePrice->price,
-            'status' => ($request->amount_paid >= $coursePrice->price) ? 'paid' : 'partial',
-        ]);
-
-        // ✅ إنشاء الفاتورة
-        $invoice = Invoice::create([
-            'student_id' => $student->id,
-            'payment_id' => $payment->id,
-            'amount' => $request->amount_paid,
-            'status' => '1',
-            'invoice_number' => '25' . time(),
-            'invoice_details' => 'رسوم الكورس: ' . Course::find($courseId)->course_name,
-            'due_date' => now()->addDays(30),
-            'paid_at' => now(),
-            'payment_sources_id' => PaymentSource::where('name', $request->payment_method)->value('id'),
-        ]);
-
-        DB::commit();
-
-        return redirect()->route('students.invoice', $student->id)->with('success', '✅ تم تسجيل الطالب في الدورة الجديدة بنجاح!');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return back()->withErrors(['error' => '❌ حدث خطأ: ' . $e->getMessage()]);
     }
-}
-
+    
     public function showInvoice($studentId)
     {
         // جلب الطالب من قاعدة البيانات

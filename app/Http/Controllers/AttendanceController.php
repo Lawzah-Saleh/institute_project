@@ -199,7 +199,7 @@ class AttendanceController extends Controller
 public function getStudentsForSession($sessionId)
 {
     $session = CourseSession::find($sessionId);
-    
+
     if (!$session) {
         return response()->json(['error' => 'Session not found'], 404);
     }
@@ -308,59 +308,63 @@ public function monthlyAttendanceReport(Request $request)
 
 
 // **********************teacher
-
-
-
-public function showFormteacher()
+public function showAttendanceForm(Request $request)
 {
+    // جلب الأقسام المتاحة
     $departments = Department::all();
-    $holidays = Holiday::where('state', 1)->pluck('date')->toArray();
 
-    // تعريف المتغيرات حتى لا تظهر أخطاء
+    // المتغيرات الخاصة بالعرض
     $courses = [];
     $sessions = [];
     $students = [];
-    $noStudentsMessage = null;
+    $sessionDates = [];
     $session = null;
 
+    // التحقق إذا كان المعلم قد اختار القسم
+    if ($request->has('department_id')) {
+        $courses = Course::where('department_id', $request->department_id)->get();
+    }
 
-    return view('Teacher-dashboard.presence and absence', compact(
-        'departments', 'courses', 'sessions', 'students', 'noStudentsMessage', 'session',
-        'holidays'
-    ));
+    // التحقق إذا كان المعلم قد اختار الدورة
+    if ($request->has('course_id')) {
+        $sessions = CourseSession::where('course_id', $request->course_id)
+                                 ->where('employee_id', auth()->user()->employee->id)
+                                 ->get();
+    }
+
+    // التحقق إذا كان المعلم قد اختار الجلسة
+    if ($request->has('session_id')) {
+        $session = CourseSession::findOrFail($request->session_id);
+
+        // الحصول على تاريخ البداية والنهاية للجلسة
+        $startDate = Carbon::parse($session->start_date);
+        $endDate = Carbon::parse($session->end_date);
+
+        // جلب التواريخ المتاحة (تجنب أيام العطل)
+        $holidays = Holiday::where('state', 1)->pluck('date')->toArray();
+
+        // إنشاء مصفوفة للتواريخ المتاحة
+        for ($date = $startDate; $date <= $endDate; $date->addDay()) {
+            // التحقق من عدم أن يكون اليوم الجمعة أو يوم عطلة
+            if ($date->dayOfWeek != Carbon::FRIDAY && !in_array($date->toDateString(), $holidays)) {
+                $sessionDates[] = $date->toDateString();
+            }
+        }
+    }
+
+    // التحقق إذا كان المعلم قد اختار التاريخ
+    if ($request->has('session_date')) {
+        $students = Student::join('course_session_students', 'students.id', '=', 'course_session_students.student_id')
+                           ->where('course_session_students.course_session_id', $request->session_id)
+                           ->select('students.*')
+                           ->get();
+    }
+
+    return view('Teacher-dashboard.presence_and_absence', compact('departments', 'courses', 'sessions', 'students', 'session', 'sessionDates'));
 }
 
 
 
-public function showStudentsteacher($sessionId)
-{
-    $session = CourseSession::findOrFail($sessionId);
-    $departments = Department::where('state', 1)->get();
-    $courses = Course::where('department_id', request('department_id'))->get();
-    $sessions = CourseSession::where('course_id', request('course_id'))
-
-
-        ->where('employee_id', auth()->user()->employee->id)
-        ->get();
-
-    $students = Student::join('course_session_students', 'students.id', '=', 'course_session_students.student_id')
-        ->where('course_session_students.course_session_id', $sessionId)
-        ->select('students.*')
-        ->with(['degrees' => function ($query) use ($sessionId) {
-            $query->where('course_session_id', $sessionId);
-        }, 'courseSessions.course']) // لتحميل الكورسات أيضًا
-        ->get();
-
-    $noStudentsMessage = $students->isEmpty() ? 'لا يوجد طلاب في هذه الجلسة.' : null;
-
-    $holidays = Holiday::pluck('date')->toArray(); // استرجاع تواريخ الإجازات من قاعدة البيانات
-return view('Teacher-dashboard.presence and absence', compact(
-    'departments', 'courses', 'sessions', 'session', 'students', 'noStudentsMessage', 'holidays'
-));
-
-
-
-}
 
 
 public function getCoursesteacher($departmentId)
@@ -391,40 +395,47 @@ public function getSessionsteacher($courseId)
 
     return response()->json($sessions);
 }
-
-public function storeteacherattendance(Request $request)
+public function storeAttendance(Request $request)
 {
-    // تحقق من تحديد الجلسة
-    if (!$request->has('session_id') || !$request->session_id) {
-        return redirect()->back()->with('error', 'يجب اختيار جلسة.');
+    // التحقق من وجود الجلسة والتاريخ والطلاب في الطلب
+    if (!$request->has('session_id') || !$request->has('session_date') || !$request->has('status')) {
+        return redirect()->back()->with('error', 'يجب تحديد الجلسة والتاريخ والطلاب');
     }
 
-    $sessionId = $request->session_id;
-    $session = CourseSession::find($sessionId);
-
-    if (!$session) {
-        return redirect()->back()->with('error', 'الجلسة غير موجودة.');
+    // جلب الجلسة المختارة
+    $session = CourseSession::findOrFail($request->session_id);
+    
+    // التأكد من أن الجلسة تخص المعلم الحالي
+    if ($session->employee_id != auth()->user()->employee->id) {
+        return redirect()->back()->with('error', 'لا يمكنك تسجيل الحضور لهذه الجلسة');
     }
 
-    // تسجيل الحضور لجميع الطلاب
+    // حفظ الحضور لكل طالب تم تحديده
     foreach ($request->status as $studentId => $status) {
-        // تأكد من عدم تكرار الحضور
+        // التحقق إذا كان الحضور مسجل لهذا الطالب في نفس الجلسة والتاريخ
         $attendanceExists = Attendance::where('student_id', $studentId)
-                                      ->where('session_id', $sessionId)
+                                      ->where('session_id', $session->id)
+                                      ->whereDate('attendance_date', $request->session_date) // التأكد من نفس التاريخ
                                       ->exists();
 
+        // إذا لم يكن الحضور مسجل، نقوم بتسجيل الحضور
         if (!$attendanceExists) {
             Attendance::create([
                 'student_id' => $studentId,
-                'session_id' => $sessionId,
-                'attendance_date' => now()->toDateString(),
-                'status' => $status,
+                'session_id' => $session->id,
+                'attendance_date' => $request->session_date, // تأكد من تمرير التاريخ الصحيح
+                'status' => $status,  // 1: حاضر، 0: غائب
                 'employee_id' => auth()->id(),
             ]);
+        } else {
+            return redirect()->back()->with('error', 'تم تسجيل الحضور لهذا اليوم .');
         }
     }
 
-    return redirect()->back()->with('success', 'تم تسجيل الحضور بنجاح.');
+    return redirect()->back()->with('success', 'تم حفظ الحضور بنجاح');
 }
+
+
+
 
 }

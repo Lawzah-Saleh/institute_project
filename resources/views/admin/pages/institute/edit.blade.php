@@ -7,8 +7,8 @@
 <div class="page-wrapper">
     <div class="content container-fluid">
         <div class="card shadow-sm p-4">
-            <div class="card-header bg-primary text-white text-center">
-                <h4>✏️ تعديل بيانات المعهد</h4>
+            <div class="card-header text-white text-center"style="background: rgba(25, 96, 152, 0.8);">
+                <h4> تعديل بيانات المعهد</h4>
             </div>
             <div class="card-body">
                 <form action="{{ route('institute.update', $institute->id) }}" method="POST" enctype="multipart/form-data">

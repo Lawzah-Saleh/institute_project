@@ -50,7 +50,7 @@
                 </li>
 
                 <li>
-                    <a href="{{ url('presence and absence') }}">
+                    <a href="{{ route('teacher.attendance.form') }}">
                         <i class="fas fa-clipboard"></i>
                         <span class="text-white">الحضور والغياب</span>
                     </a>

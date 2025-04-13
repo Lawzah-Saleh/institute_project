@@ -122,6 +122,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Route::get('students/{id}/edit', [StudentController::class, 'edit'])->name('students.edit');
     // Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update');
 
+    Route::get('/students/search', [StudentController::class, 'showSearchStudentPage'])->name('students.search');
 
 
     Route::get('/students/register-next', [StudentController::class, 'registerNextForm'])
@@ -219,7 +220,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Route::get('/get-courses/{departmentId}', [DegreeController::class, 'getCourses']);
     // Route::get('/get-sessions/{courseId}', [DegreeController::class, 'getSessions']);
     Route::get('/get-students/{sessionId}', [DegreeController::class, 'getStudents']);
-    // to fix the route 
+    // to fix the route
     // Route::get('/admin/degrees/{sessionId}', [DegreeController::class, 'show'])->name('degrees.show');
 
 
@@ -520,17 +521,24 @@ Route::get('/add-result/{sessionId}', [DegreeController::class, 'showStudentstea
 //     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
 //     ->name('get.sessions');
 
-Route::get('/presence and absence', [AttendanceController::class, 'showFormteacher'])
-    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
-    ->name('degrees.form');
+// Route::get('/presence and absence', [AttendanceController::class, 'showFormteacher'])
+//     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+//     ->name('degrees.form');
+//attendance
+    // Route::get('/teacher/attendance', [AttendanceController::class, 'showStudentsteacher'])    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+    // ->name('teacherattendance.show');
+// Route for showing the attendance page
+// Route::get('/teacher/attendance/{sessionId}', [AttendanceController::class, 'showStudentsteacher'])->name('teacher.attendance');
 
-Route::get('/presence and absence/{sessionId}', [AttendanceController::class, 'showStudentsteacher'])
-    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
-    ->name('degrees.show');
 
-Route::post('/attendance/store', [AttendanceController::class, 'storeteacherattendance'])
-    ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
-    ->name('degrees.store');
+// Route لعرض صفحة الحضور
+Route::get('/teacher/attendance', [AttendanceController::class, 'showAttendanceForm'])->name('teacher.attendance.form');
+
+// Route لحفظ الحضور
+Route::post('/teacher/attendance/store', [AttendanceController::class, 'storeAttendance'])->name('teacher.attendance.store');
+// Route::post('/attendance/store', [AttendanceController::class, 'storeteacherattendance'])
+//     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة
+//     ->name('degrees.store');
 
 Route::post('/degrees/store', [DegreeController::class, 'storeteacher'])
     ->middleware(['auth', 'is_teacher'])  // إضافة ميديوير للمصادقة

@@ -7,7 +7,7 @@
 @section('content')
 <div class="container mt-4">
     <div class="card shadow border-0">
-        <div class="card-header bg-primary text-white text-center">
+        <div class="card-header  text-white text-center"style="background: rgba(25, 96, 152, 0.8);">
             <h4>تأكيد الدفع والفاتورة</h4>
         </div>
 
@@ -41,7 +41,7 @@
             <a href="{{ route('students.index') }}" class="btn btn-primary w-100">⬅️ العودة إلى قائمة الطلاب</a>
             @if ($payment)
             <div class="text-center mt-4">
-                <a href="{{ route('students.invoice.print', $student->id) }}" class="btn btn-info">
+                <a href="{{ route('students.invoice.print', $student->id) }}" class="btn "style="background-color: #e94c21;color: white">
                     🧾 إصدار سند
                 </a>
             </div>
