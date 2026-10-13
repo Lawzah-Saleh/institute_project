@@ -103,8 +103,6 @@
                 </div>
             </div>
 
-
-              <!-- 📌 Employee Qualifications -->
               <div class="tab-pane fade" id="qualifications_tab">
                 <div class="card mt-3">
                     <div class="card-body">
@@ -142,13 +140,6 @@
             </div>
 
 
-
-
-
-
-
-
-
             {{-- تبويب كلمة المرور --}}
             <div id="password_tab" class="tab-pane fade">
                 <div class="card">
@@ -161,7 +152,7 @@
                                 <form method="POST" action="{{ route('teacher.change-password') }}">
                                     @csrf
 
-                                  <!-- كلمة المرور (داخل تبويب تغيير كلمة المرور) -->
+                        
 <div class="form-group mb-3">
     <label>كلمة المرور القديمة</label>
     <div class="position-relative">
@@ -191,8 +182,6 @@
         </span>
     </div>
 </div>
-
-
                                     <button type="submit" class="btn" style="background-color: #196098; color: white; width: 100px;">حفظ</button>
                                 </form>
                             </div>
@@ -205,17 +194,11 @@
     </div>
 </div>
 
-{{-- تصميم الحقل والأيقونة --}}
 <style>
     .form-control.ps-5 {
         padding-left: 2.5rem !important;
     }
 </style>
-
-
-{{-- جافاسكربت تبديل الرؤية --}}
-
-
 
 <script>
     function togglePassword(iconWrapper, inputId) {
