@@ -6,7 +6,7 @@
 <div class="page-wrapper">
     <div class="content container-fluid" style="background-color: #f9f9fb">
 
-        {{-- التنبيهات --}}
+      
 
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -33,7 +33,7 @@
             </div>
         @endif
 
-        {{-- الترحيب --}}
+      
         <div class="flex justify-center mb-4">
             <div class="bg-white shadow-md rounded-lg p-4 text-center w-full md:w-2/3">
                 <h3 class="text-2xl font-bold text-gray-700">الملف الشخصي</h3>
@@ -41,8 +41,6 @@
         </div>
 
 
-
-        {{-- الصورة والبيانات --}}
         <div class="bg-white shadow-md rounded-lg p-4 mb-7 d-flex align-items-center">
             <img src="{{ $employee->image && file_exists(public_path('storage/' . $employee->image))
                 ? asset('storage/' . $employee->image)
@@ -57,7 +55,6 @@
             </div>
         </div>
 
-        {{-- التبويبات --}}
         <ul class="nav nav-tabs nav-tabs-solid mb-3">
             <li class="nav-item">
                 <a class="nav-link active" data-bs-toggle="tab" href="#per_details_tab">معلومات</a>
