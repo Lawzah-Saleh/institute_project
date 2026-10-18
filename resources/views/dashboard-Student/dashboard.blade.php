@@ -19,8 +19,6 @@
         </div>
     </div>
 </div>
-
-<!-- Dashboard Stats -->
 <div class="row" style="display: flex;">
     <!-- Total Courses -->
     <div class="col-xl-3 col-sm-6 col-12 d-flex">
@@ -39,12 +37,6 @@
             </div>
         </div>
     </div>
-
-
-
-
-<!-- Enrolled Courses -->
-<!-- Dashboard Stats -->
     <!-- Total Courses -->
     <div class="col-xl-3 col-sm-6 col-12 d-flex">
         <div class="mycard">
